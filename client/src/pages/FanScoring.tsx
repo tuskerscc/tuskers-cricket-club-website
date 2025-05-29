@@ -481,20 +481,22 @@ FIRST INNINGS - ${firstInningsTeam}:
 ${matchState.firstInningsScore}
 
 Current Batsmen:
-${matchState.innings === 1 ? matchState.batsmen.map(batsman => 
-  `${batsman.name}: ${batsman.runs}* (${batsman.balls} balls, ${batsman.fours} fours, ${batsman.sixes} sixes)`
-).join('\n') : 'Innings Complete'}
-
-${matchState.dismissedBatsmen.length > 0 ? 
-`Dismissed Batsmen:
-${matchState.dismissedBatsmen.map(batsman => 
-  `${batsman.name}: ${batsman.runs} (${batsman.balls} balls, ${batsman.fours} fours, ${batsman.sixes} sixes) - ${batsman.dismissalType || 'Dismissed'}`
-).join('\n')}` : ''}
+${matchState.firstInningsData ? 
+  [...matchState.firstInningsData.batsmen, ...matchState.firstInningsData.dismissedBatsmen]
+    .filter(b => b.runs > 0 || b.balls > 0)
+    .map(batsman => 
+      `${batsman.name}: ${batsman.runs}${batsman.isOut ? '' : '*'} (${batsman.balls} balls, ${batsman.fours} fours, ${batsman.sixes} sixes)${batsman.isOut && batsman.dismissalType ? ' - ' + batsman.dismissalType : ''}`
+    ).join('\n') : 
+  'No batting data available'
+}
 
 Bowling Figures:
-${matchState.bowlers.map(bowler => 
-  `${bowler.name}: ${bowler.overs}.${bowler.overs === Math.floor(bowler.overs) ? '0' : Math.floor((bowler.overs % 1) * 6)} overs, ${bowler.maidens} maidens, ${bowler.runs} runs, ${bowler.wickets} wickets`
-).join('\n')}
+${matchState.firstInningsData ? 
+  matchState.firstInningsData.bowlers.map(bowler => 
+    `${bowler.name}: ${bowler.overs}.${Math.floor((bowler.overs % 1) * matchState.ballsPerOver)} overs, ${bowler.maidens} maidens, ${bowler.runs} runs, ${bowler.wickets} wickets`
+  ).join('\n') : 
+  'No bowling data available'
+}
 
 ${matchState.innings === 2 ? `
 SECOND INNINGS - ${secondInningsTeam}:
