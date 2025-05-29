@@ -124,8 +124,9 @@ export default function FanScoring() {
   };
 
   const addNewBatsman = (newState: MatchState) => {
+    const currentTeam = newState.battingTeam === 1 ? newState.team1 : newState.team2;
     const newBatsman: Batsman = {
-      name: newBatsmanName || `Batsman ${newState.wickets + 3}`,
+      name: newBatsmanName || `${currentTeam} Batsman ${newState.wickets + 3}`,
       runs: 0,
       balls: 0,
       fours: 0,
@@ -652,8 +653,8 @@ export default function FanScoring() {
                           newState.overs = 0;
                           newState.balls = 0;
                           newState.batsmen = [
-                            { name: 'Batsman 1', runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
-                            { name: 'Batsman 2', runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
+                            { name: `${newState.battingTeam === 1 ? newState.team2 : newState.team1} Batsman 1`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
+                            { name: `${newState.battingTeam === 1 ? newState.team2 : newState.team1} Batsman 2`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
                           ];
                           newState.currentOver = [];
                           newState.showBatsmanModal = true;
