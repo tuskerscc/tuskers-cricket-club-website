@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPlayerSchema, insertMatchSchema, insertArticleSchema, insertPollSchema } from "@shared/schema";
-import { getLiveMatches, generateLivePoll, generateLiveQuiz } from "./cricket-api";
+import { generateCricketPoll, generateCricketQuiz } from "./cricket-api";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Teams endpoints
@@ -303,33 +303,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Live cricket data endpoints
-  app.get("/api/cricket/live-matches", async (req, res) => {
-    try {
-      const liveMatches = await getLiveMatches();
-      res.json(liveMatches);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch live matches" });
-    }
-  });
+  // Cricket data endpoints
 
   app.get("/api/cricket/live-poll", async (req, res) => {
     try {
-      const liveMatches = await getLiveMatches();
-      const poll = generateLivePoll(liveMatches);
+      const poll = generateCricketPoll();
       res.json(poll);
     } catch (error) {
-      res.status(500).json({ error: "Failed to generate live poll" });
+      res.status(500).json({ error: "Failed to generate cricket poll" });
     }
   });
 
   app.get("/api/cricket/live-quiz", async (req, res) => {
     try {
-      const liveMatches = await getLiveMatches();
-      const quiz = generateLiveQuiz(liveMatches);
+      const quiz = generateCricketQuiz();
       res.json(quiz);
     } catch (error) {
-      res.status(500).json({ error: "Failed to generate live quiz" });
+      res.status(500).json({ error: "Failed to generate cricket quiz" });
     }
   });
 

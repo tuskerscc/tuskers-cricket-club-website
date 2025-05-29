@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 
 export default function Header() {
@@ -6,23 +6,22 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
-      {/* Top Live Scores Bar */}
+      {/* Cricket Widget and Social Bar */}
       <div className="bg-[#1e3a8a] text-white py-2">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-6">
-              <span className="text-[#f59e0b] font-semibold">LIVE SCORES:</span>
-              <div className="hidden md:flex items-center space-x-4">
-                <span>IND vs AUS: 245/6 (45.2)</span>
-                <span>•</span>
-                <span>ENG vs NZ: 178/4 (32.1)</span>
-              </div>
+              <span className="text-[#f59e0b] font-semibold">LIVE CRICKET:</span>
             </div>
-            <div className="hidden md:flex items-center space-x-4">
-              <i className="fab fa-facebook text-lg hover:text-[#f59e0b] cursor-pointer transition-colors"></i>
-              <i className="fab fa-twitter text-lg hover:text-[#f59e0b] cursor-pointer transition-colors"></i>
-              <i className="fab fa-instagram text-lg hover:text-[#f59e0b] cursor-pointer transition-colors"></i>
-              <i className="fab fa-youtube text-lg hover:text-[#f59e0b] cursor-pointer transition-colors"></i>
+            <div className="flex items-center space-x-4">
+              {/* Cricket Widget Container */}
+              <div id="cricket-widget" className="hidden lg:block"></div>
+              <div className="hidden md:flex items-center space-x-4 ml-4">
+                <i className="fab fa-facebook text-lg hover:text-[#f59e0b] cursor-pointer transition-colors"></i>
+                <i className="fab fa-twitter text-lg hover:text-[#f59e0b] cursor-pointer transition-colors"></i>
+                <i className="fab fa-instagram text-lg hover:text-[#f59e0b] cursor-pointer transition-colors"></i>
+                <i className="fab fa-youtube text-lg hover:text-[#f59e0b] cursor-pointer transition-colors"></i>
+              </div>
             </div>
           </div>
         </div>
