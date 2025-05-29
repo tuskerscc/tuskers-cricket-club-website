@@ -238,6 +238,98 @@ export const scoringBalls = pgTable("scoring_balls", {
   timestamp: timestamp("timestamp").defaultNow(),
 });
 
+// Forum Categories
+export const forumCategories = pgTable("forum_categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  icon: varchar("icon", { length: 50 }),
+  color: varchar("color", { length: 20 }),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Forum Topics/Threads
+export const forumTopics = pgTable("forum_topics", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").references(() => forumCategories.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  slug: varchar("slug", { length: 250 }).unique().notNull(),
+  content: text("content").notNull(),
+  isSticky: boolean("is_sticky").default(false),
+  isLocked: boolean("is_locked").default(false),
+  viewCount: integer("view_count").default(0),
+  replyCount: integer("reply_count").default(0),
+  lastReplyAt: timestamp("last_reply_at"),
+  lastReplyUserId: integer("last_reply_user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Forum Posts/Replies
+export const forumPosts = pgTable("forum_posts", {
+  id: serial("id").primaryKey(),
+  topicId: integer("topic_id").references(() => forumTopics.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  isFirstPost: boolean("is_first_post").default(false),
+  likeCount: integer("like_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Post Likes
+export const forumPostLikes = pgTable("forum_post_likes", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").references(() => forumPosts.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Profiles Extended
+export const userProfiles = pgTable("user_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  displayName: varchar("display_name", { length: 50 }),
+  bio: text("bio"),
+  location: varchar("location", { length: 100 }),
+  favoritePlayer: varchar("favorite_player", { length: 100 }),
+  joinDate: timestamp("join_date").defaultNow(),
+  postCount: integer("post_count").default(0),
+  reputation: integer("reputation").default(0),
+  avatar: varchar("avatar", { length: 255 }),
+  isOnline: boolean("is_online").default(false),
+  lastSeen: timestamp("last_seen").defaultNow(),
+  badges: text("badges").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Community Events
+export const communityEvents = pgTable("community_events", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  eventDate: timestamp("event_date").notNull(),
+  location: varchar("location", { length: 200 }),
+  organizer: varchar("organizer", { length: 100 }),
+  maxParticipants: integer("max_participants"),
+  currentParticipants: integer("current_participants").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event Participants
+export const eventParticipants = pgTable("event_participants", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").references(() => communityEvents.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  status: varchar("status", { length: 20 }).default("registered"), // 'registered', 'attended', 'cancelled'
+  registeredAt: timestamp("registered_at").defaultNow(),
+});
+
 // Relations
 export const teamsRelations = relations(teams, ({ many }) => ({
   homeMatches: many(matches, { relationName: "homeTeam" }),
@@ -313,6 +405,73 @@ export const galleryRelations = relations(gallery, ({ one }) => ({
   match: one(matches, {
     fields: [gallery.matchId],
     references: [matches.id],
+  }),
+}));
+
+// Forum Relations
+export const forumCategoriesRelations = relations(forumCategories, ({ many }) => ({
+  topics: many(forumTopics),
+}));
+
+export const forumTopicsRelations = relations(forumTopics, ({ one, many }) => ({
+  category: one(forumCategories, {
+    fields: [forumTopics.categoryId],
+    references: [forumCategories.id],
+  }),
+  user: one(users, {
+    fields: [forumTopics.userId],
+    references: [users.id],
+  }),
+  lastReplyUser: one(users, {
+    fields: [forumTopics.lastReplyUserId],
+    references: [users.id],
+    relationName: "lastReplyUser",
+  }),
+  posts: many(forumPosts),
+}));
+
+export const forumPostsRelations = relations(forumPosts, ({ one, many }) => ({
+  topic: one(forumTopics, {
+    fields: [forumPosts.topicId],
+    references: [forumTopics.id],
+  }),
+  user: one(users, {
+    fields: [forumPosts.userId],
+    references: [users.id],
+  }),
+  likes: many(forumPostLikes),
+}));
+
+export const forumPostLikesRelations = relations(forumPostLikes, ({ one }) => ({
+  post: one(forumPosts, {
+    fields: [forumPostLikes.postId],
+    references: [forumPosts.id],
+  }),
+  user: one(users, {
+    fields: [forumPostLikes.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [userProfiles.userId],
+    references: [users.id],
+  }),
+}));
+
+export const communityEventsRelations = relations(communityEvents, ({ many }) => ({
+  participants: many(eventParticipants),
+}));
+
+export const eventParticipantsRelations = relations(eventParticipants, ({ one }) => ({
+  event: one(communityEvents, {
+    fields: [eventParticipants.eventId],
+    references: [communityEvents.id],
+  }),
+  user: one(users, {
+    fields: [eventParticipants.userId],
+    references: [users.id],
   }),
 }));
 
@@ -407,6 +566,45 @@ export const insertScoringBallSchema = createInsertSchema(scoringBalls).omit({
   timestamp: true,
 });
 
+// Forum Insert Schemas
+export const insertForumCategorySchema = createInsertSchema(forumCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertForumTopicSchema = createInsertSchema(forumTopics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertForumPostSchema = createInsertSchema(forumPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertForumPostLikeSchema = createInsertSchema(forumPostLikes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCommunityEventSchema = createInsertSchema(communityEvents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertEventParticipantSchema = createInsertSchema(eventParticipants).omit({
+  id: true,
+  registeredAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -465,3 +663,25 @@ export type InsertScoringInnings = z.infer<typeof insertScoringInningsSchema>;
 
 export type ScoringBall = typeof scoringBalls.$inferSelect;
 export type InsertScoringBall = z.infer<typeof insertScoringBallSchema>;
+
+// Forum Types
+export type ForumCategory = typeof forumCategories.$inferSelect;
+export type InsertForumCategory = z.infer<typeof insertForumCategorySchema>;
+
+export type ForumTopic = typeof forumTopics.$inferSelect;
+export type InsertForumTopic = z.infer<typeof insertForumTopicSchema>;
+
+export type ForumPost = typeof forumPosts.$inferSelect;
+export type InsertForumPost = z.infer<typeof insertForumPostSchema>;
+
+export type ForumPostLike = typeof forumPostLikes.$inferSelect;
+export type InsertForumPostLike = z.infer<typeof insertForumPostLikeSchema>;
+
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
+
+export type CommunityEvent = typeof communityEvents.$inferSelect;
+export type InsertCommunityEvent = z.infer<typeof insertCommunityEventSchema>;
+
+export type EventParticipant = typeof eventParticipants.$inferSelect;
+export type InsertEventParticipant = z.infer<typeof insertEventParticipantSchema>;
