@@ -282,13 +282,58 @@ export default function FanScoring() {
     setNewBatsmanName('');
   };
 
+  const getBowlerLimit = (totalOvers: number) => {
+    if (totalOvers > 10) {
+      return Math.floor(totalOvers / 5);
+    }
+    return totalOvers; // No limit for matches with 10 overs or less
+  };
+
+  const canBowlerContinue = (bowlerName: string, totalOvers: number, bowlers: Bowler[]) => {
+    const bowler = bowlers.find(b => b.name === bowlerName);
+    if (!bowler) return true;
+    
+    const limit = getBowlerLimit(totalOvers);
+    return bowler.overs < limit;
+  };
+
+  const getAvailableBowlers = () => {
+    if (!matchState) return [];
+    
+    const limit = getBowlerLimit(matchState.maxOvers);
+    const availableBowlers = matchState.bowlers.filter(bowler => 
+      bowler.overs < limit
+    );
+    
+    return availableBowlers;
+  };
+
   const handleNewBowler = () => {
     if (!matchState || !newBowlerName) return;
     
     const newState = { ...matchState };
-    const newBowler = { name: newBowlerName, overs: 0, maidens: 0, runs: 0, wickets: 0 };
-    newState.currentBowler = newBowler;
-    newState.bowlers.push(newBowler);
+    
+    // Check if this bowler already exists
+    const existingBowler = newState.bowlers.find(b => b.name === newBowlerName);
+    
+    if (existingBowler) {
+      // Use existing bowler if they can still bowl
+      if (canBowlerContinue(newBowlerName, newState.maxOvers, newState.bowlers)) {
+        newState.currentBowler = existingBowler;
+      } else {
+        toast({ 
+          title: "Bowling Limit Reached", 
+          description: `${newBowlerName} has reached the maximum overs limit of ${getBowlerLimit(newState.maxOvers)} overs.` 
+        });
+        return;
+      }
+    } else {
+      // Create new bowler
+      const newBowler = { name: newBowlerName, overs: 0, maidens: 0, runs: 0, wickets: 0 };
+      newState.currentBowler = newBowler;
+      newState.bowlers.push(newBowler);
+    }
+    
     newState.showBowlerModal = false;
     setMatchState(newState);
     setNewBowlerName('');
@@ -633,13 +678,36 @@ export default function FanScoring() {
               {/* All Bowlers */}
               <div className="bg-gray-50 rounded-xl p-4">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3">Bowlers</h3>
+                {matchState.maxOvers > 10 && (
+                  <div className="text-xs text-blue-600 mb-2">
+                    Limit: {getBowlerLimit(matchState.maxOvers)} overs per bowler
+                  </div>
+                )}
                 <div className="space-y-2">
-                  {matchState.bowlers.map((bowler, index) => (
-                    <div key={index} className="text-xs border-b border-gray-200 pb-2">
-                      <div className="font-medium">{bowler.name}</div>
-                      <div className="text-gray-600">{bowler.overs}-{bowler.maidens}-{bowler.runs}-{bowler.wickets}</div>
-                    </div>
-                  ))}
+                  {matchState.bowlers.map((bowler, index) => {
+                    const isCurrentBowler = bowler.name === matchState.currentBowler.name;
+                    const canContinue = canBowlerContinue(bowler.name, matchState.maxOvers, matchState.bowlers);
+                    
+                    return (
+                      <div key={index} className={`text-xs border-b border-gray-200 pb-2 ${isCurrentBowler ? 'bg-yellow-50 p-2 rounded' : ''}`}>
+                        <div className="flex justify-between items-center">
+                          <div className="font-medium flex items-center gap-2">
+                            {bowler.name}
+                            {isCurrentBowler && <span className="text-xs bg-yellow-400 text-yellow-800 px-1 rounded">*</span>}
+                          </div>
+                          {matchState.maxOvers > 10 && (
+                            <div className={`text-xs px-1 rounded ${canContinue ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                              {bowler.overs}/{getBowlerLimit(matchState.maxOvers)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-gray-600">{bowler.overs}-{bowler.maidens}-{bowler.runs}-{bowler.wickets}</div>
+                        {!canContinue && matchState.maxOvers > 10 && (
+                          <div className="text-xs text-red-600 mt-1">Limit reached</div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -730,12 +798,46 @@ export default function FanScoring() {
         {/* New Bowler Modal */}
         {matchState.showBowlerModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4">
               <h3 className="text-xl font-bold text-gray-800 mb-4">Select New Bowler</h3>
               
               <div className="space-y-4">
+                {/* Bowling Restrictions Info */}
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>Bowling Limit:</strong> {matchState.maxOvers > 10 ? 
+                      `Each bowler can bowl maximum ${getBowlerLimit(matchState.maxOvers)} overs` : 
+                      'No bowling restrictions for this format'}
+                  </p>
+                </div>
+
+                {/* Available Bowlers */}
+                {getAvailableBowlers().length > 0 && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Available Bowlers</label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {getAvailableBowlers().map((bowler, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setNewBowlerName(bowler.name);
+                          }}
+                          className="w-full text-left p-2 border rounded-lg hover:bg-gray-50 flex justify-between items-center"
+                        >
+                          <span className="font-medium">{bowler.name}</span>
+                          <span className="text-sm text-gray-600">
+                            {bowler.overs}/{getBowlerLimit(matchState.maxOvers)} overs
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Bowler Name</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    {getAvailableBowlers().length > 0 ? 'Or Enter New Bowler Name' : 'Bowler Name'}
+                  </label>
                   <input
                     type="text"
                     value={newBowlerName}
