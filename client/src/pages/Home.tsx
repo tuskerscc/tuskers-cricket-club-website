@@ -7,6 +7,7 @@ import StartingEleven from '@/components/StartingEleven';
 import PlayerAnalytics from '@/components/PlayerAnalytics';
 import LatestUpdates from '@/components/LatestUpdates';
 import FanZone from '@/components/FanZone';
+import CricketTrivia from '@/components/CricketTrivia';
 import Footer from '@/components/Footer';
 import type { TeamStats } from '@/lib/types';
 
@@ -77,6 +78,7 @@ export default function Home() {
         <Squad />
         <StartingEleven />
         <PlayerAnalytics />
+        <CricketTrivia />
         <LatestUpdates />
         <FanZone />
       </main>
