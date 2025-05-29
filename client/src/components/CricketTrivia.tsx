@@ -55,10 +55,19 @@ export default function CricketTrivia() {
   // Submit score mutation
   const submitScoreMutation = useMutation({
     mutationFn: async (data: { playerName: string; score: number; questionsAnswered: number; accuracy: number }) => {
-      return apiRequest('/api/trivia/submit-score', {
+      const response = await fetch('/api/trivia/submit-score', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data)
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit score');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/trivia/leaderboard'] });

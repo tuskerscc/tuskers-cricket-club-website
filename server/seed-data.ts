@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { 
   teams, players, venues, competitions, matches, playerStats, 
-  articles, socialPosts, polls, gallery 
+  articles, socialPosts, polls, gallery, triviaQuestions 
 } from "@shared/schema";
 
 export async function seedDatabase() {
@@ -263,6 +263,134 @@ export async function seedDatabase() {
 
     for (const galleryItem of galleryData) {
       await db.insert(gallery).values(galleryItem);
+    }
+
+    // Insert trivia questions
+    const triviaQuestionsData = [
+      {
+        question: "Who holds the record for the highest individual score in Test cricket?",
+        options: ["Brian Lara", "Matthew Hayden", "Don Bradman", "Virender Sehwag"],
+        correct: "Brian Lara",
+        difficulty: "medium",
+        category: "Records",
+        points: 15
+      },
+      {
+        question: "Which country won the first Cricket World Cup in 1975?",
+        options: ["Australia", "West Indies", "England", "India"],
+        correct: "West Indies",
+        difficulty: "easy",
+        category: "World Cup",
+        points: 10
+      },
+      {
+        question: "What is the maximum number of overs a bowler can bowl in a One Day International?",
+        options: ["8", "10", "12", "15"],
+        correct: "10",
+        difficulty: "easy",
+        category: "Rules",
+        points: 10
+      },
+      {
+        question: "Who is known as the 'Captain Cool' in cricket?",
+        options: ["Virat Kohli", "MS Dhoni", "Rohit Sharma", "Kane Williamson"],
+        correct: "MS Dhoni",
+        difficulty: "easy",
+        category: "Players",
+        points: 10
+      },
+      {
+        question: "Which venue is known as the 'Home of Cricket'?",
+        options: ["MCG", "Lord's", "The Oval", "Eden Gardens"],
+        correct: "Lord's",
+        difficulty: "medium",
+        category: "Venues",
+        points: 15
+      },
+      {
+        question: "What does LBW stand for in cricket?",
+        options: ["Leg Before Wicket", "Left Behind Wicket", "Last Ball Win", "Low Ball Wide"],
+        correct: "Leg Before Wicket",
+        difficulty: "easy",
+        category: "Rules",
+        points: 10
+      },
+      {
+        question: "Who has taken the most wickets in Test cricket history?",
+        options: ["Shane Warne", "Muttiah Muralitharan", "Anil Kumble", "Glenn McGrath"],
+        correct: "Muttiah Muralitharan",
+        difficulty: "medium",
+        category: "Records",
+        points: 15
+      },
+      {
+        question: "In which year was the first T20 World Cup held?",
+        options: ["2005", "2007", "2009", "2010"],
+        correct: "2007",
+        difficulty: "medium",
+        category: "T20",
+        points: 15
+      },
+      {
+        question: "What is the fastest recorded ball in cricket history?",
+        options: ["161.3 km/h", "157.7 km/h", "155.9 km/h", "159.1 km/h"],
+        correct: "161.3 km/h",
+        difficulty: "hard",
+        category: "Records",
+        points: 20
+      },
+      {
+        question: "Which team has won the most Cricket World Cups?",
+        options: ["Australia", "West Indies", "India", "England"],
+        correct: "Australia",
+        difficulty: "medium",
+        category: "World Cup",
+        points: 15
+      },
+      {
+        question: "Who scored the fastest century in ODI cricket?",
+        options: ["AB de Villiers", "Corey Anderson", "Shahid Afridi", "Chris Gayle"],
+        correct: "AB de Villiers",
+        difficulty: "medium",
+        category: "Records",
+        points: 15
+      },
+      {
+        question: "What is the term for scoring 100 runs in cricket?",
+        options: ["Century", "Double", "Ton", "Hundred"],
+        correct: "Century",
+        difficulty: "easy",
+        category: "Terms",
+        points: 10
+      },
+      {
+        question: "Which format of cricket has the most overs per innings?",
+        options: ["T20", "ODI", "Test", "The Hundred"],
+        correct: "Test",
+        difficulty: "easy",
+        category: "Formats",
+        points: 10
+      },
+      {
+        question: "Who is the leading run scorer in international cricket?",
+        options: ["Sachin Tendulkar", "Virat Kohli", "Ricky Ponting", "Kumar Sangakkara"],
+        correct: "Sachin Tendulkar",
+        difficulty: "medium",
+        category: "Records",
+        points: 15
+      },
+      {
+        question: "What is the term for dismissing a batsman on the first ball they face?",
+        options: ["Golden Duck", "Silver Duck", "Diamond Duck", "Platinum Duck"],
+        correct: "Golden Duck",
+        difficulty: "medium",
+        category: "Terms",
+        points: 15
+      }
+    ];
+
+    for (const triviaQuestion of triviaQuestionsData) {
+      await db.insert(triviaQuestions).values(triviaQuestion);
     }
 
     console.log("Database seeded successfully!");

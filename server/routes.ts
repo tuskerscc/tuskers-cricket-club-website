@@ -323,6 +323,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Trivia endpoints
+  app.get("/api/trivia/questions", async (req, res) => {
+    try {
+      const questions = await storage.getTriviaQuestions();
+      res.json(questions);
+    } catch (error) {
+      console.error('Error fetching trivia questions:', error);
+      res.status(500).json({ error: 'Failed to fetch trivia questions' });
+    }
+  });
+
+  app.get("/api/trivia/leaderboard", async (req, res) => {
+    try {
+      const leaderboard = await storage.getTriviaLeaderboard();
+      res.json(leaderboard);
+    } catch (error) {
+      console.error('Error fetching trivia leaderboard:', error);
+      res.status(500).json({ error: 'Failed to fetch trivia leaderboard' });
+    }
+  });
+
+  app.post("/api/trivia/submit-score", async (req, res) => {
+    try {
+      const { playerName, score, questionsAnswered, accuracy } = req.body;
+      
+      if (!playerName || score === undefined || questionsAnswered === undefined || accuracy === undefined) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const entry = await storage.submitTriviaScore({
+        playerName,
+        score,
+        questionsAnswered,
+        accuracy
+      });
+
+      res.json(entry);
+    } catch (error) {
+      console.error('Error submitting trivia score:', error);
+      res.status(500).json({ error: 'Failed to submit trivia score' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
