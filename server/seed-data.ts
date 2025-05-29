@@ -139,7 +139,23 @@ export async function seedDatabase() {
         awayTeamId: lightningTeam.id,
         venueId: homeVenue.id,
         competitionId: premierLeague.id,
-        matchDate: new Date('2024-12-15T14:30:00Z'),
+        matchDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        status: 'upcoming',
+        homeTeamScore: null,
+        awayTeamScore: null,
+        homeTeamOvers: null,
+        awayTeamOvers: null,
+        result: null,
+        playerOfMatch: null,
+        isLive: false,
+        liveData: null
+      },
+      {
+        homeTeamId: lightningTeam.id,
+        awayTeamId: tuskersTeam.id,
+        venueId: homeVenue.id,
+        competitionId: premierLeague.id,
+        matchDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
         status: 'upcoming',
         homeTeamScore: null,
         awayTeamScore: null,
@@ -155,7 +171,7 @@ export async function seedDatabase() {
         awayTeamId: thunderTeam.id,
         venueId: homeVenue.id,
         competitionId: championsLeague.id,
-        matchDate: new Date('2024-11-28T14:30:00Z'),
+        matchDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
         status: 'completed',
         homeTeamScore: '245/6',
         awayTeamScore: '187/9',
@@ -163,6 +179,22 @@ export async function seedDatabase() {
         awayTeamOvers: '45.2',
         result: 'Tuskers CC won by 58 runs',
         playerOfMatch: insertedPlayers[0].id,
+        isLive: false,
+        liveData: null
+      },
+      {
+        homeTeamId: thunderTeam.id,
+        awayTeamId: tuskersTeam.id,
+        venueId: homeVenue.id,
+        competitionId: championsLeague.id,
+        matchDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 days ago
+        status: 'completed',
+        homeTeamScore: '198/8',
+        awayTeamScore: '201/4',
+        homeTeamOvers: '50.0',
+        awayTeamOvers: '48.3',
+        result: 'Tuskers CC won by 6 wickets',
+        playerOfMatch: insertedPlayers[1].id,
         isLive: false,
         liveData: null
       }

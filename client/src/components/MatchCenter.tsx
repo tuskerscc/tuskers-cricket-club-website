@@ -132,9 +132,9 @@ export default function MatchCenter() {
         {filteredMatches.length > 3 ? (
           // Table format for more than 3 matches
           <div className="mt-8 bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-96 overflow-y-auto">
               <table className="w-full">
-                <thead className="bg-[#1e3a8a] text-white">
+                <thead className="bg-[#1e3a8a] text-white sticky top-0 z-10">
                   <tr>
                     <th className="px-6 py-4 text-left font-semibold">Status</th>
                     <th className="px-6 py-4 text-left font-semibold">Match</th>
