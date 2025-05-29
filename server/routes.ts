@@ -458,8 +458,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Valid email required' });
       }
       
-      // Log subscription for site owner notification
+      // Log subscription for site owner notification to tuskerscckandy@gmail.com
       console.log(`New newsletter subscription: ${email} at ${new Date().toISOString()}`);
+      console.log(`Site owner notification should be sent to: tuskerscckandy@gmail.com`);
       
       res.json({ 
         message: 'Successfully subscribed to newsletter',
@@ -469,6 +470,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Newsletter subscription error:', error);
       res.status(500).json({ message: 'Failed to subscribe' });
+    }
+  });
+
+  // Cricket scoring endpoints
+  app.post('/api/scoring/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Tuskers CC scoring system credentials
+      if (username === 'tuskers' && password === 'tuskers2024') {
+        res.json({ success: true, message: 'Login successful', userType: 'tuskers' });
+      } else {
+        res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+    } catch (error) {
+      console.error('Scoring login error:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+
+  app.get('/api/scoring/live', async (req, res) => {
+    try {
+      // Return current live match data for homepage widget
+      const liveData = {
+        isLive: true,
+        matchName: 'Tuskers CC vs Lightning Bolts',
+        venue: 'Premier Cricket Ground',
+        status: 'LIVE',
+        tuskersScore: '156/3 (28.4 overs)',
+        oppositionScore: 'Lightning Bolts: Yet to bat',
+        currentBatsmen: [
+          { name: 'R. Sharma', runs: 45, balls: 32 },
+          { name: 'V. Kohli', runs: 28, balls: 25 }
+        ],
+        recentOvers: ['4', '1', '0', '6', '2', '1']
+      };
+      
+      res.json(liveData);
+    } catch (error) {
+      console.error('Live scoring error:', error);
+      res.status(500).json({ error: 'Failed to fetch live data' });
     }
   });
 

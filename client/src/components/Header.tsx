@@ -27,6 +27,19 @@ export default function Header() {
             <a href="#matches" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
               Fixtures
             </a>
+            <div className="relative group">
+              <button className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors flex items-center">
+                Scoring <i className="fas fa-chevron-down ml-1 text-xs"></i>
+              </button>
+              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <Link href="/scoring/fan" className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-[#1e3a8a] transition-colors rounded-t-lg">
+                  <i className="fas fa-users mr-2"></i>Fan Scoring
+                </Link>
+                <Link href="/scoring/tuskers" className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-[#1e3a8a] transition-colors rounded-b-lg">
+                  <i className="fas fa-shield-alt mr-2"></i>Official Scoring
+                </Link>
+              </div>
+            </div>
             <a href="#trivia" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
               Trivia
             </a>
