@@ -33,9 +33,11 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-[#1e3a8a] rounded-lg flex items-center justify-center">
-              <span className="text-[#f59e0b] font-bold text-lg">TC</span>
-            </div>
+            <img 
+              src="/attached_assets/Tuskers CC Logo.png" 
+              alt="Tuskers CC" 
+              className="w-12 h-12 rounded-lg object-contain"
+            />
             <div>
               <h1 className="text-2xl font-bold text-[#1e3a8a]">TUSKERS CC</h1>
               <p className="text-sm text-gray-600">Cricket Club</p>

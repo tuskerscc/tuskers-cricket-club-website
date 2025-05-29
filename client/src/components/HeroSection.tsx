@@ -21,7 +21,7 @@ export default function HeroSection() {
               Champions League Winners 2024
             </div>
             <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Welcome to<br>
+              Welcome to<br />
               <span className="text-[#fcd34d]">Tuskers CC</span>
             </h1>
             <p className="text-xl mb-8 text-gray-200 leading-relaxed">
