@@ -53,6 +53,8 @@ export default function FanScoring() {
   const [team2Name, setTeam2Name] = useState('');
   const [selectedFormat, setSelectedFormat] = useState<'5-over' | 'T10' | 'T20' | 'ODI'>('T20');
   const [playersPerTeam, setPlayersPerTeam] = useState(11);
+  const [tossWinner, setTossWinner] = useState<1 | 2>(1);
+  const [tossDecision, setTossDecision] = useState<'bat' | 'bowl'>('bat');
   const [batsman1Name, setBatsman1Name] = useState('');
   const [batsman2Name, setBatsman2Name] = useState('');
   const [bowlerName, setBowlerName] = useState('');
@@ -89,10 +91,13 @@ export default function FanScoring() {
 
     const maxOvers = getMaxOvers(selectedFormat);
     
+    // Determine batting team based on toss decision
+    const firstBattingTeam = tossDecision === 'bat' ? tossWinner : (tossWinner === 1 ? 2 : 1);
+    
     setMatchState({
       team1: team1Name,
       team2: team2Name,
-      battingTeam: 1,
+      battingTeam: firstBattingTeam,
       innings: 1,
       totalRuns: 0,
       wickets: 0,
@@ -306,8 +311,45 @@ export default function FanScoring() {
       }
     }
     
-    // Show batsman selection modal if wickets < maxWickets
-    if (newState.wickets < newState.maxWickets) {
+    // Check if team is all out
+    if (newState.wickets >= newState.maxWickets) {
+      // Team is all out - end innings
+      if (newState.innings === 1) {
+        // Start second innings automatically
+        newState.innings = 2;
+        newState.battingTeam = newState.battingTeam === 1 ? 2 : 1;
+        newState.target = newState.totalRuns + 1;
+        const nextTeam = newState.battingTeam === 1 ? newState.team1 : newState.team2;
+        const prevTeam = newState.battingTeam === 1 ? newState.team2 : newState.team1;
+        
+        toast({ 
+          title: "All Out!", 
+          description: `${prevTeam} all out for ${newState.totalRuns}. ${nextTeam} needs ${newState.target} to win.` 
+        });
+        
+        // Reset for second innings
+        newState.totalRuns = 0;
+        newState.wickets = 0;
+        newState.overs = 0;
+        newState.balls = 0;
+        newState.batsmen = [
+          { name: `${nextTeam} Batsman 1`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
+          { name: `${nextTeam} Batsman 2`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
+        ];
+        newState.currentOver = [];
+        newState.recentOvers = [];
+        newState.bowlers = [];
+        newState.dismissedBatsmen = [];
+        newState.showBatsmanModal = true;
+      } else {
+        // Match complete - second team all out
+        toast({ 
+          title: "Match Complete!", 
+          description: `${newState.battingTeam === 1 ? newState.team1 : newState.team2} all out for ${newState.totalRuns}. ${newState.battingTeam === 1 ? newState.team2 : newState.team1} wins!` 
+        });
+      }
+    } else {
+      // Show batsman selection modal if more wickets available
       newState.showBatsmanModal = true;
     }
     
@@ -331,17 +373,19 @@ export default function FanScoring() {
     newState.currentBowler.runs += runs;
     
     if (type === 'wide' || type === 'noball') {
-      // Don't increment balls for wides and no-balls
+      // Wide balls and no-balls: Don't increment balls, don't give runs to batsman, don't rotate strike
       newState.currentOver.push(`${type.charAt(0).toUpperCase()}${runs > 1 ? runs : ''}`);
+      // No striker rotation for wides and no-balls regardless of runs
     } else {
+      // Byes and leg-byes: increment balls, don't give runs to batsman, but can rotate strike
       newState.balls++;
       newState.batsmen[newState.striker].balls++;
       newState.currentOver.push(`${type === 'bye' ? 'b' : 'lb'}${runs > 1 ? runs : ''}`);
-    }
-    
-    // Switch striker for odd runs
-    if (runs % 2 === 1) {
-      switchStriker(newState);
+      
+      // Switch striker for odd runs (only for byes and leg-byes)
+      if (runs % 2 === 1) {
+        switchStriker(newState);
+      }
     }
     
     // Handle over completion (only for byes and leg-byes)
@@ -605,6 +649,63 @@ export default function FanScoring() {
                 <p className="text-xs text-gray-500 mt-1">
                   Maximum wickets: {playersPerTeam - 1}
                 </p>
+              </div>
+
+              {/* Toss Selection */}
+              <div className="space-y-4 p-4 bg-gray-50 rounded-xl">
+                <h3 className="font-semibold text-gray-700">Toss Details</h3>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Toss Winner</label>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setTossWinner(1)}
+                      className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                        tossWinner === 1 
+                          ? 'bg-[#1e3a8a] text-white' 
+                          : 'bg-white text-gray-700 border border-gray-300'
+                      }`}
+                    >
+                      {team1Name || 'Team 1'}
+                    </button>
+                    <button
+                      onClick={() => setTossWinner(2)}
+                      className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                        tossWinner === 2 
+                          ? 'bg-[#1e3a8a] text-white' 
+                          : 'bg-white text-gray-700 border border-gray-300'
+                      }`}
+                    >
+                      {team2Name || 'Team 2'}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Toss Decision</label>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setTossDecision('bat')}
+                      className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                        tossDecision === 'bat' 
+                          ? 'bg-[#1e3a8a] text-white' 
+                          : 'bg-white text-gray-700 border border-gray-300'
+                      }`}
+                    >
+                      Bat First
+                    </button>
+                    <button
+                      onClick={() => setTossDecision('bowl')}
+                      className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                        tossDecision === 'bowl' 
+                          ? 'bg-[#1e3a8a] text-white' 
+                          : 'bg-white text-gray-700 border border-gray-300'
+                      }`}
+                    >
+                      Bowl First
+                    </button>
+                  </div>
+                </div>
               </div>
               
               <button
