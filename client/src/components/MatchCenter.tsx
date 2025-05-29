@@ -141,7 +141,6 @@ export default function MatchCenter() {
                     <th className="px-6 py-4 text-left font-semibold">Date</th>
                     <th className="px-6 py-4 text-left font-semibold">Venue</th>
                     <th className="px-6 py-4 text-left font-semibold">Competition</th>
-                    <th className="px-6 py-4 text-center font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -171,14 +170,6 @@ export default function MatchCenter() {
                       </td>
                       <td className="px-6 py-4 text-gray-700">
                         {match.competition.name}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button 
-                          onClick={() => handleViewMatchReport(match.id)}
-                          className="bg-[#1e3a8a] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#1e40af] transition-colors text-sm"
-                        >
-                          View Details
-                        </button>
                       </td>
                     </tr>
                   ))}
