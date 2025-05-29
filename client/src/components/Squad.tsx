@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { PlayerWithStats } from '@/lib/types';
 
 export default function Squad() {
   const [category, setCategory] = useState<'all' | 'batsmen' | 'bowlers' | 'allrounders' | 'wicketkeeper'>('all');
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerWithStats | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
 
   const { data: players = [], isLoading } = useQuery<PlayerWithStats[]>({
     queryKey: ['/api/players']
@@ -18,6 +21,36 @@ export default function Squad() {
     if (category === 'wicketkeeper') return player.role.toLowerCase().includes('wicket-keeper');
     return false;
   }).slice(0, 25); // Limit to 25 players
+
+  // Auto-scroll functionality
+  useEffect(() => {
+    if (!isAutoScrolling || filteredPlayers.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex(prevIndex => 
+        prevIndex >= filteredPlayers.length - 3 ? 0 : prevIndex + 1
+      );
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [filteredPlayers.length, isAutoScrolling]);
+
+  // Navigation functions
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+    setIsAutoScrolling(false);
+    setTimeout(() => setIsAutoScrolling(true), 5000);
+  };
+
+  const nextSlide = () => {
+    const newIndex = currentIndex >= filteredPlayers.length - 3 ? 0 : currentIndex + 1;
+    goToSlide(newIndex);
+  };
+
+  const prevSlide = () => {
+    const newIndex = currentIndex <= 0 ? filteredPlayers.length - 3 : currentIndex - 1;
+    goToSlide(newIndex);
+  };
 
   if (isLoading) {
     return (
@@ -109,7 +142,138 @@ export default function Squad() {
           </button>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        {/* Bay Window Style Image Slider */}
+        <div className="relative overflow-hidden">
+          {filteredPlayers.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No players found in this category.</p>
+            </div>
+          ) : (
+            <>
+              {/* Navigation Arrows */}
+              <button 
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-[#1e3a8a] rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110"
+                onMouseEnter={() => setIsAutoScrolling(false)}
+                onMouseLeave={() => setIsAutoScrolling(true)}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button 
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-[#1e3a8a] rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110"
+                onMouseEnter={() => setIsAutoScrolling(false)}
+                onMouseLeave={() => setIsAutoScrolling(true)}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Bay Window Slider Container */}
+              <div 
+                ref={sliderRef}
+                className="flex transition-transform duration-700 ease-in-out"
+                style={{ transform: `translateX(-${currentIndex * 33.333}%)` }}
+                onMouseEnter={() => setIsAutoScrolling(false)}
+                onMouseLeave={() => setIsAutoScrolling(true)}
+              >
+                {filteredPlayers.map((player, index) => {
+                  const isCenter = index === currentIndex + 1;
+                  const isAdjacent = index === currentIndex || index === currentIndex + 2;
+                  
+                  return (
+                    <div
+                      key={player.id}
+                      className={`flex-shrink-0 w-1/3 px-2 transition-all duration-700 ${
+                        isCenter 
+                          ? 'transform scale-110 z-20' 
+                          : isAdjacent 
+                          ? 'transform scale-95 z-10' 
+                          : 'transform scale-85 z-0'
+                      }`}
+                    >
+                      <div 
+                        className={`bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden shadow-lg cursor-pointer transition-all duration-500 hover:shadow-2xl ${
+                          isCenter ? 'ring-4 ring-[#1e3a8a]/20' : ''
+                        }`}
+                        onClick={() => setSelectedPlayer(player)}
+                      >
+                        <div className="relative">
+                          <img 
+                            src={player.photo || 'https://via.placeholder.com/300x400/1e3a8a/white?text=Player'}
+                            alt={player.name}
+                            className="w-full h-80 object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                          <div className="absolute bottom-4 left-4 text-white">
+                            <h3 className="text-xl font-bold mb-1">{player.name}</h3>
+                            <p className="text-[#ffd700] font-semibold">{player.role}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="p-6">
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="text-center bg-[#eff6ff] rounded-lg p-3">
+                              <div className="text-2xl font-bold text-[#1e3a8a]">
+                                {player.stats?.matches || 0}
+                              </div>
+                              <div className="text-gray-600">Matches</div>
+                            </div>
+                            <div className="text-center bg-[#fef3c7] rounded-lg p-3">
+                              <div className="text-2xl font-bold text-[#d97706]">
+                                {player.stats?.runsScored || 0}
+                              </div>
+                              <div className="text-gray-600">Runs</div>
+                            </div>
+                          </div>
+                          
+                          {player.role.toLowerCase().includes('bowler') && (
+                            <div className="mt-4 text-center bg-[#f0fdf4] rounded-lg p-3">
+                              <div className="text-2xl font-bold text-[#16a34a]">
+                                {player.stats?.wicketsTaken || 0}
+                              </div>
+                              <div className="text-gray-600">Wickets</div>
+                            </div>
+                          )}
+                          
+                          {(player.role.toLowerCase().includes('keeper') || player.role.toLowerCase().includes('wicket')) && (
+                            <div className="mt-4 text-center bg-[#fdf2f8] rounded-lg p-3">
+                              <div className="text-2xl font-bold text-[#e11d48]">
+                                {player.stats?.catches || 0}
+                              </div>
+                              <div className="text-gray-600">Catches</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Dot Indicators */}
+              <div className="flex justify-center mt-8 space-x-2">
+                {Array.from({ length: Math.max(0, filteredPlayers.length - 2) }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentIndex 
+                        ? 'bg-[#1e3a8a] scale-125' 
+                        : 'bg-gray-300 hover:bg-gray-400'
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Keep the existing player modal unchanged */}
+        <div className="hidden">
           {filteredPlayers.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <p className="text-gray-500 text-lg">No players found in this category.</p>

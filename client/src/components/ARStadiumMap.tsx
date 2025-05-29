@@ -32,20 +32,23 @@ export default function ARStadiumMap() {
     queryKey: ['/api/players']
   });
 
-  // Cricket field positions in traditional formation
+  // Cricket field positions with proper 30-yard circle placement
   const fieldPositions: PlayerPosition[] = players.slice(0, 11).map((player, index) => {
     const positions = [
-      { x: 50, y: 65, fieldPosition: 'Wicket-keeper' }, // Behind stumps
-      { x: 30, y: 75, fieldPosition: 'Square leg' }, // Square leg
-      { x: 65, y: 15, fieldPosition: 'Long on' }, // Long on
-      { x: 25, y: 45, fieldPosition: 'Point' }, // Point
-      { x: 75, y: 45, fieldPosition: 'Cover' }, // Cover
-      { x: 50, y: 10, fieldPosition: 'Long off' }, // Long off
-      { x: 50, y: 35, fieldPosition: 'Bowler' }, // Bowler
-      { x: 85, y: 50, fieldPosition: 'Off-side sweeper' }, // Off-side sweeper
-      { x: 15, y: 70, fieldPosition: 'Leg-side sweeper' }, // Leg-side sweeper
-      { x: 85, y: 80, fieldPosition: 'Fine leg' }, // Fine leg
-      { x: 15, y: 25, fieldPosition: 'Third man' } // Third man
+      // Inside/On 30-yard circle edge
+      { x: 50, y: 65, fieldPosition: 'Wicket-keeper' }, // Behind stumps (inside)
+      { x: 35, y: 70, fieldPosition: 'Square leg' }, // On circle edge
+      { x: 30, y: 45, fieldPosition: 'Point' }, // On circle edge
+      { x: 70, y: 45, fieldPosition: 'Cover' }, // On circle edge
+      { x: 50, y: 35, fieldPosition: 'Bowler' }, // Inside circle
+      { x: 75, y: 75, fieldPosition: 'Fine leg' }, // On circle edge
+      
+      // Outside 30-yard circle (deeper positions)
+      { x: 60, y: 12, fieldPosition: 'Long on' }, // Deep boundary
+      { x: 50, y: 8, fieldPosition: 'Long off' }, // Deep boundary
+      { x: 85, y: 50, fieldPosition: 'Off-side sweeper' }, // Deep boundary
+      { x: 15, y: 65, fieldPosition: 'Leg-side sweeper' }, // Deep boundary
+      { x: 12, y: 25, fieldPosition: 'Third man' } // Deep boundary
     ];
 
     return {
