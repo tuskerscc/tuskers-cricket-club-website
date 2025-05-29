@@ -392,7 +392,7 @@ export class DatabaseStorage implements IStorage {
 
   // Forum Methods
   async getForumCategories(): Promise<ForumCategory[]> {
-    return await db.select().from(forumCategories).orderBy(forumCategories.displayOrder);
+    return await db.select().from(forumCategories).orderBy(forumCategories.id);
   }
 
   async getForumTopics(categoryId?: number): Promise<ForumTopic[]> {
