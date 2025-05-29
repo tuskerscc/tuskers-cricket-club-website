@@ -1,8 +1,18 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPlayerSchema, insertMatchSchema, insertArticleSchema, insertPollSchema } from "@shared/schema";
 import { generateCricketPoll, generateCricketQuiz } from "./cricket-api";
+
+// Extend Express Request type to include session
+declare module 'express-serve-static-core' {
+  interface Request {
+    session: {
+      adminLoggedIn?: boolean;
+      [key: string]: any;
+    };
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Admin authentication routes
