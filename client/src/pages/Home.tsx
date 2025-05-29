@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
+import LiveScoreWidget from '@/components/LiveScoreWidget';
 import MatchCenter from '@/components/MatchCenter';
 import Squad from '@/components/Squad';
 import StartingEleven from '@/components/StartingEleven';
@@ -22,6 +23,13 @@ export default function Home() {
       
       <main>
         <HeroSection />
+        
+        {/* Live Score Widget */}
+        <section className="py-8">
+          <div className="container mx-auto px-4 max-w-7xl">
+            <LiveScoreWidget />
+          </div>
+        </section>
         
         {/* Announcements Section */}
         <section className="py-12 bg-gradient-to-r from-[#1e3a8a] to-blue-800">
