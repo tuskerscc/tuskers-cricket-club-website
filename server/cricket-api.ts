@@ -1,5 +1,5 @@
-const RAPIDAPI_KEY = "0958181a25mshdd91bd784761359p1fbc29jsnbeae1a0d580f";
-const RAPIDAPI_HOST = "free-cricbuzz-cricket-api.p.rapidapi.com";
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || "0958181a25mshdd91bd784761359p1fbc29jsnbeae1a0d580f";
+const RAPIDAPI_HOST = process.env.CRICKET_API_HOST || "free-cricbuzz-cricket-api.p.rapidapi.com";
 
 interface LiveMatch {
   id: string;
