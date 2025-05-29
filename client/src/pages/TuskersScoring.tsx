@@ -608,20 +608,41 @@ Generated: ${new Date().toLocaleString()}
           {/* Match Header */}
           <div className="bg-gray-50 p-4 border-b">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                  {matchState.team1.substring(0, 2).toUpperCase()}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                    {(matchState.battingTeam === 1 ? matchState.team1 : matchState.team2).substring(0, 2).toUpperCase()}
+                  </div>
+                  <span className="font-semibold">{matchState.battingTeam === 1 ? matchState.team1 : matchState.team2} batting</span>
                 </div>
-                <span className="font-semibold">{matchState.team1}</span>
+                {matchState.innings === 2 && matchState.target && (
+                  <div className="text-sm space-y-1">
+                    <div className="text-blue-600 font-semibold">
+                      Target: {matchState.target}
+                    </div>
+                    <div className="text-orange-600 font-semibold">
+                      Need: {Math.max(0, matchState.target - matchState.totalRuns)} runs in {((getMaxOvers(matchState.format) - matchState.overs) * 6 - matchState.balls)} balls
+                    </div>
+                    <div className="text-red-600 font-semibold">
+                      RRR: {(() => {
+                        const ballsLeft = (getMaxOvers(matchState.format) - matchState.overs) * 6 - matchState.balls;
+                        const runsNeeded = matchState.target - matchState.totalRuns;
+                        const oversLeft = ballsLeft / 6;
+                        return oversLeft > 0 ? (runsNeeded / oversLeft).toFixed(2) : '0.00';
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold">{matchState.totalRuns}/{matchState.wickets}</div>
-                <div className="text-sm text-gray-600">Over {matchState.overs}.{matchState.balls} / {matchState.maxOvers}</div>
+                <div className="text-sm text-gray-600">Over {matchState.overs}.{matchState.balls} / {getMaxOvers(matchState.format)}</div>
                 <div className="text-xs text-blue-600 font-semibold">{matchState.format} Format</div>
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-600">Official Scoring</div>
-                <div className="text-xs text-green-600">RR: {matchState.overs > 0 ? (matchState.totalRuns / (matchState.overs + matchState.balls/6)).toFixed(2) : '0.00'}</div>
+                <div className="text-xs text-green-600">CRR: {matchState.overs > 0 || matchState.balls > 0 ? (matchState.totalRuns / (matchState.overs + matchState.balls/6)).toFixed(2) : '0.00'}</div>
+                <div className="text-xs text-gray-500">Innings {matchState.innings}</div>
               </div>
             </div>
           </div>
