@@ -48,7 +48,7 @@ export default function Squad() {
 
   return (
     <section id="squad" className="py-16 bg-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 max-w-7xl">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-[#1e3a8a] mb-4">Our Squad</h2>
           <p className="text-xl text-gray-600">Meet the talented players who make Tuskers CC a champion team</p>
@@ -119,13 +119,13 @@ export default function Squad() {
                 key={player.id} 
                 className="group bg-gradient-to-br from-[#eff6ff] to-blue-50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative"
               >
-                {player.isCaptain && (
+                {player.is_captain && (
                   <div className="absolute top-4 right-4 bg-[#f59e0b] text-[#1e3a8a] px-3 py-1 rounded-full text-xs font-bold z-10">
                     <i className="fas fa-crown mr-1"></i>
                     CAPTAIN
                   </div>
                 )}
-                {player.isViceCaptain && (
+                {player.is_vice_captain && (
                   <div className="absolute top-4 right-4 bg-[#1e40af] text-white px-3 py-1 rounded-full text-xs font-bold z-10">
                     VICE-CAPTAIN
                   </div>
