@@ -4,6 +4,7 @@ import type { PlayerWithStats } from '@/lib/types';
 
 export default function Squad() {
   const [category, setCategory] = useState<'all' | 'batsmen' | 'bowlers' | 'allrounders' | 'wicketkeeper'>('all');
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerWithStats | null>(null);
 
   const { data: players = [], isLoading } = useQuery<PlayerWithStats[]>({
     queryKey: ['/api/players']
@@ -175,7 +176,10 @@ export default function Squad() {
                     </div>
                   )}
 
-                  <button className="w-full mt-4 bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors group-hover:bg-[#f59e0b] group-hover:text-[#1e3a8a]">
+                  <button 
+                    onClick={() => setSelectedPlayer(player)}
+                    className="w-full mt-4 bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors group-hover:bg-[#f59e0b] group-hover:text-[#1e3a8a]"
+                  >
                     View Full Profile
                   </button>
                 </div>
@@ -192,6 +196,126 @@ export default function Squad() {
             Player Statistics
           </button>
         </div>
+
+        {/* Player Detail Modal */}
+        {selectedPlayer && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="relative">
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelectedPlayer(null)}
+                  className="absolute top-4 right-4 bg-gray-200 hover:bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center z-10"
+                >
+                  ✕
+                </button>
+
+                {/* Player Header */}
+                <div className="bg-gradient-to-br from-[#1e3a8a] to-blue-800 text-white p-6 rounded-t-2xl">
+                  <div className="flex items-center space-x-4">
+                    <img 
+                      src={selectedPlayer.photo || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200'} 
+                      alt={selectedPlayer.name} 
+                      className="w-20 h-20 rounded-full object-cover border-4 border-white"
+                    />
+                    <div>
+                      <h2 className="text-2xl font-bold">{selectedPlayer.name}</h2>
+                      <p className="text-blue-200">{selectedPlayer.role}</p>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <span className="bg-[#fcd34d] text-[#1e3a8a] px-3 py-1 rounded-full text-sm font-bold">
+                          #{selectedPlayer.jerseyNumber}
+                        </span>
+                        {selectedPlayer.isCaptain && (
+                          <span className="bg-[#f59e0b] text-[#1e3a8a] px-3 py-1 rounded-full text-sm font-bold">
+                            CAPTAIN
+                          </span>
+                        )}
+                        {selectedPlayer.isViceCaptain && (
+                          <span className="bg-[#1e40af] text-white px-3 py-1 rounded-full text-sm font-bold">
+                            VICE-CAPTAIN
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Player Details */}
+                <div className="p-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Basic Info */}
+                    <div>
+                      <h3 className="text-lg font-bold text-[#1e3a8a] mb-4">Player Information</h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Batting Style:</span>
+                          <span className="font-semibold">{selectedPlayer.battingStyle || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Bowling Style:</span>
+                          <span className="font-semibold">{selectedPlayer.bowlingStyle || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Jersey Number:</span>
+                          <span className="font-semibold">#{selectedPlayer.jerseyNumber}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Role:</span>
+                          <span className="font-semibold">{selectedPlayer.role}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Performance Stats */}
+                    <div>
+                      <h3 className="text-lg font-bold text-[#1e3a8a] mb-4">Performance Stats</h3>
+                      {selectedPlayer.stats ? (
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Matches:</span>
+                            <span className="font-semibold">{selectedPlayer.stats.matchesPlayed || 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Runs Scored:</span>
+                            <span className="font-semibold">{selectedPlayer.stats.runsScored || 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Wickets Taken:</span>
+                            <span className="font-semibold">{selectedPlayer.stats.wicketsTaken || 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Catches:</span>
+                            <span className="font-semibold">{selectedPlayer.stats.catches || 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Average:</span>
+                            <span className="font-semibold">{selectedPlayer.stats.average || 'N/A'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Strike Rate:</span>
+                            <span className="font-semibold">{selectedPlayer.stats.strikeRate || 'N/A'}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-gray-500">No performance data available</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex space-x-4 mt-8">
+                    <button 
+                      onClick={() => setSelectedPlayer(null)}
+                      className="flex-1 bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
+                    >
+                      Close Profile
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
