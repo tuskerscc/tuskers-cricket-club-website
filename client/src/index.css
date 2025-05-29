@@ -1,0 +1,349 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 220 13% 97%; /* #F8FAFC */
+  --foreground: 222 84% 5%; /* #0F172A */
+  --muted: 220 13% 91%; /* #E2E8F0 */
+  --muted-foreground: 220 9% 46%; /* #64748B */
+  --popover: 0 0% 100%; /* #FFFFFF */
+  --popover-foreground: 222 84% 5%; /* #0F172A */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 222 84% 5%; /* #0F172A */
+  --border: 220 13% 91%; /* #E2E8F0 */
+  --input: 220 13% 91%; /* #E2E8F0 */
+  --primary: 217 91% 60%; /* #1E3A8A - Royal Blue */
+  --primary-foreground: 210 40% 98%; /* #F8FAFC */
+  --secondary: 220 13% 95%; /* #F1F5F9 */
+  --secondary-foreground: 222 84% 5%; /* #0F172A */
+  --accent: 220 13% 95%; /* #F1F5F9 */
+  --accent-foreground: 222 84% 5%; /* #0F172A */
+  --destructive: 0 84% 60%; /* #EF4444 */
+  --destructive-foreground: 210 40% 98%; /* #F8FAFC */
+  --ring: 217 91% 60%; /* #1E3A8A */
+  --radius: 0.5rem;
+  
+  /* Custom Tuskers CC colors */
+  --royal-blue-50: 239 100% 97%; /* #EFF6FF */
+  --royal-blue-900: 217 91% 60%; /* #1E3A8A */
+  --tusker-gold-400: 43 96% 56%; /* #FCD34D */
+  --tusker-gold-500: 38 92% 50%; /* #F59E0B */
+  --tusker-gold-600: 32 95% 44%; /* #D97706 */
+}
+
+.dark {
+  --background: 222 84% 5%; /* #0F172A */
+  --foreground: 210 40% 98%; /* #F8FAFC */
+  --muted: 217 33% 17%; /* #1E293B */
+  --muted-foreground: 215 20% 65%; /* #94A3B8 */
+  --popover: 222 84% 5%; /* #0F172A */
+  --popover-foreground: 210 40% 98%; /* #F8FAFC */
+  --card: 222 84% 5%; /* #0F172A */
+  --card-foreground: 210 40% 98%; /* #F8FAFC */
+  --border: 217 33% 17%; /* #1E293B */
+  --input: 217 33% 17%; /* #1E293B */
+  --primary: 217 91% 60%; /* #1E3A8A */
+  --primary-foreground: 210 40% 98%; /* #F8FAFC */
+  --secondary: 217 33% 17%; /* #1E293B */
+  --secondary-foreground: 210 40% 98%; /* #F8FAFC */
+  --accent: 217 33% 17%; /* #1E293B */
+  --accent-foreground: 210 40% 98%; /* #F8FAFC */
+  --destructive: 0 62% 30%; /* #7F1D1D */
+  --destructive-foreground: 210 40% 98%; /* #F8FAFC */
+  --ring: 217 91% 60%; /* #1E3A8A */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+@layer components {
+  /* Custom gradient backgrounds */
+  .bg-royal-gradient {
+    background: linear-gradient(135deg, hsl(var(--royal-blue-900)) 0%, hsl(var(--royal-blue-900)) 100%);
+  }
+  
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, hsl(var(--tusker-gold-500)) 0%, hsl(var(--tusker-gold-600)) 100%);
+  }
+
+  /* Custom animations */
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes bounce-subtle {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-2px);
+    }
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s infinite;
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--tusker-gold-500)) hsl(var(--muted));
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--tusker-gold-500));
+    border-radius: 3px;
+  }
+
+  /* Loading states */
+  .skeleton {
+    @apply animate-pulse bg-muted rounded;
+  }
+
+  /* Custom button variants */
+  .btn-royal {
+    @apply bg-royal-blue-900 text-white hover:bg-royal-blue-800 transition-colors duration-300;
+  }
+
+  .btn-gold {
+    @apply bg-tusker-gold-500 text-royal-blue-900 hover:bg-tusker-gold-400 transition-colors duration-300;
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Focus ring */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-royal-blue-500 focus:ring-offset-2;
+  }
+}
+
+@layer utilities {
+  /* Custom spacing for cricket field layout */
+  .field-position {
+    @apply absolute transform -translate-x-1/2 -translate-y-1/2;
+  }
+
+  /* Custom grid layouts */
+  .grid-auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  .grid-auto-fill {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  /* Royal Blue color utilities */
+  .bg-royal-blue-50 { background-color: hsl(var(--royal-blue-50)); }
+  .bg-royal-blue-900 { background-color: hsl(var(--royal-blue-900)); }
+  .text-royal-blue-900 { color: hsl(var(--royal-blue-900)); }
+  .border-royal-blue-900 { border-color: hsl(var(--royal-blue-900)); }
+
+  /* Gold color utilities */
+  .bg-tusker-gold-400 { background-color: hsl(var(--tusker-gold-400)); }
+  .bg-tusker-gold-500 { background-color: hsl(var(--tusker-gold-500)); }
+  .bg-tusker-gold-600 { background-color: hsl(var(--tusker-gold-600)); }
+  .text-tusker-gold-400 { color: hsl(var(--tusker-gold-400)); }
+  .text-tusker-gold-500 { color: hsl(var(--tusker-gold-500)); }
+  .border-tusker-gold-500 { border-color: hsl(var(--tusker-gold-500)); }
+
+  /* Hide scrollbar but keep functionality */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Aspect ratios for images */
+  .aspect-cricket-card {
+    aspect-ratio: 4 / 5;
+  }
+
+  .aspect-hero {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Cricket field specific styles */
+  .cricket-field {
+    background: radial-gradient(circle, #22c55e 0%, #16a34a 100%);
+    position: relative;
+  }
+
+  .cricket-field::before {
+    content: '';
+    position: absolute;
+    inset: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+  }
+
+  .cricket-field::after {
+    content: '';
+    position: absolute;
+    inset: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+  }
+
+  /* Live indicator */
+  .live-indicator {
+    position: relative;
+  }
+
+  .live-indicator::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  /* Match status indicators */
+  .status-live {
+    @apply bg-red-500 text-white;
+  }
+
+  .status-upcoming {
+    @apply bg-blue-500 text-white;
+  }
+
+  .status-completed {
+    @apply bg-green-500 text-white;
+  }
+
+  .status-won {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .status-lost {
+    @apply bg-red-100 text-red-800;
+  }
+
+  /* Player role colors */
+  .role-batsman {
+    @apply bg-blue-100 text-blue-800;
+  }
+
+  .role-bowler {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .role-allrounder {
+    @apply bg-purple-100 text-purple-800;
+  }
+
+  .role-wicketkeeper {
+    @apply bg-green-100 text-green-800;
+  }
+
+  /* Social platform colors */
+  .social-twitter {
+    @apply bg-blue-500 hover:bg-blue-600;
+  }
+
+  .social-instagram {
+    @apply bg-pink-500 hover:bg-pink-600;
+  }
+
+  .social-facebook {
+    @apply bg-blue-700 hover:bg-blue-800;
+  }
+
+  .social-youtube {
+    @apply bg-red-600 hover:bg-red-700;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: 0 0% 0%;
+    --ring: 0 0% 0%;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .animate-pulse,
+  .animate-pulse-slow,
+  .animate-bounce-subtle {
+    animation: none;
+  }
+}
+
+/* Focus visible for better accessibility */
+@supports selector(:focus-visible) {
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/* Custom selection colors */
+::selection {
+  background-color: hsl(var(--tusker-gold-400));
+  color: hsl(var(--royal-blue-900));
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply inline-block w-4 h-4 border-2 border-current border-r-transparent rounded-full animate-spin;
+}
