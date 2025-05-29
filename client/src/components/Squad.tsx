@@ -352,14 +352,7 @@ export default function Squad() {
           )}
         </div>
 
-        <div className="text-center mt-12">
-          <button className="bg-[#1e3a8a] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#1e40af] transition-colors mr-4">
-            View Complete Squad
-          </button>
-          <button className="border-2 border-[#1e3a8a] text-[#1e3a8a] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#eff6ff] transition-colors">
-            Player Statistics
-          </button>
-        </div>
+
 
         {/* Player Detail Modal */}
         {selectedPlayer && (

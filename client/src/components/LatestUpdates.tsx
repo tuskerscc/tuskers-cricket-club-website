@@ -151,12 +151,12 @@ export default function LatestUpdates() {
         </div>
 
         <div className="text-center mt-12">
-          <button className="bg-[#1e3a8a] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#1e40af] transition-colors mr-4">
+          <a 
+            href="/news" 
+            className="inline-block bg-[#1e3a8a] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#1e40af] transition-colors"
+          >
             View All News
-          </button>
-          <button className="border-2 border-[#1e3a8a] text-[#1e3a8a] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#eff6ff] transition-colors">
-            Subscribe to Newsletter
-          </button>
+          </a>
         </div>
       </div>
     </section>

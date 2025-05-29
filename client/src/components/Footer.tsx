@@ -1,35 +1,4 @@
-import { useState } from 'react';
-
 export default function Footer() {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      try {
-        const response = await fetch('/api/newsletter/subscribe', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email }),
-        });
-        
-        if (response.ok) {
-          setSubscribed(true);
-          setEmail('');
-          alert('Thank you for subscribing! You will receive confirmation via email.');
-          setTimeout(() => setSubscribed(false), 5000);
-        } else {
-          alert('Failed to subscribe. Please try again.');
-        }
-      } catch (error) {
-        console.error('Subscription error:', error);
-        alert('Failed to subscribe. Please check your connection and try again.');
-      }
-    }
-  };
 
   return (
     <footer className="bg-[#1e3a8a] text-white py-16">
@@ -97,33 +66,23 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Newsletter */}
+          {/* Contact Info */}
           <div>
-            <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Stay Updated</h4>
-            <p className="text-[#bfdbfe] mb-4">Subscribe to our newsletter for latest news and match updates.</p>
-            <form onSubmit={handleNewsletterSubmit} className="space-y-3">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-[#1e40af] border border-[#1d4ed8] rounded-lg text-white placeholder-[#93c5fd] focus:outline-none focus:border-[#fcd34d]"
-                required
-              />
-              <button 
-                type="submit"
-                className="w-full bg-[#f59e0b] text-[#1e3a8a] py-3 rounded-lg font-semibold hover:bg-[#fbbf24] transition-colors"
-              >
-                {subscribed ? (
-                  <>
-                    <i className="fas fa-check mr-2"></i>
-                    Subscribed!
-                  </>
-                ) : (
-                  'Subscribe'
-                )}
-              </button>
-            </form>
+            <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Contact Us</h4>
+            <div className="space-y-3 text-[#bfdbfe]">
+              <div className="flex items-center">
+                <i className="fas fa-envelope mr-3 text-[#fcd34d]"></i>
+                <span>tuskerscckandy@gmail.com</span>
+              </div>
+              <div className="flex items-center">
+                <i className="fas fa-phone mr-3 text-[#fcd34d]"></i>
+                <span>+94 XXX XXX XXX</span>
+              </div>
+              <div className="flex items-center">
+                <i className="fas fa-map-marker-alt mr-3 text-[#fcd34d]"></i>
+                <span>Kandy, Sri Lanka</span>
+              </div>
+            </div>
           </div>
         </div>
 
