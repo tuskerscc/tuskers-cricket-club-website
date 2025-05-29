@@ -2,37 +2,32 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { SocialPost, Poll, GalleryItem } from '@shared/schema';
 
-interface LivePoll {
+interface CricketPoll {
   question: string;
   options: string[];
+  context: string;
   isLive: boolean;
-  matchInfo?: {
-    venue: string;
-    status: string;
-    scores?: any;
-  };
 }
 
-interface LiveQuiz {
+interface CricketQuiz {
   question: string;
   options: string[];
   correct: string;
-  context?: string;
-  isLive: boolean;
+  context: string;
 }
 
 export default function FanZone() {
   const [selectedPollOption, setSelectedPollOption] = useState<string>('');
   const [selectedQuizAnswer, setSelectedQuizAnswer] = useState<string>('');
 
-  const { data: livePoll } = useQuery<LivePoll>({
+  const { data: cricketPoll } = useQuery<CricketPoll>({
     queryKey: ['/api/cricket/live-poll'],
-    refetchInterval: 60000 // Refetch every minute for live updates
+    refetchInterval: 300000 // Refetch every 5 minutes for new questions
   });
 
-  const { data: liveQuiz } = useQuery<LiveQuiz>({
+  const { data: cricketQuiz } = useQuery<CricketQuiz>({
     queryKey: ['/api/cricket/live-quiz'],
-    refetchInterval: 300000 // Refetch every 5 minutes
+    refetchInterval: 600000 // Refetch every 10 minutes for new questions
   });
 
   const { data: galleryItems = [] } = useQuery<GalleryItem[]>({
@@ -56,30 +51,26 @@ export default function FanZone() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Polls & Engagement */}
           <div className="space-y-8">
-            {/* Live Cricket Poll Widget */}
-            {livePoll && (
+            {/* Cricket Historical Poll Widget */}
+            {cricketPoll && (
               <div className="bg-gradient-to-br from-[#fef3c7] to-yellow-50 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-[#1e3a8a]">Live Cricket Poll</h3>
-                  {livePoll.isLive && (
-                    <div className="flex items-center bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                      <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
-                      LIVE
-                    </div>
-                  )}
+                  <h3 className="text-xl font-bold text-[#1e3a8a]">Cricket Poll</h3>
+                  <div className="flex items-center bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                    <i className="fas fa-history mr-1"></i>
+                    CRICKET TRIVIA
+                  </div>
                 </div>
                 <div className="mb-4">
-                  <h4 className="font-semibold text-[#1e40af] mb-3">{livePoll.question}</h4>
-                  {livePoll.matchInfo && (
-                    <div className="bg-blue-50 p-3 rounded-lg mb-3">
-                      <p className="text-sm text-blue-800">
-                        <i className="fas fa-map-marker-alt mr-1"></i>
-                        {livePoll.matchInfo.venue} • {livePoll.matchInfo.status}
-                      </p>
-                    </div>
-                  )}
+                  <h4 className="font-semibold text-[#1e40af] mb-3">{cricketPoll.question}</h4>
+                  <div className="bg-blue-50 p-3 rounded-lg mb-3">
+                    <p className="text-sm text-blue-800">
+                      <i className="fas fa-info-circle mr-1"></i>
+                      {cricketPoll.context}
+                    </p>
+                  </div>
                   <div className="space-y-3">
-                    {livePoll.options.map((option: string, index: number) => {
+                    {cricketPoll.options.map((option: string, index: number) => {
                       const randomPercentage = Math.floor(Math.random() * 40) + 10; // Simulate voting percentages
                       
                       return (
@@ -108,7 +99,7 @@ export default function FanZone() {
                     })}
                   </div>
                   <p className="text-sm text-gray-600 mt-3">
-                    Based on live international cricket matches • Updates every minute
+                    Based on cricket history and records • New questions every 5 minutes
                   </p>
                 </div>
               </div>
@@ -143,30 +134,26 @@ export default function FanZone() {
               )}
             </div>
 
-            {/* Live Cricket Quiz Widget */}
-            {liveQuiz && (
+            {/* Cricket Historical Quiz Widget */}
+            {cricketQuiz && (
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-bold text-[#1e3a8a]">Cricket Quiz</h3>
-                  {liveQuiz.isLive && (
-                    <div className="flex items-center bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                      <i className="fas fa-trophy mr-1"></i>
-                      LIVE CONTEXT
-                    </div>
-                  )}
+                  <div className="flex items-center bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                    <i className="fas fa-trophy mr-1"></i>
+                    CRICKET KNOWLEDGE
+                  </div>
                 </div>
                 <div className="mb-4">
-                  <h4 className="font-semibold text-[#1e40af] mb-3">{liveQuiz.question}</h4>
-                  {liveQuiz.context && (
-                    <div className="bg-green-50 p-3 rounded-lg mb-3">
-                      <p className="text-sm text-green-800">
-                        <i className="fas fa-info-circle mr-1"></i>
-                        {liveQuiz.context}
-                      </p>
-                    </div>
-                  )}
+                  <h4 className="font-semibold text-[#1e40af] mb-3">{cricketQuiz.question}</h4>
+                  <div className="bg-green-50 p-3 rounded-lg mb-3">
+                    <p className="text-sm text-green-800">
+                      <i className="fas fa-info-circle mr-1"></i>
+                      {cricketQuiz.context}
+                    </p>
+                  </div>
                   <div className="space-y-2">
-                    {liveQuiz.options.map((answer) => (
+                    {cricketQuiz.options.map((answer: string) => (
                       <button 
                         key={answer}
                         className={`w-full text-left p-3 bg-white rounded-lg border-2 transition-colors ${
@@ -177,12 +164,27 @@ export default function FanZone() {
                         onClick={() => setSelectedQuizAnswer(answer)}
                       >
                         {answer}
+                        {selectedQuizAnswer === answer && answer === cricketQuiz.correct && (
+                          <i className="fas fa-check text-green-600 ml-2"></i>
+                        )}
                       </button>
                     ))}
                   </div>
+                  {selectedQuizAnswer && (
+                    <div className={`mt-3 p-3 rounded-lg ${
+                      selectedQuizAnswer === cricketQuiz.correct 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {selectedQuizAnswer === cricketQuiz.correct 
+                        ? 'Correct! Well done!' 
+                        : `Incorrect. The correct answer is: ${cricketQuiz.correct}`
+                      }
+                    </div>
+                  )}
                 </div>
                 <button className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
-                  Take Full Quiz
+                  Next Question
                 </button>
               </div>
             )}

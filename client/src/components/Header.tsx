@@ -4,6 +4,28 @@ import { Link } from 'wouter';
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  useEffect(() => {
+    // Initialize cricket widget after component mounts
+    const initWidget = () => {
+      if (window.cricketWidget) {
+        window.cricketWidget.init({
+          elementId: 'cricket-widget',
+          theme: 'dark',
+          size: 'small'
+        });
+      }
+    };
+
+    // Check if script is already loaded
+    if (document.querySelector('script[src="https://cdorgapi.b-cdn.net/widgets/score.js"]')) {
+      initWidget();
+    } else {
+      // Wait for script to load
+      const timer = setTimeout(initWidget, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
       {/* Cricket Widget and Social Bar */}
