@@ -16,10 +16,7 @@ export default function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Hero Content */}
           <div className="text-white">
-            <div className="inline-flex items-center bg-[#f59e0b] text-[#1e3a8a] px-4 py-2 rounded-full font-semibold text-sm mb-6">
-              <i className="fas fa-trophy mr-2"></i>
-              Champions League Winners 2024
-            </div>
+
             <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               Welcome to<br />
               <span className="text-[#fcd34d]">Tuskers CC</span>
@@ -29,9 +26,9 @@ export default function HeroSection() {
               Join us as we continue our journey to excellence on and off the field.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="border-2 border-[#fcd34d] text-[#fcd34d] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#fcd34d] hover:text-[#1e3a8a] transition-all">
+              <a href="#matches" className="inline-block border-2 border-[#fcd34d] text-[#fcd34d] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#fcd34d] hover:text-[#1e3a8a] transition-all">
                 View Fixtures
-              </button>
+              </a>
             </div>
           </div>
 

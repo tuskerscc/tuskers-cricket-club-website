@@ -1,134 +1,156 @@
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import type { Player } from '@shared/schema';
 
-interface ScoringLogin {
-  username: string;
-  password: string;
-}
-
-interface MatchData {
-  matchName: string;
-  team1: string;
-  team2: string;
-  venue: string;
-  matchDate: string;
-  overs: number;
-}
-
-interface PlayerPerformance {
-  playerId: number;
-  playerName: string;
+interface Batsman {
+  name: string;
   runs: number;
   balls: number;
   fours: number;
   sixes: number;
-  wickets: number;
+  isOut: boolean;
+  dismissalType?: string;
+}
+
+interface Bowler {
+  name: string;
   overs: number;
   maidens: number;
-  runsGiven: number;
+  runs: number;
+  wickets: number;
+}
+
+interface MatchState {
+  team1: string;
+  team2: string;
+  battingTeam: 1 | 2;
+  innings: 1 | 2;
+  totalRuns: number;
+  wickets: number;
+  overs: number;
+  balls: number;
+  batsmen: [Batsman, Batsman];
+  currentBowler: Bowler;
+  recentOvers: string[];
+  target?: number;
 }
 
 export default function TuskersScoring() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentMatch, setCurrentMatch] = useState<MatchData | null>(null);
-  const [activeTab, setActiveTab] = useState<'setup' | 'live' | 'summary'>('setup');
-  const [playerPerformances, setPlayerPerformances] = useState<PlayerPerformance[]>([]);
-  const [isLive, setIsLive] = useState(false);
+  const [matchState, setMatchState] = useState<MatchState | null>(null);
+  const [showSetup, setShowSetup] = useState(true);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [team1Name, setTeam1Name] = useState('Tuskers CC');
+  const [team2Name, setTeam2Name] = useState('');
   const { toast } = useToast();
-
-  const { register: registerLogin, handleSubmit: handleLoginSubmit } = useForm<ScoringLogin>();
-  const { register: registerMatch, handleSubmit: handleMatchSubmit } = useForm<MatchData>();
 
   const { data: players = [] } = useQuery<Player[]>({
     queryKey: ['/api/players'],
     enabled: isAuthenticated
   });
 
-  const handleLogin = async (data: ScoringLogin) => {
-    try {
-      const response = await fetch('/api/scoring/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        setIsAuthenticated(true);
-        sessionStorage.setItem('tuskersScoring', 'true');
-        toast({ title: "Login Successful", description: "Welcome to Tuskers CC Scoring System" });
-      } else {
-        toast({ 
-          title: "Login Failed", 
-          description: "Invalid credentials. Use tuskers/tuskers2024",
-          variant: "destructive" 
-        });
-      }
-    } catch (error) {
+  const handleLogin = async () => {
+    if (username === 'tuskers' && password === 'tuskers2024') {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('tuskersScoring', 'true');
+      toast({ title: "Login Successful", description: "Welcome to Tuskers CC Scoring System" });
+    } else {
       toast({ 
-        title: "Error", 
-        description: "Failed to connect to server",
+        title: "Login Failed", 
+        description: "Invalid credentials. Use tuskers/tuskers2024",
         variant: "destructive" 
       });
     }
   };
 
-  const handleMatchSetup = (data: MatchData) => {
-    setCurrentMatch(data);
-    setActiveTab('live');
-    toast({ title: "Match Setup Complete", description: "Ready to start live scoring" });
-  };
+  const initializeMatch = () => {
+    if (!team2Name) {
+      toast({ title: "Error", description: "Please enter opposition team name" });
+      return;
+    }
 
-  const handleStartLive = () => {
-    setIsLive(true);
-    toast({ title: "Live Scoring Started", description: "Match is now live!" });
-  };
-
-  const handleEndMatch = () => {
-    setIsLive(false);
-    setActiveTab('summary');
-    toast({ title: "Match Ended", description: "Generating final summary" });
-  };
-
-  const addPlayerPerformance = () => {
-    const newPerformance: PlayerPerformance = {
-      playerId: 0,
-      playerName: '',
-      runs: 0,
-      balls: 0,
-      fours: 0,
-      sixes: 0,
+    setMatchState({
+      team1: team1Name,
+      team2: team2Name,
+      battingTeam: 1,
+      innings: 1,
+      totalRuns: 0,
       wickets: 0,
       overs: 0,
-      maidens: 0,
-      runsGiven: 0,
-    };
-    setPlayerPerformances([...playerPerformances, newPerformance]);
+      balls: 0,
+      batsmen: [
+        { name: 'Select Batsman', runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
+        { name: 'Select Batsman', runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
+      ],
+      currentBowler: { name: 'Select Bowler', overs: 0, maidens: 0, runs: 0, wickets: 0 },
+      recentOvers: []
+    });
+    setShowSetup(false);
   };
 
-  const updatePlayerPerformance = (index: number, field: keyof PlayerPerformance, value: any) => {
-    const updated = [...playerPerformances];
-    updated[index] = { ...updated[index], [field]: value };
-    setPlayerPerformances(updated);
+  const addRuns = (runs: number, ballFaced: boolean = true) => {
+    if (!matchState) return;
+
+    const newState = { ...matchState };
+    newState.totalRuns += runs;
+    
+    if (ballFaced) {
+      newState.balls++;
+      newState.batsmen[0].balls++;
+      newState.batsmen[0].runs += runs;
+      
+      if (runs === 4) newState.batsmen[0].fours++;
+      if (runs === 6) newState.batsmen[0].sixes++;
+      
+      if (newState.balls === 6) {
+        newState.overs++;
+        newState.balls = 0;
+        newState.currentBowler.overs++;
+      }
+    }
+    
+    newState.currentBowler.runs += runs;
+    setMatchState(newState);
   };
 
-  const generateLiveScoreData = () => {
-    if (!currentMatch || !isLive) return null;
+  const addWicket = () => {
+    if (!matchState) return;
+    
+    const newState = { ...matchState };
+    newState.wickets++;
+    newState.balls++;
+    newState.currentBowler.wickets++;
+    newState.batsmen[0].isOut = true;
+    
+    if (newState.balls === 6) {
+      newState.overs++;
+      newState.balls = 0;
+      newState.currentBowler.overs++;
+    }
+    
+    setMatchState(newState);
+  };
 
-    return {
-      match: currentMatch,
-      status: 'LIVE',
-      tuskersScore: '156/3 (28.4 overs)',
-      oppositionScore: `${currentMatch.team2}: Yet to bat`,
-      currentBatsmen: playerPerformances.slice(0, 2).map(p => ({
-        name: p.playerName || 'Player',
-        runs: p.runs,
-        balls: p.balls
-      })),
-      recentOvers: ['4', '1', '0', '6', '2', '1']
-    };
+  const addExtra = (type: 'wide' | 'noball' | 'bye' | 'legbye', runs: number = 1) => {
+    if (!matchState) return;
+    
+    const newState = { ...matchState };
+    newState.totalRuns += runs;
+    
+    if (type === 'wide' || type === 'noball') {
+      newState.currentBowler.runs += runs;
+    } else {
+      newState.balls++;
+      if (newState.balls === 6) {
+        newState.overs++;
+        newState.balls = 0;
+        newState.currentBowler.overs++;
+      }
+    }
+    
+    setMatchState(newState);
   };
 
   useEffect(() => {
