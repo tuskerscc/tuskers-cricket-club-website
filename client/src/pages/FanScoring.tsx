@@ -283,10 +283,14 @@ export default function FanScoring() {
   };
 
   const getBowlerLimit = (totalOvers: number) => {
-    if (totalOvers > 10) {
-      return Math.floor(totalOvers / 5);
+    if (totalOvers === 5) {
+      return 1; // 5-over: 1 over per bowler maximum
+    } else if (totalOvers === 10) {
+      return 2; // T10: 2 overs per bowler maximum
+    } else if (totalOvers > 10) {
+      return Math.floor(totalOvers / 5); // More than 10 overs: divide by 5
     }
-    return totalOvers; // No limit for matches with 10 overs or less
+    return totalOvers; // No limit for other short formats
   };
 
   const canBowlerContinue = (bowlerName: string, totalOvers: number, bowlers: Bowler[]) => {
@@ -626,12 +630,42 @@ export default function FanScoring() {
                   </button>
                 </div>
                 
-                <button
-                  onClick={addWicket}
-                  className="w-full p-4 bg-red-600 text-white rounded-xl font-bold text-lg hover:bg-red-700 transition-colors"
-                >
-                  WICKET
-                </button>
+                <div className="space-y-3">
+                  <button
+                    onClick={addWicket}
+                    className="w-full p-4 bg-red-600 text-white rounded-xl font-bold text-lg hover:bg-red-700 transition-colors"
+                  >
+                    WICKET
+                  </button>
+                  
+                  {matchState.maxOvers > 20 && (
+                    <button
+                      onClick={() => {
+                        if (confirm(`Declare ${matchState.battingTeam === 1 ? matchState.team1 : matchState.team2} innings at ${matchState.totalRuns}/${matchState.wickets}?`)) {
+                          const newState = { ...matchState };
+                          newState.innings = 2;
+                          newState.battingTeam = newState.battingTeam === 1 ? 2 : 1;
+                          newState.target = newState.totalRuns + 1;
+                          // Reset for second innings
+                          newState.totalRuns = 0;
+                          newState.wickets = 0;
+                          newState.overs = 0;
+                          newState.balls = 0;
+                          newState.batsmen = [
+                            { name: 'Batsman 1', runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
+                            { name: 'Batsman 2', runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
+                          ];
+                          newState.currentOver = [];
+                          newState.showBatsmanModal = true;
+                          setMatchState(newState);
+                        }
+                      }}
+                      className="w-full p-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors"
+                    >
+                      DECLARE INNINGS
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Current Over */}
@@ -751,6 +785,7 @@ export default function FanScoring() {
                     <option value="stumped">Stumped</option>
                     <option value="runout">Run Out</option>
                     <option value="hitwicket">Hit Wicket</option>
+                    {matchState.maxOvers > 20 && <option value="retiredout">Retired Out</option>}
                   </select>
                 </div>
 
@@ -805,7 +840,11 @@ export default function FanScoring() {
                 {/* Bowling Restrictions Info */}
                 <div className="bg-blue-50 p-3 rounded-lg">
                   <p className="text-sm text-blue-800">
-                    <strong>Bowling Limit:</strong> {matchState.maxOvers > 10 ? 
+                    <strong>Bowling Limit:</strong> {matchState.maxOvers === 5 ? 
+                      `Each bowler can bowl maximum 1 over` : 
+                      matchState.maxOvers === 10 ? 
+                      `Each bowler can bowl maximum 2 overs` :
+                      matchState.maxOvers > 10 ? 
                       `Each bowler can bowl maximum ${getBowlerLimit(matchState.maxOvers)} overs` : 
                       'No bowling restrictions for this format'}
                   </p>
