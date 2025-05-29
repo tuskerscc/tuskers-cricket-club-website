@@ -259,7 +259,10 @@ export default function MatchCenter() {
                 </div>
               </div>
 
-              <button className="w-full mt-4 bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors">
+              <button 
+                onClick={() => handleViewMatchReport(1)}
+                className="w-full mt-4 bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
+              >
                 View Match Report
               </button>
             </div>
@@ -331,8 +334,81 @@ export default function MatchCenter() {
           )}
         </div>
 
+        {/* Display filtered matches */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+          {filteredMatches.map((match) => (
+            <div key={match.id} className="bg-white rounded-2xl shadow-lg overflow-hidden border-l-4 border-[#1e3a8a]">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                    new Date(match.matchDate) > new Date() 
+                      ? 'bg-blue-100 text-blue-800' 
+                      : 'bg-green-100 text-green-800'
+                  }`}>
+                    {new Date(match.matchDate) > new Date() ? 'UPCOMING' : 'COMPLETED'}
+                  </span>
+                  <span className="text-sm text-gray-500">{match.competition.name}</span>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-[#1e3a8a] rounded-lg flex items-center justify-center">
+                        <span className="text-[#f59e0b] font-bold text-sm">
+                          {match.homeTeam.name.substring(0, 2).toUpperCase()}
+                        </span>
+                      </div>
+                      <span className="font-bold text-[#1e3a8a]">{match.homeTeam.name}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <span className="text-gray-400 font-bold text-lg">VS</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">
+                          {match.awayTeam.name.substring(0, 2).toUpperCase()}
+                        </span>
+                      </div>
+                      <span className="font-bold text-gray-900">{match.awayTeam.name}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-gray-100">
+                  <div className="flex justify-between items-center text-sm">
+                    <div>
+                      <i className="fas fa-calendar text-gray-400 mr-2"></i>
+                      <span className="text-gray-700">
+                        {new Date(match.matchDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div>
+                      <i className="fas fa-map-marker-alt text-gray-400 mr-2"></i>
+                      <span className="text-gray-700">{match.venue.name}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => handleViewMatchReport(match.id)}
+                  className="w-full mt-4 bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
+                >
+                  View Details
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div className="text-center mt-12">
-          <button className="bg-[#1e3a8a] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#1e40af] transition-colors">
+          <button 
+            onClick={handleViewAllFixtures}
+            className="bg-[#1e3a8a] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#1e40af] transition-colors"
+          >
             View All Fixtures
           </button>
         </div>

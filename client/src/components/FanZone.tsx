@@ -40,6 +40,16 @@ export default function FanZone() {
     alert('Thank you for voting on the live cricket poll!');
   };
 
+  const handleNextQuestion = () => {
+    setSelectedQuizAnswer('');
+    // Trigger a refetch for new quiz question
+    window.location.reload();
+  };
+
+  const handleViewGallery = () => {
+    alert('Full gallery view would open here. This feature requires additional implementation.');
+  };
+
   return (
     <section id="fanzone" className="py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -159,7 +169,10 @@ export default function FanZone() {
                     </div>
                   )}
                 </div>
-                <button className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                <button 
+                  onClick={handleNextQuestion}
+                  className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                >
                   Next Question
                 </button>
               </div>
@@ -178,11 +191,14 @@ export default function FanZone() {
                     key={item.id}
                     src={item.imageUrl} 
                     alt={item.title} 
-                    className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                    className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                   />
                 ))}
               </div>
-              <button className="w-full bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors">
+              <button 
+                onClick={handleViewGallery}
+                className="w-full bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
+              >
                 View Full Gallery
               </button>
             </>
