@@ -47,7 +47,7 @@ export default function FanZone() {
   };
 
   const handleViewGallery = () => {
-    alert('Full gallery view would open here. This feature requires additional implementation.');
+    window.location.href = '/gallery';
   };
 
   return (
@@ -185,13 +185,13 @@ export default function FanZone() {
           <h3 className="text-xl font-bold text-[#1e3a8a] mb-4">Match Gallery</h3>
           {recentGallery.length > 0 ? (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 {recentGallery.map((item) => (
                   <img 
                     key={item.id}
                     src={item.imageUrl} 
                     alt={item.title} 
-                    className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                    className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity shadow-lg hover:shadow-xl"
                   />
                 ))}
               </div>
