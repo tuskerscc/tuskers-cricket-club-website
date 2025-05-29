@@ -166,9 +166,6 @@ export default function StartingEleven() {
         </div>
 
         <div className="text-center mt-12">
-          <button className="bg-[#f59e0b] text-[#1e3a8a] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#fbbf24] transition-colors mr-4">
-            Download Team Sheet
-          </button>
           <button className="border-2 border-[#fcd34d] text-[#fcd34d] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#fcd34d] hover:text-[#1e3a8a] transition-colors">
             Match Preview
           </button>

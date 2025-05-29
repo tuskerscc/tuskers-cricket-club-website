@@ -23,6 +23,34 @@ export default function Home() {
       <main>
         <HeroSection />
         
+        {/* Announcements Section */}
+        <section className="py-12 bg-gradient-to-r from-[#1e3a8a] to-blue-800">
+          <div className="container mx-auto px-4 max-w-7xl">
+            <div className="text-center text-white">
+              <h2 className="text-3xl font-bold mb-4">📢 Latest Announcements</h2>
+              <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 max-w-4xl mx-auto">
+                <div className="space-y-4">
+                  <div className="border-b border-white border-opacity-20 pb-4">
+                    <h3 className="text-xl font-semibold text-[#fcd34d] mb-2">Team Selection for Championship Final</h3>
+                    <p className="text-white text-opacity-90">Final squad announced for the upcoming championship match. Practice sessions start tomorrow at 6 AM.</p>
+                    <span className="text-sm text-white text-opacity-70">Posted 2 hours ago</span>
+                  </div>
+                  <div className="border-b border-white border-opacity-20 pb-4">
+                    <h3 className="text-xl font-semibold text-[#fcd34d] mb-2">New Training Facility Opens</h3>
+                    <p className="text-white text-opacity-90">State-of-the-art training facility now available for all squad members. Book your slots online.</p>
+                    <span className="text-sm text-white text-opacity-70">Posted 1 day ago</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-[#fcd34d] mb-2">Registration Open for Youth Academy</h3>
+                    <p className="text-white text-opacity-90">Young cricketers aged 12-18 can now apply for our development program. Limited seats available.</p>
+                    <span className="text-sm text-white text-opacity-70">Posted 3 days ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
         {/* Quick Stats Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4 max-w-7xl">

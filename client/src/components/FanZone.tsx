@@ -48,9 +48,10 @@ export default function FanZone() {
           <p className="text-xl text-gray-600">Join the Tuskers community and engage with fellow cricket enthusiasts</p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Polls & Engagement */}
-          <div className="space-y-8">
+        {/* Poll and Quiz Side by Side */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+          {/* Cricket Poll */}
+          <div>
             {/* Cricket Historical Poll Widget */}
             {cricketPoll && (
               <div className="bg-gradient-to-br from-[#fef3c7] to-yellow-50 rounded-2xl p-6">
@@ -105,35 +106,10 @@ export default function FanZone() {
               </div>
             )}
 
-            {/* Photo Gallery Widget */}
-            <div className="bg-gradient-to-br from-[#eff6ff] to-purple-50 rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-[#1e3a8a] mb-4">Match Gallery</h3>
-              {recentGallery.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    {recentGallery.map((item) => (
-                      <img 
-                        key={item.id}
-                        src={item.imageUrl} 
-                        alt={item.title} 
-                        className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                      />
-                    ))}
-                  </div>
-                  <button className="w-full bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors">
-                    View Full Gallery
-                  </button>
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-500 mb-4">No gallery items available.</p>
-                  <button className="bg-[#1e3a8a] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors">
-                    Upload Photos
-                  </button>
-                </div>
-              )}
-            </div>
+          </div>
 
+          {/* Cricket Quiz */}
+          <div>
             {/* Cricket Historical Quiz Widget */}
             {cricketQuiz && (
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6">

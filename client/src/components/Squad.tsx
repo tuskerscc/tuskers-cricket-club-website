@@ -16,7 +16,7 @@ export default function Squad() {
     if (category === 'allrounders') return player.role.toLowerCase().includes('all-rounder');
     if (category === 'wicketkeeper') return player.role.toLowerCase().includes('wicket-keeper');
     return false;
-  });
+  }).slice(0, 25); // Limit to 25 players
 
   if (isLoading) {
     return (
@@ -119,13 +119,13 @@ export default function Squad() {
                 key={player.id} 
                 className="group bg-gradient-to-br from-[#eff6ff] to-blue-50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative"
               >
-                {player.is_captain && (
+                {player.isCaptain && (
                   <div className="absolute top-4 right-4 bg-[#f59e0b] text-[#1e3a8a] px-3 py-1 rounded-full text-xs font-bold z-10">
                     <i className="fas fa-crown mr-1"></i>
                     CAPTAIN
                   </div>
                 )}
-                {player.is_vice_captain && (
+                {player.isViceCaptain && (
                   <div className="absolute top-4 right-4 bg-[#1e40af] text-white px-3 py-1 rounded-full text-xs font-bold z-10">
                     VICE-CAPTAIN
                   </div>
