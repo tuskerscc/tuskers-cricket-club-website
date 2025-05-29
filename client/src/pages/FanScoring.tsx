@@ -44,6 +44,7 @@ interface MatchState {
   showDismissalModal: boolean;
   showBowlerModal: boolean;
   showBatsmanModal: boolean;
+  showSecondInningsSetup: boolean;
   playersPerTeam: number;
   maxWickets: number;
   tossWinner: 1 | 2;
@@ -118,6 +119,9 @@ export default function FanScoring() {
   const [batsman1Name, setBatsman1Name] = useState('');
   const [batsman2Name, setBatsman2Name] = useState('');
   const [bowlerName, setBowlerName] = useState('');
+  const [secondInningsOpener1, setSecondInningsOpener1] = useState('');
+  const [secondInningsOpener2, setSecondInningsOpener2] = useState('');
+  const [secondInningsBowler, setSecondInningsBowler] = useState('');
   const [dismissalType, setDismissalType] = useState('');
   const [fielderName, setFielderName] = useState('');
   const [newBatsmanName, setNewBatsmanName] = useState('');
@@ -214,6 +218,7 @@ export default function FanScoring() {
       showDismissalModal: false,
       showBowlerModal: false,
       showBatsmanModal: false,
+      showSecondInningsSetup: false,
       playersPerTeam: playersPerTeam,
       maxWickets: playersPerTeam - 1,
       tossWinner: tossWinner,
