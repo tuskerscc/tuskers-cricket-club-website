@@ -34,7 +34,7 @@ export interface TeamStats {
   matchesWon: number;
   totalRuns: number;
   wicketsTaken: number;
-  fanBase: string;
+  nrr: number;
 }
 
 export interface CountdownData {

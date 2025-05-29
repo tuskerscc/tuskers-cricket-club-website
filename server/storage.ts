@@ -16,7 +16,7 @@ import {
   type EventParticipant, type InsertEventParticipant
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql, count } from "drizzle-orm";
+import { eq, desc, and, sql, count, sum, or } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -78,7 +78,7 @@ export interface IStorage {
     matchesWon: number;
     totalRuns: number;
     wicketsTaken: number;
-    fanBase: string;
+    nrr: number;
   }>;
 
   // Trivia
@@ -354,15 +354,15 @@ export class DatabaseStorage implements IStorage {
     matchesWon: number;
     totalRuns: number;
     wicketsTaken: number;
-    fanBase: string;
+    nrr: number;
   }> {
-    // This would typically aggregate from match results and player stats
-    // For now, returning placeholder values that would be calculated from the database
+    // For now, return sample NRR data
+    // In production, this would calculate from actual match data
     return {
-      matchesWon: 0,
-      totalRuns: 0,
-      wicketsTaken: 0,
-      fanBase: "0"
+      matchesWon: 15,
+      totalRuns: 2850,
+      wicketsTaken: 125,
+      nrr: 1.245 // Positive NRR indicating good team performance
     };
   }
 
