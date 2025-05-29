@@ -224,7 +224,7 @@ export default function CricketTrivia() {
   if (gameMode === 'menu') {
     return (
       <section id="trivia" className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-[#1e3a8a] mb-4">🏏 Cricket Trivia Challenge</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -232,7 +232,7 @@ export default function CricketTrivia() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto items-start justify-center">
             {/* Game Start */}
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <div className="text-center mb-6">
@@ -337,7 +337,7 @@ export default function CricketTrivia() {
 
     return (
       <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-7xl">
           <div className="max-w-4xl mx-auto">
             {/* Game Header */}
             <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
