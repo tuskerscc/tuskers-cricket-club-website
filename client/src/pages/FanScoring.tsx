@@ -169,7 +169,59 @@ export default function FanScoring() {
       newState.recentOvers.unshift(newState.currentOver.join(' '));
       newState.currentOver = [];
       switchStriker(newState);
-      newState.showBowlerModal = true;
+      
+      // Check if innings is complete (overs limit reached)
+      if (newState.overs >= newState.maxOvers) {
+        if (newState.innings === 1) {
+          // Start second innings automatically
+          newState.innings = 2;
+          newState.battingTeam = newState.battingTeam === 1 ? 2 : 1;
+          newState.target = newState.totalRuns + 1;
+          const nextTeam = newState.battingTeam === 1 ? newState.team1 : newState.team2;
+          const prevTeam = newState.battingTeam === 1 ? newState.team2 : newState.team1;
+          
+          toast({ 
+            title: "Innings Complete!", 
+            description: `${prevTeam} finished at ${newState.totalRuns}/${newState.wickets}. ${nextTeam} needs ${newState.target} to win.` 
+          });
+          
+          // Reset for second innings
+          newState.totalRuns = 0;
+          newState.wickets = 0;
+          newState.overs = 0;
+          newState.balls = 0;
+          newState.batsmen = [
+            { name: `${nextTeam} Batsman 1`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
+            { name: `${nextTeam} Batsman 2`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
+          ];
+          newState.currentOver = [];
+          newState.recentOvers = [];
+          newState.bowlers = [];
+          newState.dismissedBatsmen = [];
+          newState.showBatsmanModal = true;
+        } else {
+          // Match complete - second innings finished
+          const team1Score = newState.battingTeam === 1 ? newState.totalRuns : (newState.target ? newState.target - 1 : 0);
+          const team2Score = newState.battingTeam === 2 ? newState.totalRuns : (newState.target ? newState.target - 1 : 0);
+          
+          let result = "";
+          if (newState.battingTeam === 2) {
+            if (newState.totalRuns >= newState.target!) {
+              result = `${newState.team2} wins by ${newState.maxWickets - newState.wickets} wickets!`;
+            } else {
+              result = `${newState.team1} wins by ${newState.target! - newState.totalRuns - 1} runs!`;
+            }
+          }
+          
+          toast({ 
+            title: "Match Complete!", 
+            description: result || `Final: ${newState.team1} ${team1Score} vs ${newState.team2} ${team2Score}` 
+          });
+        }
+      } else {
+        // Continue with next over - need new bowler
+        newState.showBowlerModal = true;
+      }
     }
     
     // Update bowler in bowlers array
@@ -212,7 +264,46 @@ export default function FanScoring() {
       newState.recentOvers.unshift(newState.currentOver.join(' '));
       newState.currentOver = [];
       switchStriker(newState);
-      newState.showBowlerModal = true;
+      
+      // Check if innings is complete (overs limit reached)
+      if (newState.overs >= newState.maxOvers) {
+        if (newState.innings === 1) {
+          // Start second innings automatically
+          newState.innings = 2;
+          newState.battingTeam = newState.battingTeam === 1 ? 2 : 1;
+          newState.target = newState.totalRuns + 1;
+          const nextTeam = newState.battingTeam === 1 ? newState.team1 : newState.team2;
+          const prevTeam = newState.battingTeam === 1 ? newState.team2 : newState.team1;
+          
+          toast({ 
+            title: "Innings Complete!", 
+            description: `${prevTeam} finished at ${newState.totalRuns}/${newState.wickets}. ${nextTeam} needs ${newState.target} to win.` 
+          });
+          
+          // Reset for second innings
+          newState.totalRuns = 0;
+          newState.wickets = 0;
+          newState.overs = 0;
+          newState.balls = 0;
+          newState.batsmen = [
+            { name: `${nextTeam} Batsman 1`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
+            { name: `${nextTeam} Batsman 2`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
+          ];
+          newState.currentOver = [];
+          newState.recentOvers = [];
+          newState.bowlers = [];
+          newState.dismissedBatsmen = [];
+          newState.showBatsmanModal = true;
+        } else {
+          // Match complete
+          toast({ 
+            title: "Match Complete!", 
+            description: `Final Score: ${newState.team1} vs ${newState.team2}` 
+          });
+        }
+      } else {
+        newState.showBowlerModal = true;
+      }
     }
     
     // Show batsman selection modal if wickets < maxWickets
@@ -261,7 +352,46 @@ export default function FanScoring() {
       newState.recentOvers.unshift(newState.currentOver.join(' '));
       newState.currentOver = [];
       switchStriker(newState);
-      newState.showBowlerModal = true;
+      
+      // Check if innings is complete (overs limit reached)
+      if (newState.overs >= newState.maxOvers) {
+        if (newState.innings === 1) {
+          // Start second innings automatically
+          newState.innings = 2;
+          newState.battingTeam = newState.battingTeam === 1 ? 2 : 1;
+          newState.target = newState.totalRuns + 1;
+          const nextTeam = newState.battingTeam === 1 ? newState.team1 : newState.team2;
+          const prevTeam = newState.battingTeam === 1 ? newState.team2 : newState.team1;
+          
+          toast({ 
+            title: "Innings Complete!", 
+            description: `${prevTeam} finished at ${newState.totalRuns}/${newState.wickets}. ${nextTeam} needs ${newState.target} to win.` 
+          });
+          
+          // Reset for second innings
+          newState.totalRuns = 0;
+          newState.wickets = 0;
+          newState.overs = 0;
+          newState.balls = 0;
+          newState.batsmen = [
+            { name: `${nextTeam} Batsman 1`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
+            { name: `${nextTeam} Batsman 2`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
+          ];
+          newState.currentOver = [];
+          newState.recentOvers = [];
+          newState.bowlers = [];
+          newState.dismissedBatsmen = [];
+          newState.showBatsmanModal = true;
+        } else {
+          // Match complete
+          toast({ 
+            title: "Match Complete!", 
+            description: `Final Score: ${newState.team1} vs ${newState.team2}` 
+          });
+        }
+      } else {
+        newState.showBowlerModal = true;
+      }
     }
     
     // Update bowler in bowlers array
