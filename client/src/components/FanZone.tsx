@@ -166,6 +166,35 @@ export default function FanZone() {
             )}
           </div>
         </div>
+
+        {/* Match Gallery at the end */}
+        <div className="bg-gradient-to-br from-[#eff6ff] to-purple-50 rounded-2xl p-6">
+          <h3 className="text-xl font-bold text-[#1e3a8a] mb-4">Match Gallery</h3>
+          {recentGallery.length > 0 ? (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                {recentGallery.map((item) => (
+                  <img 
+                    key={item.id}
+                    src={item.imageUrl} 
+                    alt={item.title} 
+                    className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                ))}
+              </div>
+              <button className="w-full bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors">
+                View Full Gallery
+              </button>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">No gallery items available.</p>
+              <button className="bg-[#1e3a8a] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors">
+                Upload Photos
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
