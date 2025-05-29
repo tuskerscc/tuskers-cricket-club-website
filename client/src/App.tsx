@@ -20,6 +20,7 @@ function Router() {
       <Route path="/gallery" component={Gallery} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={Admin} />
+      <Route path="/fan-scoring" component={FanScoring} />
       <Route path="/scoring/fan" component={FanScoring} />
       <Route path="/scoring/tuskers" component={TuskersScoring} />
       <Route component={NotFound} />
