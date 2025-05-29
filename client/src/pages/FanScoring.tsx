@@ -30,8 +30,12 @@ interface MatchState {
   balls: number;
   batsmen: [Batsman, Batsman];
   currentBowler: Bowler;
+  bowlers: Bowler[];
   recentOvers: string[];
   target?: number;
+  format: '5-over' | 'T10' | 'T20' | 'ODI';
+  maxOvers: number;
+  striker: 0 | 1;
 }
 
 export default function FanScoring() {
@@ -41,6 +45,17 @@ export default function FanScoring() {
   
   const [team1Name, setTeam1Name] = useState('');
   const [team2Name, setTeam2Name] = useState('');
+  const [selectedFormat, setSelectedFormat] = useState<'5-over' | 'T10' | 'T20' | 'ODI'>('T20');
+
+  const getMaxOvers = (format: string) => {
+    switch(format) {
+      case '5-over': return 5;
+      case 'T10': return 10;
+      case 'T20': return 20;
+      case 'ODI': return 50;
+      default: return 20;
+    }
+  };
 
   const initializeMatch = () => {
     if (!team1Name || !team2Name) {
@@ -48,6 +63,8 @@ export default function FanScoring() {
       return;
     }
 
+    const maxOvers = getMaxOvers(selectedFormat);
+    
     setMatchState({
       team1: team1Name,
       team2: team2Name,
@@ -62,9 +79,32 @@ export default function FanScoring() {
         { name: 'Batsman 2', runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
       ],
       currentBowler: { name: 'Bowler 1', overs: 0, maidens: 0, runs: 0, wickets: 0 },
-      recentOvers: []
+      bowlers: [{ name: 'Bowler 1', overs: 0, maidens: 0, runs: 0, wickets: 0 }],
+      recentOvers: [],
+      format: selectedFormat,
+      maxOvers: maxOvers,
+      striker: 0
     });
     setShowSetup(false);
+  };
+
+  const switchStriker = (newState: MatchState) => {
+    newState.striker = newState.striker === 0 ? 1 : 0;
+  };
+
+  const addNewBatsman = (newState: MatchState) => {
+    const outBatsmanIndex = newState.batsmen.findIndex(b => b.isOut);
+    if (outBatsmanIndex !== -1) {
+      newState.batsmen[outBatsmanIndex] = {
+        name: `Batsman ${newState.wickets + 2}`,
+        runs: 0,
+        balls: 0,
+        fours: 0,
+        sixes: 0,
+        isOut: false
+      };
+      newState.striker = outBatsmanIndex as 0 | 1;
+    }
   };
 
   const addRuns = (runs: number, ballFaced: boolean = true) => {
@@ -75,20 +115,33 @@ export default function FanScoring() {
     
     if (ballFaced) {
       newState.balls++;
-      newState.batsmen[0].balls++;
-      newState.batsmen[0].runs += runs;
+      newState.batsmen[newState.striker].balls++;
+      newState.batsmen[newState.striker].runs += runs;
       
-      if (runs === 4) newState.batsmen[0].fours++;
-      if (runs === 6) newState.batsmen[0].sixes++;
+      if (runs === 4) newState.batsmen[newState.striker].fours++;
+      if (runs === 6) newState.batsmen[newState.striker].sixes++;
+      
+      // Switch striker on odd runs
+      if (runs % 2 === 1) {
+        switchStriker(newState);
+      }
       
       if (newState.balls === 6) {
         newState.overs++;
         newState.balls = 0;
         newState.currentBowler.overs++;
+        switchStriker(newState); // Switch striker at end of over
       }
     }
     
     newState.currentBowler.runs += runs;
+    
+    // Update bowler in bowlers array
+    const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
+    if (bowlerIndex !== -1) {
+      newState.bowlers[bowlerIndex] = { ...newState.currentBowler };
+    }
+    
     setMatchState(newState);
   };
 
@@ -99,12 +152,24 @@ export default function FanScoring() {
     newState.wickets++;
     newState.balls++;
     newState.currentBowler.wickets++;
-    newState.batsmen[0].isOut = true;
+    newState.batsmen[newState.striker].isOut = true;
     
     if (newState.balls === 6) {
       newState.overs++;
       newState.balls = 0;
       newState.currentBowler.overs++;
+      switchStriker(newState);
+    }
+    
+    // Add new batsman if wickets < 10
+    if (newState.wickets < 10) {
+      addNewBatsman(newState);
+    }
+    
+    // Update bowler in bowlers array
+    const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
+    if (bowlerIndex !== -1) {
+      newState.bowlers[bowlerIndex] = { ...newState.currentBowler };
     }
     
     setMatchState(newState);
@@ -118,16 +183,92 @@ export default function FanScoring() {
     
     if (type === 'wide' || type === 'noball') {
       newState.currentBowler.runs += runs;
+      // No ball progression for wide/noball
     } else {
       newState.balls++;
+      if (runs % 2 === 1) {
+        switchStriker(newState);
+      }
       if (newState.balls === 6) {
         newState.overs++;
         newState.balls = 0;
         newState.currentBowler.overs++;
+        switchStriker(newState);
       }
     }
     
+    // Update bowler in bowlers array
+    const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
+    if (bowlerIndex !== -1) {
+      newState.bowlers[bowlerIndex] = { ...newState.currentBowler };
+    }
+    
     setMatchState(newState);
+  };
+
+  const changeBowler = (newBowlerName: string) => {
+    if (!matchState) return;
+    
+    const newState = { ...matchState };
+    
+    // Check if bowler already exists
+    const existingBowler = newState.bowlers.find(b => b.name === newBowlerName);
+    
+    if (existingBowler) {
+      newState.currentBowler = { ...existingBowler };
+    } else {
+      const newBowler = { name: newBowlerName, overs: 0, maidens: 0, runs: 0, wickets: 0 };
+      newState.currentBowler = newBowler;
+      newState.bowlers.push(newBowler);
+    }
+    
+    setMatchState(newState);
+  };
+
+  const generateMatchReport = () => {
+    if (!matchState) return;
+
+    const reportContent = `
+CRICKET MATCH REPORT
+===================
+
+Match: ${matchState.team1} vs ${matchState.team2}
+Format: ${matchState.format}
+Date: ${new Date().toLocaleDateString()}
+
+SCORECARD:
+${matchState.team1}: ${matchState.totalRuns}/${matchState.wickets} (${matchState.overs}.${matchState.balls} overs)
+
+BATTING PERFORMANCE:
+${matchState.batsmen.map((batsman, index) => 
+  `${batsman.name}: ${batsman.runs}${batsman.isOut ? '' : '*'} (${batsman.balls}b, ${batsman.fours}×4, ${batsman.sixes}×6) SR: ${batsman.balls > 0 ? ((batsman.runs / batsman.balls) * 100).toFixed(1) : '0.0'}`
+).join('\n')}
+
+BOWLING FIGURES:
+${matchState.bowlers.map(bowler => 
+  `${bowler.name}: ${bowler.overs}-${bowler.maidens}-${bowler.runs}-${bowler.wickets}`
+).join('\n')}
+
+MATCH SUMMARY:
+Total Runs: ${matchState.totalRuns}
+Wickets Lost: ${matchState.wickets}
+Overs Bowled: ${matchState.overs}.${matchState.balls}
+Run Rate: ${matchState.overs > 0 ? (matchState.totalRuns / (matchState.overs + matchState.balls/6)).toFixed(2) : '0.00'}
+
+Generated by Tuskers CC Fan Scoring System
+    `;
+
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${matchState.team1}_vs_${matchState.team2}_${matchState.format}_report.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({ title: "Report Downloaded", description: "Match report saved successfully!" });
   };
 
   if (showSetup) {
@@ -141,6 +282,20 @@ export default function FanScoring() {
             </div>
             
             <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Match Format</label>
+                <select
+                  value={selectedFormat}
+                  onChange={(e) => setSelectedFormat(e.target.value as '5-over' | 'T10' | 'T20' | 'ODI')}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="5-over">5 Overs</option>
+                  <option value="T10">T10 (10 overs)</option>
+                  <option value="T20">T20 (20 overs)</option>
+                  <option value="ODI">ODI (50 overs)</option>
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Team 1</label>
                 <input
@@ -167,7 +322,7 @@ export default function FanScoring() {
                 onClick={initializeMatch}
                 className="w-full bg-[#1e3a8a] text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-800 transition-colors"
               >
-                Start Match
+                Start {selectedFormat} Match
               </button>
             </div>
           </div>
@@ -208,10 +363,12 @@ export default function FanScoring() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold">{matchState.totalRuns}/{matchState.wickets}</div>
-                <div className="text-sm text-gray-600">Over {matchState.overs}.{matchState.balls}</div>
+                <div className="text-sm text-gray-600">Over {matchState.overs}.{matchState.balls} / {matchState.maxOvers}</div>
+                <div className="text-xs text-blue-600 font-semibold">{matchState.format} Format</div>
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-600">Ball by Ball</div>
+                <div className="text-xs text-green-600">RR: {matchState.overs > 0 ? (matchState.totalRuns / (matchState.overs + matchState.balls/6)).toFixed(2) : '0.00'}</div>
               </div>
             </div>
           </div>
@@ -231,7 +388,7 @@ export default function FanScoring() {
               </div>
               
               {matchState.batsmen.map((batsman, index) => (
-                <div key={index} className="grid grid-cols-7 gap-2 py-2 border-b border-gray-200">
+                <div key={index} className={`grid grid-cols-7 gap-2 py-2 border-b border-gray-200 ${index === matchState.striker ? 'bg-yellow-50' : ''}`}>
                   <div className="col-span-2 flex items-center gap-2">
                     <input
                       type="text"
@@ -243,7 +400,8 @@ export default function FanScoring() {
                       }}
                       className="text-sm border rounded px-2 py-1 w-full"
                     />
-                    {index === 0 && <span className="text-xs bg-yellow-100 px-1 rounded">*</span>}
+                    {index === matchState.striker && <span className="text-xs bg-yellow-400 text-black px-1 rounded font-bold">*</span>}
+                    {batsman.isOut && <span className="text-xs bg-red-100 text-red-800 px-1 rounded">OUT</span>}
                   </div>
                   <span className="text-center">{batsman.runs}</span>
                   <span className="text-center">{batsman.balls}</span>
@@ -252,6 +410,31 @@ export default function FanScoring() {
                   <span className="text-center">{batsman.balls > 0 ? ((batsman.runs / batsman.balls) * 100).toFixed(1) : '0.0'}</span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Current Bowler */}
+          <div className="p-4 border-b">
+            <div className="text-xs font-semibold text-gray-500 mb-2">CURRENT BOWLER</div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <input
+                  type="text"
+                  value={matchState.currentBowler.name}
+                  onChange={(e) => changeBowler(e.target.value)}
+                  className="text-sm border rounded px-2 py-1"
+                  placeholder="Enter bowler name"
+                />
+                <span className="text-sm text-gray-600">
+                  {matchState.currentBowler.overs}-{matchState.currentBowler.maidens}-{matchState.currentBowler.runs}-{matchState.currentBowler.wickets}
+                </span>
+              </div>
+              <button 
+                onClick={() => changeBowler(`Bowler ${matchState.bowlers.length + 1}`)}
+                className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded"
+              >
+                New Bowler
+              </button>
             </div>
           </div>
 
@@ -267,7 +450,7 @@ export default function FanScoring() {
                     </div>
                   ))}
                 </div>
-                <button className="text-blue-600 text-sm">⊕</button>
+                <button className="text-blue-600 text-sm">✎</button>
               </div>
             ))}
           </div>
@@ -292,7 +475,7 @@ export default function FanScoring() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-center gap-3">
+            <div className="flex justify-center gap-3 mb-4">
               <button 
                 onClick={addWicket}
                 className="px-4 py-2 rounded-full bg-red-500 text-white font-semibold"
@@ -317,7 +500,22 @@ export default function FanScoring() {
               >
                 BYE
               </button>
-              <button className="px-4 py-2 rounded-full bg-blue-600 text-white font-semibold">→</button>
+            </div>
+
+            {/* Match Controls */}
+            <div className="flex justify-center gap-3">
+              <button 
+                onClick={generateMatchReport}
+                className="px-6 py-2 rounded-full bg-green-600 text-white font-semibold"
+              >
+                📄 DOWNLOAD REPORT
+              </button>
+              <button 
+                onClick={() => setShowSetup(true)}
+                className="px-6 py-2 rounded-full bg-blue-600 text-white font-semibold"
+              >
+                🔄 NEW MATCH
+              </button>
             </div>
           </div>
         </div>
