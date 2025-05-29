@@ -206,7 +206,7 @@ export default function PlayerAnalytics() {
                       <div className="space-y-3">
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                           <span className="font-medium">Matches Played</span>
-                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.matchesPlayed || 0}</span>
+                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.matches || 0}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                           <span className="font-medium">Total Runs</span>
@@ -218,7 +218,7 @@ export default function PlayerAnalytics() {
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                           <span className="font-medium">Batting Average</span>
-                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.battingAverage || 0}</span>
+                          <span className="text-[#1e3a8a] font-bold">{calculateBattingAverage(selectedPlayer.stats.runsScored || 0, selectedPlayer.stats.matches || 0)}</span>
                         </div>
                       </div>
                     </div>
@@ -226,10 +226,10 @@ export default function PlayerAnalytics() {
                       <h4 className="text-lg font-semibold text-[#1e3a8a] mb-4">Performance Radar</h4>
                       <ResponsiveContainer width="100%" height={250}>
                         <RadarChart data={[
-                          { subject: 'Batting Avg', A: Math.min(selectedPlayer.stats.battingAverage || 0, 100) },
-                          { subject: 'Strike Rate', A: Math.min((selectedPlayer.stats.strikeRate || 0) / 2, 100) },
-                          { subject: 'Bowling Avg', A: Math.max(100 - (selectedPlayer.stats.bowlingAverage || 100), 0) },
-                          { subject: 'Economy', A: Math.max(100 - ((selectedPlayer.stats.economyRate || 10) * 10), 0) },
+                          { subject: 'Runs', A: Math.min((selectedPlayer.stats.runsScored || 0) / 10, 100) },
+                          { subject: 'Wickets', A: Math.min((selectedPlayer.stats.wicketsTaken || 0) * 5, 100) },
+                          { subject: 'Fours', A: Math.min((selectedPlayer.stats.fours || 0) * 2, 100) },
+                          { subject: 'Sixes', A: Math.min((selectedPlayer.stats.sixes || 0) * 10, 100) },
                           { subject: 'Fielding', A: Math.min(((selectedPlayer.stats.catches || 0) + (selectedPlayer.stats.runOuts || 0)) * 10, 100) }
                         ]}>
                           <PolarGrid />
@@ -260,20 +260,20 @@ export default function PlayerAnalytics() {
                       <h4 className="text-lg font-semibold text-[#1e3a8a] mb-4">Batting Metrics</h4>
                       <div className="space-y-3">
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                          <span className="font-medium">Highest Score</span>
-                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.highestScore || 0}</span>
+                          <span className="font-medium">Balls Faced</span>
+                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.ballsFaced || 0}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                           <span className="font-medium">Strike Rate</span>
-                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.strikeRate || 0}</span>
+                          <span className="text-[#1e3a8a] font-bold">{calculateStrikeRate(selectedPlayer.stats.runsScored || 0, selectedPlayer.stats.ballsFaced || 0)}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                          <span className="font-medium">Centuries</span>
-                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.centuries || 0}</span>
+                          <span className="font-medium">Fours</span>
+                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.fours || 0}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                          <span className="font-medium">Half Centuries</span>
-                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.halfCenturies || 0}</span>
+                          <span className="font-medium">Sixes</span>
+                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.sixes || 0}</span>
                         </div>
                       </div>
                     </div>
@@ -298,20 +298,20 @@ export default function PlayerAnalytics() {
                       <h4 className="text-lg font-semibold text-[#1e3a8a] mb-4">Bowling Metrics</h4>
                       <div className="space-y-3">
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                          <span className="font-medium">Best Bowling</span>
-                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.bestBowling || 'N/A'}</span>
+                          <span className="font-medium">Balls Bowled</span>
+                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.ballsBowled || 0}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                          <span className="font-medium">Bowling Average</span>
-                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.bowlingAverage || 0}</span>
+                          <span className="font-medium">Runs Conceded</span>
+                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.runsConceded || 0}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                           <span className="font-medium">Economy Rate</span>
-                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.economyRate || 0}</span>
+                          <span className="text-[#1e3a8a] font-bold">{calculateEconomyRate(selectedPlayer.stats.runsConceded || 0, selectedPlayer.stats.ballsBowled || 0)}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                           <span className="font-medium">Overs Bowled</span>
-                          <span className="text-[#1e3a8a] font-bold">{selectedPlayer.stats.oversBowled || 0}</span>
+                          <span className="text-[#1e3a8a] font-bold">{((selectedPlayer.stats.ballsBowled || 0) / 6).toFixed(1)}</span>
                         </div>
                       </div>
                     </div>
