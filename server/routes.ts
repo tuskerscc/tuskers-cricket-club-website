@@ -26,8 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
         // Set session
-        (req.session as any).adminLoggedIn = true;
-        (req.session as any).adminLoginTime = new Date().toISOString();
+        req.session.adminLoggedIn = true;
         
         res.json({ success: true, message: 'Login successful' });
       } else {
@@ -35,6 +34,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error('Admin login error:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+
+  // Admin verification endpoint
+  app.get('/api/admin/verify', async (req, res) => {
+    try {
+      if (req.session && req.session.adminLoggedIn) {
+        res.json({ success: true, message: 'Authenticated' });
+      } else {
+        res.status(401).json({ success: false, message: 'Not authenticated' });
+      }
+    } catch (error) {
+      console.error('Admin verify error:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+
+  // Admin logout endpoint
+  app.post('/api/admin/logout', async (req, res) => {
+    try {
+      if (req.session) {
+        req.session.adminLoggedIn = false;
+      }
+      res.json({ success: true, message: 'Logged out' });
+    } catch (error) {
+      console.error('Admin logout error:', error);
       res.status(500).json({ success: false, message: 'Server error' });
     }
   });
