@@ -29,10 +29,6 @@ export default function HeroSection() {
               Join us as we continue our journey to excellence on and off the field.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="bg-[#f59e0b] text-[#1e3a8a] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#fbbf24] transition-all transform hover:scale-105">
-                <i className="fas fa-play mr-2"></i>
-                Watch Highlights
-              </button>
               <button className="border-2 border-[#fcd34d] text-[#fcd34d] px-8 py-4 rounded-lg font-bold text-lg hover:bg-[#fcd34d] hover:text-[#1e3a8a] transition-all">
                 View Fixtures
               </button>
