@@ -162,6 +162,30 @@ export const gallery = pgTable("gallery", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Trivia questions table
+export const triviaQuestions = pgTable("trivia_questions", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(),
+  options: text("options").array().notNull(),
+  correct: text("correct").notNull(),
+  difficulty: text("difficulty").notNull(), // easy, medium, hard
+  category: text("category").notNull(),
+  points: integer("points").default(10),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Trivia leaderboard table
+export const triviaLeaderboard = pgTable("trivia_leaderboard", {
+  id: serial("id").primaryKey(),
+  playerName: text("player_name").notNull(),
+  score: integer("score").notNull(),
+  questionsAnswered: integer("questions_answered").notNull(),
+  accuracy: numeric("accuracy", { precision: 5, scale: 2 }).notNull(),
+  playDate: timestamp("play_date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const teamsRelations = relations(teams, ({ many }) => ({
   homeMatches: many(matches, { relationName: "homeTeam" }),
@@ -297,6 +321,17 @@ export const insertQuizSchema = createInsertSchema(quizzes).omit({
 
 export const insertGallerySchema = createInsertSchema(gallery).omit({
   id: true,
+  createdAt: true,
+});
+
+export const insertTriviaQuestionSchema = createInsertSchema(triviaQuestions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTriviaLeaderboardSchema = createInsertSchema(triviaLeaderboard).omit({
+  id: true,
+  playDate: true,
   createdAt: true,
 });
 
