@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, real } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -181,7 +181,7 @@ export const triviaLeaderboard = pgTable("trivia_leaderboard", {
   playerName: text("player_name").notNull(),
   score: integer("score").notNull(),
   questionsAnswered: integer("questions_answered").notNull(),
-  accuracy: numeric("accuracy", { precision: 5, scale: 2 }).notNull(),
+  accuracy: real("accuracy").notNull(),
   playDate: timestamp("play_date").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -374,3 +374,9 @@ export type InsertQuiz = z.infer<typeof insertQuizSchema>;
 
 export type GalleryItem = typeof gallery.$inferSelect;
 export type InsertGalleryItem = z.infer<typeof insertGallerySchema>;
+
+export type TriviaQuestion = typeof triviaQuestions.$inferSelect;
+export type InsertTriviaQuestion = z.infer<typeof insertTriviaQuestionSchema>;
+
+export type TriviaLeaderboard = typeof triviaLeaderboard.$inferSelect;
+export type InsertTriviaLeaderboard = z.infer<typeof insertTriviaLeaderboardSchema>;

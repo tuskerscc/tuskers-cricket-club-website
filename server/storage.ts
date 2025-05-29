@@ -1,12 +1,13 @@
 import { 
   users, teams, venues, competitions, players, matches, lineups, playerStats, 
-  articles, socialPosts, polls, quizzes, gallery,
+  articles, socialPosts, polls, quizzes, gallery, triviaQuestions, triviaLeaderboard,
   type User, type InsertUser, type Team, type InsertTeam, type Venue, type InsertVenue,
   type Competition, type InsertCompetition, type Player, type InsertPlayer, 
   type Match, type InsertMatch, type Lineup, type InsertLineup,
   type PlayerStats, type InsertPlayerStats, type Article, type InsertArticle,
   type SocialPost, type InsertSocialPost, type Poll, type InsertPoll,
-  type Quiz, type InsertQuiz, type GalleryItem, type InsertGalleryItem
+  type Quiz, type InsertQuiz, type GalleryItem, type InsertGalleryItem,
+  type TriviaQuestion, type InsertTriviaQuestion, type TriviaLeaderboard, type InsertTriviaLeaderboard
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count } from "drizzle-orm";
@@ -73,6 +74,11 @@ export interface IStorage {
     wicketsTaken: number;
     fanBase: string;
   }>;
+
+  // Trivia
+  getTriviaQuestions(): Promise<TriviaQuestion[]>;
+  getTriviaLeaderboard(): Promise<TriviaLeaderboard[]>;
+  submitTriviaScore(entry: InsertTriviaLeaderboard): Promise<TriviaLeaderboard>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -336,6 +342,30 @@ export class DatabaseStorage implements IStorage {
       wicketsTaken: 0,
       fanBase: "0"
     };
+  }
+
+  async getTriviaQuestions(): Promise<TriviaQuestion[]> {
+    return await db.select().from(triviaQuestions).where(eq(triviaQuestions.isActive, true));
+  }
+
+  async getTriviaLeaderboard(): Promise<TriviaLeaderboard[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return await db
+      .select()
+      .from(triviaLeaderboard)
+      .where(sql`date(${triviaLeaderboard.playDate}) = date(${today.toISOString()})`)
+      .orderBy(desc(triviaLeaderboard.score), desc(triviaLeaderboard.accuracy))
+      .limit(50);
+  }
+
+  async submitTriviaScore(entry: InsertTriviaLeaderboard): Promise<TriviaLeaderboard> {
+    const [result] = await db
+      .insert(triviaLeaderboard)
+      .values(entry)
+      .returning();
+    return result;
   }
 }
 
