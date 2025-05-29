@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
 
@@ -58,6 +58,11 @@ interface MatchState {
     playerOfMatch: string;
     tossDetails: string;
   };
+  showInningsBreak: boolean;
+  inningsBreakDuration: number;
+  inningsBreakTimer: number;
+  inningsBreakStarted: boolean;
+  firstInningsScore: string;
 }
 
 interface Tournament {
@@ -127,6 +132,25 @@ export default function FanScoring() {
   const [teamsCount, setTeamsCount] = useState(4);
   const { toast } = useToast();
 
+  // Timer for innings break
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (matchState?.showInningsBreak && matchState?.inningsBreakStarted && matchState?.inningsBreakTimer > 0) {
+      interval = setInterval(() => {
+        setMatchState(prev => {
+          if (!prev) return prev;
+          const newTimer = prev.inningsBreakTimer - 1;
+          if (newTimer <= 0) {
+            // Timer finished, show player setup for second innings
+            return { ...prev, showInningsBreak: false, inningsBreakTimer: 0, inningsBreakStarted: false };
+          }
+          return { ...prev, inningsBreakTimer: newTimer };
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [matchState?.showInningsBreak, matchState?.inningsBreakStarted, matchState?.inningsBreakTimer]);
+
   const getMaxOvers = (format: '5-over' | 'T10' | 'T20' | 'ODI' | 'Custom') => {
     switch (format) {
       case '5-over': return 5;
@@ -192,7 +216,12 @@ export default function FanScoring() {
       tossWinner: tossWinner,
       tossDecision: tossDecision,
       isComplete: false,
-      ballsPerOver: ballsPerOver
+      ballsPerOver: ballsPerOver,
+      showInningsBreak: false,
+      inningsBreakDuration: 0,
+      inningsBreakTimer: 0,
+      inningsBreakStarted: false,
+      firstInningsScore: ''
     });
     setShowPlayerSetup(false);
   };
