@@ -5,6 +5,32 @@ import type { MatchWithDetails } from '@/lib/types';
 
 export default function MatchCenter() {
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'completed' | 'home'>('all');
+  
+  const handleViewMatchReport = (matchId: number) => {
+    alert(`Match report for match #${matchId} would be displayed here. This feature requires backend implementation.`);
+  };
+
+  const handleAddToCalendar = (match: any) => {
+    const startDate = new Date(match.matchDate || Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const endDate = new Date(startDate.getTime() + 4 * 60 * 60 * 1000);
+    
+    const title = encodeURIComponent('Tuskers CC vs Lightning Bolts');
+    const start = startDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const end = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const location = encodeURIComponent('Premier Cricket Ground');
+    
+    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&location=${location}&details=${encodeURIComponent('Cricket match between Tuskers CC and Lightning Bolts')}`;
+    
+    window.open(googleCalendarUrl, '_blank');
+  };
+
+  const handleViewAllFixtures = () => {
+    alert('Complete fixtures calendar would be displayed here. This feature requires additional implementation.');
+  };
+
+  const handleWatchHighlights = () => {
+    alert('Match highlights video would be played here. This feature requires video content integration.');
+  };
 
   const { data: matches = [], isLoading } = useQuery<MatchWithDetails[]>({
     queryKey: ['/api/matches']
@@ -19,8 +45,16 @@ export default function MatchCenter() {
   });
 
   const nextMatch = upcomingMatches[0];
-  const matchDate = nextMatch ? new Date(nextMatch.matchDate) : new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
-  const countdown = useCountdown(matchDate);
+  const matchDate = nextMatch?.matchDate || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString();
+  const countdown = useCountdown(new Date(matchDate));
+
+  const filteredMatches = matches.filter(match => {
+    if (filter === 'all') return true;
+    if (filter === 'upcoming') return new Date(match.matchDate) > new Date();
+    if (filter === 'completed') return new Date(match.matchDate) < new Date();
+    if (filter === 'home') return match.homeTeam.name === 'Tuskers CC';
+    return false;
+  });
 
   if (isLoading) {
     return (
@@ -164,7 +198,10 @@ export default function MatchCenter() {
                 </div>
               </div>
 
-              <button className="w-full mt-4 bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors">
+              <button 
+                onClick={() => handleAddToCalendar(nextMatch)}
+                className="w-full mt-4 bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
+              >
                 <i className="fas fa-calendar-plus mr-2"></i>
                 Add to Calendar
               </button>
