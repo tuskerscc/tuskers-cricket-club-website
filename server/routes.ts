@@ -5,6 +5,89 @@ import { insertPlayerSchema, insertMatchSchema, insertArticleSchema, insertPollS
 import { generateCricketPoll, generateCricketQuiz } from "./cricket-api";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Admin authentication routes
+  app.post('/api/admin/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Simple credentials for demo (in production, use environment variables and hashed passwords)
+      const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'tuskers2024';
+      
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        // Set session
+        (req.session as any).adminLoggedIn = true;
+        (req.session as any).adminLoginTime = new Date().toISOString();
+        
+        res.json({ success: true, message: 'Login successful' });
+      } else {
+        res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+    } catch (error) {
+      console.error('Admin login error:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+
+  app.get('/api/admin/verify', async (req, res) => {
+    try {
+      const isLoggedIn = (req.session as any)?.adminLoggedIn;
+      const loginTime = (req.session as any)?.adminLoginTime;
+      
+      if (!isLoggedIn || !loginTime) {
+        return res.status(401).json({ success: false, message: 'Not authenticated' });
+      }
+      
+      // Check if session is older than 8 hours
+      const sessionAge = new Date().getTime() - new Date(loginTime).getTime();
+      const maxAge = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+      
+      if (sessionAge > maxAge) {
+        delete (req.session as any).adminLoggedIn;
+        delete (req.session as any).adminLoginTime;
+        return res.status(401).json({ success: false, message: 'Session expired' });
+      }
+      
+      res.json({ success: true, message: 'Authenticated' });
+    } catch (error) {
+      console.error('Admin verify error:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+
+  app.post('/api/admin/logout', async (req, res) => {
+    try {
+      delete (req.session as any).adminLoggedIn;
+      delete (req.session as any).adminLoginTime;
+      res.json({ success: true, message: 'Logged out successfully' });
+    } catch (error) {
+      console.error('Admin logout error:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+
+  // Admin middleware to protect admin routes
+  const adminAuth = (req: any, res: any, next: any) => {
+    const isLoggedIn = req.session?.adminLoggedIn;
+    const loginTime = req.session?.adminLoginTime;
+    
+    if (!isLoggedIn || !loginTime) {
+      return res.status(401).json({ success: false, message: 'Admin authentication required' });
+    }
+    
+    // Check session age
+    const sessionAge = new Date().getTime() - new Date(loginTime).getTime();
+    const maxAge = 8 * 60 * 60 * 1000; // 8 hours
+    
+    if (sessionAge > maxAge) {
+      delete req.session.adminLoggedIn;
+      delete req.session.adminLoginTime;
+      return res.status(401).json({ success: false, message: 'Admin session expired' });
+    }
+    
+    next();
+  };
+
   // Teams endpoints
   app.get("/api/teams", async (req, res) => {
     try {
