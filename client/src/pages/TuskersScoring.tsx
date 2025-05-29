@@ -187,16 +187,86 @@ export default function TuskersScoring() {
       if (runs % 2 === 1) {
         switchStriker(newState);
       }
-      
-      if (newState.balls === 6) {
-        newState.overs++;
-        newState.balls = 0;
-        newState.currentBowler.overs++;
-        switchStriker(newState); // Switch striker at end of over
-      }
     }
     
     newState.currentBowler.runs += runs;
+
+    // Check for match completion in second innings (target reached)
+    if (newState.innings === 2 && newState.target && newState.totalRuns >= newState.target) {
+      const battingTeam = newState.battingTeam === 1 ? newState.team1 : newState.team2;
+      const result = `${battingTeam} wins by ${10 - newState.wickets} wickets!`;
+      
+      newState.isComplete = true;
+      toast({ 
+        title: "Match Complete!", 
+        description: result 
+      });
+      
+      // Update bowler in bowlers array before completing
+      const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
+      if (bowlerIndex !== -1) {
+        newState.bowlers[bowlerIndex] = { ...newState.currentBowler };
+      }
+      
+      setMatchState(newState);
+      return;
+    }
+    
+    // Handle over completion
+    if (ballFaced && newState.balls === 6) {
+      newState.overs++;
+      newState.balls = 0;
+      newState.currentBowler.overs++;
+      switchStriker(newState); // Switch striker at end of over
+      
+      // Check if innings is complete (overs limit reached)
+      const maxOvers = getMaxOvers(newState.format);
+      if (newState.overs >= maxOvers) {
+        if (newState.innings === 1) {
+          // Start second innings
+          newState.innings = 2;
+          newState.battingTeam = newState.battingTeam === 1 ? 2 : 1;
+          newState.target = newState.totalRuns + 1;
+          const nextTeam = newState.battingTeam === 1 ? newState.team1 : newState.team2;
+          const prevTeam = newState.battingTeam === 1 ? newState.team2 : newState.team1;
+          
+          toast({ 
+            title: "Innings Complete!", 
+            description: `${prevTeam} finished at ${newState.totalRuns}/${newState.wickets}. ${nextTeam} needs ${newState.target} to win.` 
+          });
+          
+          // Reset for second innings
+          newState.totalRuns = 0;
+          newState.wickets = 0;
+          newState.overs = 0;
+          newState.balls = 0;
+          newState.batsmen = [
+            { name: `${nextTeam} Batsman 1`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
+            { name: `${nextTeam} Batsman 2`, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
+          ];
+          newState.bowlers = [];
+          newState.dismissedBatsmen = [];
+          newState.showBatsmanModal = true;
+        } else {
+          // Match complete - second innings finished due to overs limit
+          const battingTeam = newState.battingTeam === 1 ? newState.team1 : newState.team2;
+          const bowlingTeam = newState.battingTeam === 1 ? newState.team2 : newState.team1;
+          
+          let result = "";
+          if (newState.target && newState.totalRuns >= newState.target) {
+            result = `${battingTeam} wins by ${10 - newState.wickets} wickets!`;
+          } else {
+            result = `${bowlingTeam} wins by ${(newState.target || 0) - newState.totalRuns - 1} runs!`;
+          }
+          
+          newState.isComplete = true;
+          toast({ 
+            title: "Match Complete!", 
+            description: result 
+          });
+        }
+      }
+    }
     
     // Update bowler in bowlers array
     const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
