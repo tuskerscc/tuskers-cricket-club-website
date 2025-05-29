@@ -173,12 +173,13 @@ export default function TuskersScoring() {
           <div className="bg-white rounded-2xl shadow-2xl p-8">
             <h2 className="text-2xl font-bold text-[#1e3a8a] mb-6 text-center">Scorer Login</h2>
             
-            <form onSubmit={handleLoginSubmit(handleLogin)} className="space-y-6">
+            <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
                 <input
-                  {...registerLogin('username', { required: true })}
                   type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
                   placeholder="Enter scorer username"
                 />
@@ -187,20 +188,21 @@ export default function TuskersScoring() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
                 <input
-                  {...registerLogin('password', { required: true })}
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
                   placeholder="Enter password"
                 />
               </div>
 
               <button
-                type="submit"
+                onClick={handleLogin}
                 className="w-full bg-[#1e3a8a] text-white py-3 px-4 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
               >
                 Access Scoring System
               </button>
-            </form>
+            </div>
 
             <div className="mt-6 text-center text-sm text-gray-600">
               <p>Credentials: tuskers / tuskers2024</p>
@@ -210,6 +212,67 @@ export default function TuskersScoring() {
       </div>
     );
   }
+
+  if (showSetup) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+        <div className="container mx-auto px-4 max-w-md">
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="text-center mb-8">
+              <div className="bg-[#1e3a8a] rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl font-bold text-white">TC</span>
+              </div>
+              <h1 className="text-3xl font-bold text-[#1e3a8a] mb-2">Official Scorecard</h1>
+              <p className="text-gray-600">Setup your match</p>
+            </div>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Team 1 (Home)</label>
+                <input
+                  type="text"
+                  value={team1Name}
+                  onChange={(e) => setTeam1Name(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                  readOnly
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Team 2 (Opposition)</label>
+                <input
+                  type="text"
+                  value={team2Name}
+                  onChange={(e) => setTeam2Name(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter opposition team name"
+                />
+              </div>
+              
+              <button
+                onClick={initializeMatch}
+                className="w-full bg-[#1e3a8a] text-white py-4 rounded-xl font-semibold text-lg hover:bg-blue-800 transition-colors"
+              >
+                Start Official Match
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsAuthenticated(false);
+                  sessionStorage.removeItem('tuskersScoring');
+                }}
+                className="w-full bg-gray-500 text-white py-2 rounded-xl font-semibold hover:bg-gray-600 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!matchState) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
