@@ -60,19 +60,27 @@ export default function ARStadiumMap() {
 
   const renderField = () => (
     <div className="relative w-full h-96 bg-gradient-to-br from-green-400 to-green-600 rounded-full overflow-hidden shadow-lg mx-auto" style={{ aspectRatio: '1' }}>
-      {/* Cricket pitch */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-1 bg-yellow-200 rounded"></div>
+      {/* Cricket pitch - longer rectangle to represent the 22-yard pitch */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-2 bg-yellow-200 rounded"></div>
       
-      {/* Stumps */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 translate-y-8">
-        <div className="w-1 h-2 bg-yellow-400 mx-auto"></div>
+      {/* Stumps at both ends */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 translate-y-1">
+        <div className="w-1 h-3 bg-yellow-400 mx-auto"></div>
       </div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-y-8">
-        <div className="w-1 h-2 bg-yellow-400 mx-auto"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-y-1">
+        <div className="w-1 h-3 bg-yellow-400 mx-auto"></div>
+      </div>
+      
+      {/* Stumps at the ends of the pitch */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 translate-x-16">
+        <div className="w-1 h-3 bg-yellow-400 mx-auto"></div>
+      </div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-x-16">
+        <div className="w-1 h-3 bg-yellow-400 mx-auto"></div>
       </div>
 
-      {/* Inner circle (30-yard circle) */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 border-2 border-white border-dashed rounded-full opacity-60"></div>
+      {/* Inner circle (30-yard circle) - expanded */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 border-2 border-white border-dashed rounded-full opacity-60"></div>
 
       {/* Player positions */}
       {showPlayerStats && fieldPositions.map((playerPos) => (
