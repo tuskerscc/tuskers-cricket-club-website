@@ -110,14 +110,6 @@ export default function LiveScoreWidget() {
           </button>
         </div>
       </div>
-
-      {/* Commentary Strip */}
-      <div className="bg-black/20 px-6 py-3">
-        <div className="text-sm text-blue-100">
-          <i className="fas fa-microphone mr-2"></i>
-          <span className="font-semibold">Live Commentary:</span> Tuskers CC building a solid partnership. Current run rate: 5.4
-        </div>
-      </div>
     </div>
   );
 }
