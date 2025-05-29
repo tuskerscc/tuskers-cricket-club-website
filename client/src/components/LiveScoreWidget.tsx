@@ -32,7 +32,7 @@ export default function LiveScoreWidget() {
         {/* Live Badge */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold">{liveScore.matchName}</h3>
-          <div className="flex items-center bg-red-500 px-3 py-1 rounded-full text-sm font-bold">
+          <div className="flex items-center bg-[#f59e0b] px-3 py-1 rounded-full text-sm font-bold">
             <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
             LIVE
           </div>
