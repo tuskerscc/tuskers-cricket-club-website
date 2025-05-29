@@ -1,13 +1,19 @@
 import { 
   users, teams, venues, competitions, players, matches, lineups, playerStats, 
   articles, socialPosts, polls, quizzes, gallery, triviaQuestions, triviaLeaderboard,
+  forumCategories, forumTopics, forumPosts, forumPostLikes, userProfiles, 
+  communityEvents, eventParticipants,
   type User, type InsertUser, type Team, type InsertTeam, type Venue, type InsertVenue,
   type Competition, type InsertCompetition, type Player, type InsertPlayer, 
   type Match, type InsertMatch, type Lineup, type InsertLineup,
   type PlayerStats, type InsertPlayerStats, type Article, type InsertArticle,
   type SocialPost, type InsertSocialPost, type Poll, type InsertPoll,
   type Quiz, type InsertQuiz, type GalleryItem, type InsertGalleryItem,
-  type TriviaQuestion, type InsertTriviaQuestion, type TriviaLeaderboard, type InsertTriviaLeaderboard
+  type TriviaQuestion, type InsertTriviaQuestion, type TriviaLeaderboard, type InsertTriviaLeaderboard,
+  type ForumCategory, type InsertForumCategory, type ForumTopic, type InsertForumTopic,
+  type ForumPost, type InsertForumPost, type ForumPostLike, type InsertForumPostLike,
+  type UserProfile, type InsertUserProfile, type CommunityEvent, type InsertCommunityEvent,
+  type EventParticipant, type InsertEventParticipant
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, count } from "drizzle-orm";
@@ -79,6 +85,22 @@ export interface IStorage {
   getTriviaQuestions(): Promise<TriviaQuestion[]>;
   getTriviaLeaderboard(): Promise<TriviaLeaderboard[]>;
   submitTriviaScore(entry: InsertTriviaLeaderboard): Promise<TriviaLeaderboard>;
+
+  // Forum
+  getForumCategories(): Promise<ForumCategory[]>;
+  getForumTopics(categoryId?: number): Promise<ForumTopic[]>;
+  getForumTopic(slug: string): Promise<ForumTopic | undefined>;
+  createForumTopic(topic: InsertForumTopic): Promise<ForumTopic>;
+  getForumPosts(topicId: number): Promise<ForumPost[]>;
+  createForumPost(post: InsertForumPost): Promise<ForumPost>;
+  getForumStats(): Promise<{ totalTopics: number; totalPosts: number; totalMembers: number }>;
+
+  // Community Events
+  getCommunityEvents(): Promise<CommunityEvent[]>;
+  createCommunityEvent(event: InsertCommunityEvent): Promise<CommunityEvent>;
+  joinCommunityEvent(eventId: number, userId: number): Promise<EventParticipant>;
+  leaveCommunityEvent(eventId: number, userId: number): Promise<void>;
+  getCommunityStats(): Promise<{ activeMembersCount: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -366,6 +388,84 @@ export class DatabaseStorage implements IStorage {
       .values(entry)
       .returning();
     return result;
+  }
+
+  // Forum Methods
+  async getForumCategories(): Promise<ForumCategory[]> {
+    return await db.select().from(forumCategories).orderBy(forumCategories.displayOrder);
+  }
+
+  async getForumTopics(categoryId?: number): Promise<ForumTopic[]> {
+    const query = db.select().from(forumTopics).orderBy(desc(forumTopics.isSticky), desc(forumTopics.updatedAt));
+    
+    if (categoryId) {
+      return await query.where(eq(forumTopics.categoryId, categoryId));
+    }
+    
+    return await query;
+  }
+
+  async getForumTopic(slug: string): Promise<ForumTopic | undefined> {
+    const [topic] = await db.select().from(forumTopics).where(eq(forumTopics.slug, slug));
+    return topic || undefined;
+  }
+
+  async createForumTopic(topic: InsertForumTopic): Promise<ForumTopic> {
+    const [newTopic] = await db.insert(forumTopics).values(topic).returning();
+    return newTopic;
+  }
+
+  async getForumPosts(topicId: number): Promise<ForumPost[]> {
+    return await db.select().from(forumPosts)
+      .where(eq(forumPosts.topicId, topicId))
+      .orderBy(forumPosts.createdAt);
+  }
+
+  async createForumPost(post: InsertForumPost): Promise<ForumPost> {
+    const [newPost] = await db.insert(forumPosts).values(post).returning();
+    return newPost;
+  }
+
+  async getForumStats(): Promise<{ totalTopics: number; totalPosts: number; totalMembers: number }> {
+    const [topicsCount] = await db.select({ count: count() }).from(forumTopics);
+    const [postsCount] = await db.select({ count: count() }).from(forumPosts);
+    const [membersCount] = await db.select({ count: count() }).from(users);
+    
+    return {
+      totalTopics: topicsCount.count,
+      totalPosts: postsCount.count,
+      totalMembers: membersCount.count
+    };
+  }
+
+  // Community Events Methods
+  async getCommunityEvents(): Promise<CommunityEvent[]> {
+    return await db.select().from(communityEvents).orderBy(communityEvents.eventDate);
+  }
+
+  async createCommunityEvent(event: InsertCommunityEvent): Promise<CommunityEvent> {
+    const [newEvent] = await db.insert(communityEvents).values(event).returning();
+    return newEvent;
+  }
+
+  async joinCommunityEvent(eventId: number, userId: number): Promise<EventParticipant> {
+    const [participant] = await db.insert(eventParticipants)
+      .values({ eventId, userId })
+      .returning();
+    return participant;
+  }
+
+  async leaveCommunityEvent(eventId: number, userId: number): Promise<void> {
+    await db.delete(eventParticipants)
+      .where(and(eq(eventParticipants.eventId, eventId), eq(eventParticipants.userId, userId)));
+  }
+
+  async getCommunityStats(): Promise<{ activeMembersCount: number }> {
+    const [membersCount] = await db.select({ count: count() }).from(users);
+    
+    return {
+      activeMembersCount: membersCount.count
+    };
   }
 }
 

@@ -528,6 +528,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Forum endpoints
+  app.get("/api/forum/categories", async (req, res) => {
+    try {
+      const categories = await storage.getForumCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch forum categories" });
+    }
+  });
+
+  app.get("/api/forum/topics/recent", async (req, res) => {
+    try {
+      const topics = await storage.getForumTopics();
+      res.json(topics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch forum topics" });
+    }
+  });
+
+  app.get("/api/forum/topics/popular", async (req, res) => {
+    try {
+      const topics = await storage.getForumTopics();
+      // Return topics sorted by view count (mock popular topics for now)
+      res.json(topics.slice(0, 5));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch popular topics" });
+    }
+  });
+
+  app.get("/api/forum/users/online", async (req, res) => {
+    try {
+      // Mock online users for now
+      res.json([]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch online users" });
+    }
+  });
+
+  app.get("/api/forum/stats", async (req, res) => {
+    try {
+      const stats = await storage.getForumStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch forum stats" });
+    }
+  });
+
+  // Community Events endpoints
+  app.get("/api/community/events", async (req, res) => {
+    try {
+      const events = await storage.getCommunityEvents();
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch community events" });
+    }
+  });
+
+  app.post("/api/community/events", async (req, res) => {
+    try {
+      const event = await storage.createCommunityEvent(req.body);
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create community event" });
+    }
+  });
+
+  app.post("/api/community/events/:id/join", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = 1; // Mock user ID for now
+      const participant = await storage.joinCommunityEvent(eventId, userId);
+      res.json(participant);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to join event" });
+    }
+  });
+
+  app.post("/api/community/events/:id/leave", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = 1; // Mock user ID for now
+      await storage.leaveCommunityEvent(eventId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to leave event" });
+    }
+  });
+
+  app.get("/api/community/stats", async (req, res) => {
+    try {
+      const stats = await storage.getCommunityStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch community stats" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
