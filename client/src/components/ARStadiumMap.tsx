@@ -60,23 +60,15 @@ export default function ARStadiumMap() {
 
   const renderField = () => (
     <div className="relative w-full h-96 bg-gradient-to-br from-green-400 to-green-600 rounded-full overflow-hidden shadow-lg mx-auto" style={{ aspectRatio: '1' }}>
-      {/* Cricket pitch - longer rectangle to represent the 22-yard pitch */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-2 bg-yellow-200 rounded"></div>
+      {/* Cricket pitch - vertical rectangle to represent the 22-yard pitch */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-32 bg-yellow-200 rounded"></div>
       
-      {/* Stumps at both ends */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 translate-y-1">
-        <div className="w-1 h-3 bg-yellow-400 mx-auto"></div>
+      {/* Stumps at both ends of the vertical pitch */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-y-16">
+        <div className="w-3 h-1 bg-yellow-400 mx-auto"></div>
       </div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-y-1">
-        <div className="w-1 h-3 bg-yellow-400 mx-auto"></div>
-      </div>
-      
-      {/* Stumps at the ends of the pitch */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 translate-x-16">
-        <div className="w-1 h-3 bg-yellow-400 mx-auto"></div>
-      </div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-x-16">
-        <div className="w-1 h-3 bg-yellow-400 mx-auto"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 translate-y-16">
+        <div className="w-3 h-1 bg-yellow-400 mx-auto"></div>
       </div>
 
       {/* Inner circle (30-yard circle) - expanded */}
