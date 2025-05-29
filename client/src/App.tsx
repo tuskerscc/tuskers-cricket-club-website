@@ -13,6 +13,7 @@ import News from "@/pages/News";
 import Gallery from "@/pages/Gallery";
 import Forum from "@/pages/Forum";
 import Community from "@/pages/Community";
+import Contact from "@/pages/Contact";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/news" component={News} />
       <Route path="/gallery" component={Gallery} />
+      <Route path="/contact" component={Contact} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={Admin} />
       <Route path="/fan-scoring" component={FanScoring} />

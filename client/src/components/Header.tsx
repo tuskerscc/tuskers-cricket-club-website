@@ -59,6 +59,9 @@ export default function Header() {
             <Link href="/community" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
               Community
             </Link>
+            <Link href="/contact" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
+              Contact
+            </Link>
             <a href="#fanzone" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
               Fan Zone
             </a>
@@ -182,6 +185,17 @@ export default function Header() {
                       <i className="fas fa-heart text-pink-600 text-sm"></i>
                     </div>
                     <span>Community Events</span>
+                    <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
+                  </Link>
+                  <Link 
+                    href="/contact" 
+                    className="flex items-center px-4 py-3 text-gray-700 hover:text-[#1e3a8a] hover:bg-blue-50 rounded-xl transition-all duration-200 font-medium ml-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center mr-3">
+                      <i className="fas fa-envelope text-teal-600 text-sm"></i>
+                    </div>
+                    <span>Contact Us</span>
                     <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
                   </Link>
                 </div>
