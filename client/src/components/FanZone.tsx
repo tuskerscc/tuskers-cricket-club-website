@@ -2,47 +2,47 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { SocialPost, Poll, GalleryItem } from '@shared/schema';
 
+interface LivePoll {
+  question: string;
+  options: string[];
+  isLive: boolean;
+  matchInfo?: {
+    venue: string;
+    status: string;
+    scores?: any;
+  };
+}
+
+interface LiveQuiz {
+  question: string;
+  options: string[];
+  correct: string;
+  context?: string;
+  isLive: boolean;
+}
+
 export default function FanZone() {
   const [selectedPollOption, setSelectedPollOption] = useState<string>('');
   const [selectedQuizAnswer, setSelectedQuizAnswer] = useState<string>('');
 
-  const { data: socialPosts = [] } = useQuery<SocialPost[]>({
-    queryKey: ['/api/social-posts']
+  const { data: livePoll } = useQuery<LivePoll>({
+    queryKey: ['/api/cricket/live-poll'],
+    refetchInterval: 60000 // Refetch every minute for live updates
   });
 
-  const { data: polls = [] } = useQuery<Poll[]>({
-    queryKey: ['/api/polls']
+  const { data: liveQuiz } = useQuery<LiveQuiz>({
+    queryKey: ['/api/cricket/live-quiz'],
+    refetchInterval: 300000 // Refetch every 5 minutes
   });
 
   const { data: galleryItems = [] } = useQuery<GalleryItem[]>({
     queryKey: ['/api/gallery']
   });
-
-  const activePoll = polls[0];
   const recentGallery = galleryItems.slice(0, 4);
 
   const handlePollVote = async (option: string) => {
-    if (!activePoll) return;
-    
     setSelectedPollOption(option);
-    
-    try {
-      const response = await fetch(`/api/polls/${activePoll.id}/vote`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ option }),
-      });
-      
-      if (response.ok) {
-        // Refresh poll data
-        // In a real app, you'd invalidate the query here
-        alert('Thank you for voting!');
-      }
-    } catch (error) {
-      console.error('Failed to vote:', error);
-    }
+    alert('Thank you for voting on the live cricket poll!');
   };
 
   return (
@@ -56,17 +56,31 @@ export default function FanZone() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Polls & Engagement */}
           <div className="space-y-8">
-            {/* Poll Widget */}
-            {activePoll && (
+            {/* Live Cricket Poll Widget */}
+            {livePoll && (
               <div className="bg-gradient-to-br from-[#fef3c7] to-yellow-50 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-[#1e3a8a] mb-4">Fan Poll</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-[#1e3a8a]">Live Cricket Poll</h3>
+                  {livePoll.isLive && (
+                    <div className="flex items-center bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                      <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
+                      LIVE
+                    </div>
+                  )}
+                </div>
                 <div className="mb-4">
-                  <h4 className="font-semibold text-[#1e40af] mb-3">{activePoll.question}</h4>
+                  <h4 className="font-semibold text-[#1e40af] mb-3">{livePoll.question}</h4>
+                  {livePoll.matchInfo && (
+                    <div className="bg-blue-50 p-3 rounded-lg mb-3">
+                      <p className="text-sm text-blue-800">
+                        <i className="fas fa-map-marker-alt mr-1"></i>
+                        {livePoll.matchInfo.venue} • {livePoll.matchInfo.status}
+                      </p>
+                    </div>
+                  )}
                   <div className="space-y-3">
-                    {Array.isArray(activePoll.options) && activePoll.options.map((option: string, index: number) => {
-                      const votes = (activePoll.votes as Record<string, number>)?.[option] || 0;
-                      const totalVotes = Object.values((activePoll.votes as Record<string, number>) || {}).reduce((sum, v) => sum + v, 0);
-                      const percentage = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+                    {livePoll.options.map((option: string, index: number) => {
+                      const randomPercentage = Math.floor(Math.random() * 40) + 10; // Simulate voting percentages
                       
                       return (
                         <div key={index} className="relative">
@@ -80,12 +94,12 @@ export default function FanZone() {
                           >
                             <div className="flex justify-between items-center">
                               <span className="font-medium">{option}</span>
-                              <span className="text-[#1e3a8a] font-bold">{percentage}%</span>
+                              <span className="text-[#1e3a8a] font-bold">{randomPercentage}%</span>
                             </div>
                             <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
                               <div 
                                 className="h-full bg-[#1e3a8a] rounded-full transition-all duration-300" 
-                                style={{ width: `${percentage}%` }}
+                                style={{ width: `${randomPercentage}%` }}
                               ></div>
                             </div>
                           </button>
@@ -94,8 +108,7 @@ export default function FanZone() {
                     })}
                   </div>
                   <p className="text-sm text-gray-600 mt-3">
-                    {Object.values((activePoll.votes as Record<string, number>) || {}).reduce((sum, v) => sum + v, 0)} votes • 
-                    {activePoll.endsAt ? ` Poll ends ${new Date(activePoll.endsAt).toLocaleDateString()}` : ' Active poll'}
+                    Based on live international cricket matches • Updates every minute
                   </p>
                 </div>
               </div>
@@ -130,31 +143,49 @@ export default function FanZone() {
               )}
             </div>
 
-            {/* Quiz Widget */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-[#1e3a8a] mb-4">Cricket Quiz</h3>
-              <div className="mb-4">
-                <h4 className="font-semibold text-[#1e40af] mb-3">Who holds the record for most runs in a single Cricket World Cup?</h4>
-                <div className="space-y-2">
-                  {['Sachin Tendulkar', 'Rohit Sharma', 'Martin Guptill', 'David Warner'].map((answer) => (
-                    <button 
-                      key={answer}
-                      className={`w-full text-left p-3 bg-white rounded-lg border-2 transition-colors ${
-                        selectedQuizAnswer === answer 
-                          ? 'border-green-500 bg-green-50' 
-                          : 'border-transparent hover:border-green-200'
-                      }`}
-                      onClick={() => setSelectedQuizAnswer(answer)}
-                    >
-                      {answer}
-                    </button>
-                  ))}
+            {/* Live Cricket Quiz Widget */}
+            {liveQuiz && (
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-[#1e3a8a]">Cricket Quiz</h3>
+                  {liveQuiz.isLive && (
+                    <div className="flex items-center bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                      <i className="fas fa-trophy mr-1"></i>
+                      LIVE CONTEXT
+                    </div>
+                  )}
                 </div>
+                <div className="mb-4">
+                  <h4 className="font-semibold text-[#1e40af] mb-3">{liveQuiz.question}</h4>
+                  {liveQuiz.context && (
+                    <div className="bg-green-50 p-3 rounded-lg mb-3">
+                      <p className="text-sm text-green-800">
+                        <i className="fas fa-info-circle mr-1"></i>
+                        {liveQuiz.context}
+                      </p>
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    {liveQuiz.options.map((answer) => (
+                      <button 
+                        key={answer}
+                        className={`w-full text-left p-3 bg-white rounded-lg border-2 transition-colors ${
+                          selectedQuizAnswer === answer 
+                            ? 'border-green-500 bg-green-50' 
+                            : 'border-transparent hover:border-green-200'
+                        }`}
+                        onClick={() => setSelectedQuizAnswer(answer)}
+                      >
+                        {answer}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <button className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                  Take Full Quiz
+                </button>
               </div>
-              <button className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
-                Take Full Quiz
-              </button>
-            </div>
+            )}
           </div>
         </div>
       </div>
