@@ -75,7 +75,7 @@ export default function News() {
             >
               <div className="relative">
                 <img
-                  src={article.imageUrl || 'https://via.placeholder.com/400x240/1e3a8a/white?text=News'}
+                  src={article.featuredImage || 'https://via.placeholder.com/400x240/1e3a8a/white?text=News'}
                   alt={article.title}
                   className="w-full h-48 object-cover"
                 />
@@ -84,7 +84,7 @@ export default function News() {
                     {article.category}
                   </span>
                 </div>
-                {article.featured && (
+                {article.isFeatured && (
                   <div className="absolute top-4 right-4">
                     <span className="bg-[#f59e0b] text-white px-3 py-1 rounded-full text-sm font-semibold">
                       Featured
@@ -102,7 +102,7 @@ export default function News() {
                 </p>
                 
                 <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
+                  <span>{article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : 'Not published'}</span>
                   <span>By {article.author}</span>
                 </div>
 

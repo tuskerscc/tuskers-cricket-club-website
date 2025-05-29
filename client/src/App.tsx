@@ -9,11 +9,13 @@ import AdminLogin from "@/pages/AdminLogin";
 import NotFound from "@/pages/not-found";
 import FanScoring from "@/pages/FanScoring";
 import TuskersScoring from "@/pages/TuskersScoring";
+import News from "@/pages/News";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/news" component={News} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={Admin} />
       <Route path="/scoring/fan" component={FanScoring} />
