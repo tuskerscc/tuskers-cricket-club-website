@@ -4,7 +4,7 @@ import HeroSection from '@/components/HeroSection';
 import MatchCenter from '@/components/MatchCenter';
 import Squad from '@/components/Squad';
 import StartingEleven from '@/components/StartingEleven';
-import PlayerAnalytics from '@/components/PlayerAnalytics';
+
 import LatestUpdates from '@/components/LatestUpdates';
 import FanZone from '@/components/FanZone';
 import CricketTrivia from '@/components/CricketTrivia';
@@ -77,7 +77,6 @@ export default function Home() {
         <MatchCenter />
         <Squad />
         <StartingEleven />
-        <PlayerAnalytics />
         <CricketTrivia />
         <LatestUpdates />
         <FanZone />
