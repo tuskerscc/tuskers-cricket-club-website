@@ -1,0 +1,206 @@
+Tuskers CC Official Website Development
+Project Objective:
+Develop a modern, engaging, feature-rich, and user-friendly official website for Tuskers CC, a cricket club. The website should serve as a central hub for fans, players, and media, providing easy access to comprehensive information, live updates, and interactive content about the club. The design and functionality should be inspired by leading sports team websites like https://www.mumbaiindians.com/, while being tailored to Tuskers CC's identity and specific needs.
+
+Theme & Branding:
+
+Primary Colors: Royal Blue and Gold.
+
+Logo: Tuskers CC logo will be provided. The design should prominently and tastefully incorporate this logo.
+
+Overall Feel: Professional, dynamic, immersive, and passionate, reflecting a modern cricket club.
+
+Target Audience:
+
+Fans and supporters of Tuskers CC.
+
+Current and prospective players.
+
+Media and press.
+
+Sponsors and partners (future consideration).
+
+Key Menu Sections and Functionality:
+
+1. Home:
+* Frontend:
+* Hero Section: Visually appealing hero section (high-quality banner image/video, club logo, tagline). This section should be dynamic, potentially highlighting live matches or major news.
+* Club Overview: A concise and engaging "About Tuskers CC" section, possibly integrated near the hero section or as a distinct block.
+* Live Score Display (Tuskers CC): If a Tuskers CC match is currently being played, a prominent live score banner/widget should be highly visible. This should display:
+* Team scores (e.g., Tuskers CC vs. Opponent).
+* Wickets, Overs.
+* Current batsmen/bowlers (if API provides).
+* Target score (if applicable).
+* Match Commentary Snippets & Ball-by-Ball Highlights (key moments, if API provides).
+* Clear "LIVE" indicator.
+* Link to a more detailed live match center page.
+* Live Score Display (Other Major Matches - Top-Right Corner): A smaller, dedicated section in the top-right corner (persistent across pages if possible) displaying live scores for major ongoing international or domestic cricket matches (e.g., ICC events, IPL, PSL, LPL).
+* Upcoming Match: Prominent display of the next upcoming Tuskers CC match (date, opponent, venue, countdown timer) when no live Tuskers CC match is in progress.
+* Latest Updates Snippets: 3-4 latest news thumbnails and headlines from the "Latest Updates" section.
+* Player Spotlight/Performance Highlights: Section showcasing key player performances or recent achievements, potentially linking to detailed stats.
+* Integrated Social Media Feeds: Display live feeds from Tuskers CC's official social media channels (e.g., Twitter/X, Instagram, Facebook).
+* Responsive design.
+* Backend:
+* Live Score Integration (Open Source):
+* Implement a solution using a suitable open-source cricket live score API or data source.
+* Fetch live scores, commentary, and ball-by-ball data for Tuskers CC matches.
+* Fetch live scores for selected international/domestic matches.
+* Logic to prioritize Tuskers CC matches.
+* Efficient real-time updates (WebSockets or polling, respecting any open-source API limits/terms).
+* CMS for managing homepage content.
+* Dynamic pulling of upcoming match data, latest news, and player stats.
+
+2. Match Center / Fixture:
+* Frontend:
+* List of all Tuskers CC upcoming and past matches.
+* Details: Date, Time, Opponent (logo), Venue, Competition, Status (Upcoming, Live, Result).
+* For Live Matches: Link to a dedicated "Live Match Center" page featuring:
+* Detailed scoreboard.
+* Full Match Commentary (live updates if API provides).
+* Ball-by-ball updates (if API provides).
+* Player statistics for the current match.
+* (Optional) Wagon wheels, pitch maps if API data supports.
+* For Past Matches: Link to a detailed "Match Report" page including final scores, summary, key performances, photos, videos, and links to player analytics from the match.
+* Filtering options (month, competition, home/away).
+* "Add to Calendar" option.
+* Backend:
+* CMS for managing match fixtures and reports.
+* Logic to update status based on date and live data.
+* API endpoint for fixture and detailed match data (including commentary, ball-by-ball).
+
+3. Squad & Player Analytics:
+* Frontend:
+* Grid/list view of current Tuskers CC players.
+* Player Profiles: Clicking a player leads to a detailed profile page featuring:
+* Photo, Name, Role, Jersey Number, Bio.
+* Career Statistics (Overall & by Competition/Season): Batting (runs, average, SR, 50s, 100s), Bowling (wickets, average, economy, best figures), Fielding.
+* Advanced Analytics & Performance Visualizations: Graphs showing performance trends, comparison tools (optional), heatmaps (if data allows).
+* Recent match performances.
+* News articles related to the player.
+* Backend:
+* CMS for managing player profiles and manually inputting/editing base stats if API doesn't cover everything.
+* Data processing for calculating and storing advanced statistics and analytics. This might involve combining API data with manually entered data.
+* API endpoint for detailed squad and player analytics data.
+
+4. Latest Updates (News/Blog):
+* Frontend:
+* Blog-style listing (news, match reports, announcements, interviews).
+* Display: Thumbnail, Title, Excerpt, Date, Author.
+* Full article page with rich content (text, images, embedded videos).
+* Social sharing buttons.
+* Categories/tags and robust search functionality.
+* Fan Interaction: Comment section on articles (with moderation).
+* Backend:
+* Robust CMS for article management.
+* API endpoint for articles and comments.
+* Moderation tools for comments.
+
+5. Tuskers Starting 11:
+* Frontend:
+* Display of the official starting lineup for the most recent or upcoming Tuskers CC match.
+* Visually engaging presentation (e.g., on a field graphic).
+* Indicate "Last Match" or "Next Match" lineup with date and opponent.
+* Backend:
+* CMS for updating the Starting 11.
+* API endpoint for Starting 11 data.
+
+6. Fan Zone / Community (New or Enhanced Section):
+* Frontend:
+* Integrated Social Media Wall: Aggregate posts mentioning Tuskers CC or specific hashtags from various platforms.
+* Polls & Quizzes: Interactive content for fan engagement.
+* (Optional) Fan forums or discussion boards.
+* Galleries (photos/videos from matches and events).
+* Backend:
+* CMS for managing Fan Zone content (polls, quizzes, gallery uploads).
+* Integration with social media APIs for the social wall.
+* Backend support for poll submissions and forum functionalities if implemented.
+
+General Website Requirements:
+
+No Ticket Sales.
+
+Design: Modern, professional, Royal Blue and Gold theme, intuitive UX.
+
+Responsiveness: Full responsiveness.
+
+Performance: Fast loading, optimized for real-time updates.
+
+SEO Friendliness: Clean URLs, meta tags, XML sitemap.
+
+Security: Standard best practices.
+
+Browser Compatibility: Latest versions of major browsers.
+
+Admin Panel (Backend - CMS):
+
+User-friendly interface for all dynamic content (fixtures, squad, news, starting 11, live score overrides, commentary input if manual, player stats, analytics parameters, social media feed configuration, fan interaction content).
+
+Management of which external leagues' scores to display.
+
+Database Structure (Guidance for Developer - Expanded):
+
+Users (admin/editor access)
+
+Players (profile info, base stats)
+
+Teams (opponents, logos)
+
+Venues
+
+Competitions
+
+Matches (Tuskers CC: fixture details, status, result, report_link, match_id_from_open_source_api for live scores)
+
+MatchEvents (for storing ball-by-ball data if API provides granular detail: match_id, ball_number, batsman_id, bowler_id, runs_scored, wicket_type, commentary_snippet_id)
+
+CommentaryEntries (match_id, timestamp/over_ball, text)
+
+PlayerMatchStats (player_id, match_id, detailed batting/bowling/fielding stats for that match)
+
+PlayerSeasonStats (player_id, season/competition_id, aggregated stats)
+
+Lineups (match_id, player_id, is_substitute)
+
+Articles, ArticleCategories, ArticleComments (with user linking and moderation flags)
+
+Settings (site settings, API configurations for open-source solution, selected external leagues)
+
+SocialMediaPosts (for caching/displaying on social wall)
+
+Polls, PollOptions, PollVotes
+
+QuizQuestions, QuizAnswers
+
+GalleryItems (images/videos with descriptions)
+
+Tables for caching API data (live scores, external matches, player stats from API).
+
+Live Score API Integration (Open Source):
+
+Developer Task:
+
+Research and identify a suitable open-source cricket live score API or data source. Evaluate its reliability, data coverage (live scores, commentary, ball-by-ball, player stats), update frequency, and terms of use.
+
+Implement backend services to regularly fetch live match data for:
+
+Tuskers CC matches (identify via the chosen open-source API, pre-configure in CMS if necessary).
+
+Selected major international and domestic leagues.
+
+Store/cache relevant data efficiently, especially for historical stats and analytics.
+
+Develop robust API endpoints on the website's backend.
+
+Ensure dynamic frontend updates.
+
+Implement error handling, API rate limit management (if applicable to the chosen open-source solution), and fallback mechanisms.
+
+Technology Stack (Developer to Propose):
+
+Frontend: e.g., React, Vue.js, Angular.
+
+Backend: e.g., Node.js/Express, Python/Django/Flask, Ruby on Rails.
+
+Database: e.g., PostgreSQL, MySQL, MongoDB (consider scalability for stats and events).
+
+CMS: Headless CMS or custom solution.
