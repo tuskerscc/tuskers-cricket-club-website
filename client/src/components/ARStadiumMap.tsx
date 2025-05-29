@@ -182,32 +182,7 @@ export default function ARStadiumMap() {
 
 
 
-        {/* AR Features Info */}
-        <div className="mt-12 grid md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-[#1e3a8a] rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-[#f59e0b] text-2xl">📱</span>
-            </div>
-            <h3 className="text-xl font-bold text-[#1e3a8a] mb-2">Interactive Map</h3>
-            <p className="text-gray-600">Click on players and amenities to explore detailed information and stats</p>
-          </div>
-          
-          <div className="text-center">
-            <div className="w-16 h-16 bg-[#1e3a8a] rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-[#f59e0b] text-2xl">🏟️</span>
-            </div>
-            <h3 className="text-xl font-bold text-[#1e3a8a] mb-2">Stadium Guide</h3>
-            <p className="text-gray-600">Navigate the venue with ease using our comprehensive amenity locations</p>
-          </div>
-          
-          <div className="text-center">
-            <div className="w-16 h-16 bg-[#1e3a8a] rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-[#f59e0b] text-2xl">⚡</span>
-            </div>
-            <h3 className="text-xl font-bold text-[#1e3a8a] mb-2">Real-time Updates</h3>
-            <p className="text-gray-600">Live player positions and venue information updated throughout the match</p>
-          </div>
-        </div>
+
       </div>
     </section>
   );
