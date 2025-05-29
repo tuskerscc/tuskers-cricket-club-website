@@ -236,11 +236,11 @@ export async function seedDatabase() {
 
     // Insert polls
     await db.insert(polls).values({
-      question: "Who should be the Player of the Match for the upcoming game?",
-      options: ["Rajesh Sharma", "Mohammed Ali", "Deepak Kumar", "Suresh Khan"],
-      votes: { "Rajesh Sharma": 45, "Mohammed Ali": 23, "Deepak Kumar": 12, "Suresh Khan": 18 },
+      question: "Which team do you think will win the current India vs Australia Test series?",
+      options: ["India", "Australia", "Draw", "Too close to call"],
+      votes: { "India": 67, "Australia": 43, "Draw": 12, "Too close to call": 28 },
       isActive: true,
-      endsAt: new Date('2024-12-15T14:30:00Z')
+      endsAt: new Date('2025-01-15T14:30:00Z')
     });
 
     // Insert gallery items

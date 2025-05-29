@@ -164,17 +164,32 @@ export class DatabaseStorage implements IStorage {
 
   async getMatches(): Promise<(Match & { homeTeam: Team; awayTeam: Team; venue: Venue; competition: Competition })[]> {
     const matchesData = await db
-      .select()
+      .select({
+        match: matches,
+        homeTeam: { id: teams.id, name: teams.name, shortName: teams.shortName, logo: teams.logo, isOurTeam: teams.isOurTeam },
+        venue: venues,
+        competition: competitions
+      })
       .from(matches)
       .innerJoin(teams, eq(matches.homeTeamId, teams.id))
-      .innerJoin(teams, eq(matches.awayTeamId, teams.id))
       .innerJoin(venues, eq(matches.venueId, venues.id))
       .innerJoin(competitions, eq(matches.competitionId, competitions.id))
       .orderBy(desc(matches.matchDate));
 
-    // Note: This is a simplified version. In real implementation, you'd need to handle the joins properly
-    // to distinguish between home and away teams
-    return [];
+    const results = [];
+    for (const row of matchesData) {
+      const [awayTeam] = await db.select().from(teams).where(eq(teams.id, row.match.awayTeamId));
+      if (awayTeam) {
+        results.push({
+          ...row.match,
+          homeTeam: row.homeTeam,
+          awayTeam,
+          venue: row.venue,
+          competition: row.competition
+        });
+      }
+    }
+    return results;
   }
 
   async getMatch(id: number): Promise<(Match & { homeTeam: Team; awayTeam: Team; venue: Venue; competition: Competition }) | undefined> {

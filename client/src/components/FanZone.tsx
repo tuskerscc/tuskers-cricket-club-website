@@ -53,77 +53,7 @@ export default function FanZone() {
           <p className="text-xl text-gray-600">Join the Tuskers community and engage with fellow cricket enthusiasts</p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Social Media Feed */}
-          <div className="lg:col-span-2">
-            <div className="bg-gradient-to-br from-[#eff6ff] to-blue-50 rounded-2xl p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-[#1e3a8a]">Social Media Feed</h3>
-                <div className="flex space-x-2">
-                  <button className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    <i className="fab fa-twitter"></i>
-                  </button>
-                  <button className="bg-pink-600 text-white p-2 rounded-lg hover:bg-pink-700 transition-colors">
-                    <i className="fab fa-instagram"></i>
-                  </button>
-                  <button className="bg-blue-800 text-white p-2 rounded-lg hover:bg-blue-900 transition-colors">
-                    <i className="fab fa-facebook"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                {socialPosts.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">No social media posts available at the moment.</p>
-                  </div>
-                ) : (
-                  socialPosts.map((post) => (
-                    <div key={post.id} className="bg-white rounded-xl p-6 shadow-sm">
-                      <div className="flex items-start space-x-4">
-                        <img 
-                          src={post.authorAvatar || "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iOCIgZmlsbD0iIzFlM2E4YSIvPgo8dGV4dCB4PSIyNCIgeT0iMzAiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC13ZWlnaHQ9IjgwMCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2Y1OWUwYiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VEM8L3RleHQ+Cjwvc3ZnPgo="} 
-                          alt={post.author} 
-                          className="w-12 h-12 rounded-full"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <span className="font-bold text-[#1e3a8a]">@{post.author}</span>
-                            {post.platform === 'twitter' && <i className="fas fa-check-circle text-blue-500 text-sm"></i>}
-                            <span className="text-gray-500 text-sm">
-                              {new Date(post.postedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
-                          <p className="text-gray-800 mb-3">{post.content}</p>
-                          <div className="flex items-center space-x-6 text-gray-500">
-                            <button className="flex items-center space-x-1 hover:text-red-500 transition-colors">
-                              <i className="far fa-heart"></i>
-                              <span>{post.likes}</span>
-                            </button>
-                            <button className="flex items-center space-x-1 hover:text-blue-500 transition-colors">
-                              <i className="far fa-comment"></i>
-                              <span>{post.comments}</span>
-                            </button>
-                            <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
-                              <i className="fas fa-retweet"></i>
-                              <span>{post.shares}</span>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <div className="text-center mt-6">
-                <button className="text-[#1e3a8a] font-semibold hover:text-[#f59e0b] transition-colors">
-                  View More Posts <i className="fas fa-arrow-right ml-1"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
+        <div className="grid lg:grid-cols-2 gap-8">
           {/* Polls & Engagement */}
           <div className="space-y-8">
             {/* Poll Widget */}
@@ -204,9 +134,9 @@ export default function FanZone() {
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6">
               <h3 className="text-xl font-bold text-[#1e3a8a] mb-4">Cricket Quiz</h3>
               <div className="mb-4">
-                <h4 className="font-semibold text-[#1e40af] mb-3">In which year was Tuskers CC founded?</h4>
+                <h4 className="font-semibold text-[#1e40af] mb-3">Who holds the record for most runs in a single Cricket World Cup?</h4>
                 <div className="space-y-2">
-                  {['2018', '2019', '2020', '2021'].map((answer) => (
+                  {['Sachin Tendulkar', 'Rohit Sharma', 'Martin Guptill', 'David Warner'].map((answer) => (
                     <button 
                       key={answer}
                       className={`w-full text-left p-3 bg-white rounded-lg border-2 transition-colors ${
