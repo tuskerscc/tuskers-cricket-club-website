@@ -7,7 +7,9 @@ import { useToast } from '@/hooks/use-toast';
 import type { Player, Match, Article, Team, Venue, Competition } from '@shared/schema';
 import { insertPlayerSchema, insertMatchSchema, insertArticleSchema } from '@shared/schema';
 
-export default function Admin() {
+import AdminProtected from '@/components/AdminProtected';
+
+function AdminContent() {
   const [activeTab, setActiveTab] = useState('players');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -106,7 +108,7 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="py-8">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
@@ -375,5 +377,13 @@ export default function Admin() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function Admin() {
+  return (
+    <AdminProtected>
+      <AdminContent />
+    </AdminProtected>
   );
 }
