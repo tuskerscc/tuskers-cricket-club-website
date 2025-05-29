@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
+import { ArrowLeft, Home, Plus, X, Clock } from 'lucide-react';
 
 interface Batsman {
   name: string;
