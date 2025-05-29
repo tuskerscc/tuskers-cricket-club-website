@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, real } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, real, decimal } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -186,6 +186,58 @@ export const triviaLeaderboard = pgTable("trivia_leaderboard", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Cricket Scoring Tables
+export const scoringUsers = pgTable("scoring_users", {
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 50 }).notNull().unique(),
+  email: varchar("email", { length: 100 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(),
+  userType: varchar("user_type", { length: 20 }).notNull().default("fan"), // 'fan' or 'tuskers'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const scoringMatches = pgTable("scoring_matches", {
+  id: serial("id").primaryKey(),
+  matchName: varchar("match_name", { length: 200 }).notNull(),
+  team1: varchar("team1", { length: 100 }).notNull(),
+  team2: varchar("team2", { length: 100 }).notNull(),
+  venue: varchar("venue", { length: 150 }),
+  matchDate: timestamp("match_date").notNull(),
+  createdBy: integer("created_by").references(() => scoringUsers.id),
+  status: varchar("status", { length: 20 }).notNull().default("upcoming"), // 'upcoming', 'live', 'completed'
+  isLive: boolean("is_live").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const scoringInnings = pgTable("scoring_innings", {
+  id: serial("id").primaryKey(),
+  matchId: integer("match_id").references(() => scoringMatches.id).notNull(),
+  battingTeam: varchar("batting_team", { length: 100 }).notNull(),
+  bowlingTeam: varchar("bowling_team", { length: 100 }).notNull(),
+  inningsNumber: integer("innings_number").notNull(), // 1 or 2
+  totalRuns: integer("total_runs").default(0),
+  totalWickets: integer("total_wickets").default(0),
+  totalOvers: real("total_overs").default(0.0),
+  extras: integer("extras").default(0),
+  isCompleted: boolean("is_completed").default(false),
+});
+
+export const scoringBalls = pgTable("scoring_balls", {
+  id: serial("id").primaryKey(),
+  inningsId: integer("innings_id").references(() => scoringInnings.id).notNull(),
+  ballNumber: integer("ball_number").notNull(),
+  overNumber: integer("over_number").notNull(),
+  batsman: varchar("batsman", { length: 100 }),
+  bowler: varchar("bowler", { length: 100 }),
+  runs: integer("runs").default(0),
+  isWicket: boolean("is_wicket").default(false),
+  wicketType: varchar("wicket_type", { length: 50 }), // 'bowled', 'caught', 'lbw', etc.
+  isExtra: boolean("is_extra").default(false),
+  extraType: varchar("extra_type", { length: 20 }), // 'wide', 'no-ball', 'bye', 'leg-bye'
+  commentary: text("commentary"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
 // Relations
 export const teamsRelations = relations(teams, ({ many }) => ({
   homeMatches: many(matches, { relationName: "homeTeam" }),
@@ -335,6 +387,26 @@ export const insertTriviaLeaderboardSchema = createInsertSchema(triviaLeaderboar
   createdAt: true,
 });
 
+// Cricket Scoring Insert Schemas
+export const insertScoringUserSchema = createInsertSchema(scoringUsers).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertScoringMatchSchema = createInsertSchema(scoringMatches).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertScoringInningsSchema = createInsertSchema(scoringInnings).omit({
+  id: true,
+});
+
+export const insertScoringBallSchema = createInsertSchema(scoringBalls).omit({
+  id: true,
+  timestamp: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -380,3 +452,16 @@ export type InsertTriviaQuestion = z.infer<typeof insertTriviaQuestionSchema>;
 
 export type TriviaLeaderboard = typeof triviaLeaderboard.$inferSelect;
 export type InsertTriviaLeaderboard = z.infer<typeof insertTriviaLeaderboardSchema>;
+
+// Cricket Scoring Types
+export type ScoringUser = typeof scoringUsers.$inferSelect;
+export type InsertScoringUser = z.infer<typeof insertScoringUserSchema>;
+
+export type ScoringMatch = typeof scoringMatches.$inferSelect;
+export type InsertScoringMatch = z.infer<typeof insertScoringMatchSchema>;
+
+export type ScoringInnings = typeof scoringInnings.$inferSelect;
+export type InsertScoringInnings = z.infer<typeof insertScoringInningsSchema>;
+
+export type ScoringBall = typeof scoringBalls.$inferSelect;
+export type InsertScoringBall = z.infer<typeof insertScoringBallSchema>;
