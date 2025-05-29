@@ -32,20 +32,20 @@ export default function ARStadiumMap() {
     queryKey: ['/api/players']
   });
 
-  // Cricket field positions in circular formation
+  // Cricket field positions in traditional formation
   const fieldPositions: PlayerPosition[] = players.slice(0, 11).map((player, index) => {
     const positions = [
-      { x: 50, y: 70, fieldPosition: 'Wicket Keeper' }, // Behind stumps
-      { x: 50, y: 30, fieldPosition: 'Bowler' }, // Bowling end
-      { x: 35, y: 25, fieldPosition: 'First Slip' },
-      { x: 65, y: 25, fieldPosition: 'Gully' },
-      { x: 25, y: 50, fieldPosition: 'Point' },
-      { x: 75, y: 50, fieldPosition: 'Cover' },
-      { x: 30, y: 75, fieldPosition: 'Square Leg' },
-      { x: 70, y: 75, fieldPosition: 'Mid Wicket' },
-      { x: 15, y: 35, fieldPosition: 'Third Man' },
-      { x: 85, y: 35, fieldPosition: 'Fine Leg' },
-      { x: 50, y: 15, fieldPosition: 'Long Off' }
+      { x: 50, y: 65, fieldPosition: 'Wicket-keeper' }, // Behind stumps
+      { x: 30, y: 75, fieldPosition: 'Square leg' }, // Square leg
+      { x: 65, y: 15, fieldPosition: 'Long on' }, // Long on
+      { x: 25, y: 45, fieldPosition: 'Point' }, // Point
+      { x: 75, y: 45, fieldPosition: 'Cover' }, // Cover
+      { x: 50, y: 10, fieldPosition: 'Long off' }, // Long off
+      { x: 50, y: 35, fieldPosition: 'Bowler' }, // Bowler
+      { x: 85, y: 50, fieldPosition: 'Off-side sweeper' }, // Off-side sweeper
+      { x: 15, y: 70, fieldPosition: 'Leg-side sweeper' }, // Leg-side sweeper
+      { x: 85, y: 80, fieldPosition: 'Fine leg' }, // Fine leg
+      { x: 15, y: 25, fieldPosition: 'Third man' } // Third man
     ];
 
     return {
@@ -72,7 +72,7 @@ export default function ARStadiumMap() {
       </div>
 
       {/* Inner circle (30-yard circle) */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-white border-dashed rounded-full opacity-60"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 border-2 border-white border-dashed rounded-full opacity-60"></div>
 
       {/* Player positions */}
       {showPlayerStats && fieldPositions.map((playerPos) => (
