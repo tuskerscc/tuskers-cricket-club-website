@@ -43,6 +43,56 @@ interface MatchState {
   showBatsmanModal: boolean;
   playersPerTeam: number;
   maxWickets: number;
+  tossWinner: 1 | 2;
+  tossDecision: 'bat' | 'bowl';
+  isComplete: boolean;
+  winningTeam?: string;
+  winMargin?: string;
+  playerOfMatch?: string;
+  matchSummary?: {
+    team1Score: string;
+    team2Score: string;
+    result: string;
+    playerOfMatch: string;
+    tossDetails: string;
+  };
+}
+
+interface Tournament {
+  id: string;
+  name: string;
+  type: 'knockout' | 'points';
+  teams: string[];
+  matches: TournamentMatch[];
+  pointsTable?: PointsTableEntry[];
+  currentStage: string;
+}
+
+interface TournamentMatch {
+  id: string;
+  team1: string;
+  team2: string;
+  stage: string;
+  isComplete: boolean;
+  result?: {
+    winner: string;
+    score1: string;
+    score2: string;
+    margin: string;
+  };
+}
+
+interface PointsTableEntry {
+  team: string;
+  played: number;
+  won: number;
+  lost: number;
+  tied: number;
+  points: number;
+  nrr: number;
+  runsFor: number;
+  runsConceded: number;
+  oversPlayed: number;
 }
 
 export default function FanScoring() {
@@ -62,6 +112,15 @@ export default function FanScoring() {
   const [fielderName, setFielderName] = useState('');
   const [newBatsmanName, setNewBatsmanName] = useState('');
   const [newBowlerName, setNewBowlerName] = useState('');
+  const [showMatchSummary, setShowMatchSummary] = useState(false);
+  const [matchResult, setMatchResult] = useState<string>('');
+  const [playerOfMatch, setPlayerOfMatch] = useState<string>('');
+  const [showTournament, setShowTournament] = useState(false);
+  const [tournament, setTournament] = useState<Tournament | null>(null);
+  const [tournamentTeams, setTournamentTeams] = useState<string[]>([]);
+  const [tournamentName, setTournamentName] = useState('');
+  const [tournamentType, setTournamentType] = useState<'knockout' | 'points'>('knockout');
+  const [teamsCount, setTeamsCount] = useState(4);
   const { toast } = useToast();
 
   const getMaxOvers = (format: '5-over' | 'T10' | 'T20' | 'ODI') => {
@@ -119,7 +178,10 @@ export default function FanScoring() {
       showBowlerModal: false,
       showBatsmanModal: false,
       playersPerTeam: playersPerTeam,
-      maxWickets: playersPerTeam - 1
+      maxWickets: playersPerTeam - 1,
+      tossWinner: tossWinner,
+      tossDecision: tossDecision,
+      isComplete: false
     });
     setShowPlayerSetup(false);
   };
