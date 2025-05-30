@@ -438,34 +438,58 @@ export class DatabaseStorage implements IStorage {
     nrr: number;
   }> {
     try {
-      const [stats] = await db.select().from(teamStats).limit(1);
-      if (stats) {
+      const allStats = await db.select().from(teamStats);
+      
+      if (allStats.length === 0) {
         return {
-          matchesWon: stats.matchesWon || 0,
-          totalMatches: stats.totalMatches || 0,
-          totalRuns: stats.totalRuns || 0,
-          wicketsTaken: stats.wicketsTaken || 0,
-          totalOvers: stats.totalOvers || 0,
-          runsAgainst: stats.runsAgainst || 0,
-          oversAgainst: stats.oversAgainst || 0,
-          nrr: stats.nrr || 0
+          matchesWon: 0,
+          totalMatches: 0,
+          totalRuns: 0,
+          wicketsTaken: 0,
+          totalOvers: 0,
+          runsAgainst: 0,
+          oversAgainst: 0,
+          nrr: 0
         };
       }
+      
+      // Calculate aggregated statistics
+      const totalMatchesPlayed = allStats.length;
+      const totalMatchesWon = allStats.reduce((sum, stat) => sum + (stat.matchesWon || 0), 0);
+      const sumTotalRuns = allStats.reduce((sum, stat) => sum + (stat.totalRuns || 0), 0);
+      const sumWicketsTaken = allStats.reduce((sum, stat) => sum + (stat.wicketsTaken || 0), 0);
+      const sumTotalOvers = allStats.reduce((sum, stat) => sum + (stat.totalOvers || 0), 0);
+      const sumRunsAgainst = allStats.reduce((sum, stat) => sum + (stat.runsAgainst || 0), 0);
+      const sumOversAgainst = allStats.reduce((sum, stat) => sum + (stat.oversAgainst || 0), 0);
+      
+      // Calculate NRR: (sum total_runs ÷ sum total_overs) - (sum runs_against ÷ sum overs_against)
+      const runRate = sumTotalOvers > 0 ? sumTotalRuns / sumTotalOvers : 0;
+      const concededRate = sumOversAgainst > 0 ? sumRunsAgainst / sumOversAgainst : 0;
+      const nrr = runRate - concededRate;
+      
+      return {
+        matchesWon: totalMatchesWon,
+        totalMatches: totalMatchesPlayed,
+        totalRuns: sumTotalRuns,
+        wicketsTaken: sumWicketsTaken,
+        totalOvers: sumTotalOvers,
+        runsAgainst: sumRunsAgainst,
+        oversAgainst: sumOversAgainst,
+        nrr: parseFloat(nrr.toFixed(3))
+      };
     } catch (error) {
       console.error('Error fetching team stats:', error);
+      return {
+        matchesWon: 0,
+        totalMatches: 0,
+        totalRuns: 0,
+        wicketsTaken: 0,
+        totalOvers: 0,
+        runsAgainst: 0,
+        oversAgainst: 0,
+        nrr: 0
+      };
     }
-    
-    // Return default values if no stats found
-    return {
-      matchesWon: 0,
-      totalMatches: 0,
-      totalRuns: 0,
-      wicketsTaken: 0,
-      totalOvers: 0,
-      runsAgainst: 0,
-      oversAgainst: 0,
-      nrr: 0
-    };
   }
 
   async updateTeamStats(data: {
