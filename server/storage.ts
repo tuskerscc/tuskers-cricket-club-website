@@ -483,37 +483,17 @@ export class DatabaseStorage implements IStorage {
       const concededRate = data.oversAgainst > 0 ? data.runsAgainst / data.oversAgainst : 0;
       const nrr = runRate - concededRate;
 
-      // Check if stats exist
-      const [existingStats] = await db.select().from(teamStats).limit(1);
-      
-      if (existingStats) {
-        // Update existing record
-        await db.update(teamStats)
-          .set({
-            matchesWon: data.matchesWon,
-            totalMatches: data.totalMatches,
-            totalRuns: data.totalRuns,
-            wicketsTaken: data.wicketsTaken,
-            totalOvers: data.totalOvers,
-            runsAgainst: data.runsAgainst,
-            oversAgainst: data.oversAgainst,
-            nrr: nrr,
-            updatedAt: new Date()
-          })
-          .where(eq(teamStats.id, existingStats.id));
-      } else {
-        // Insert new record
-        await db.insert(teamStats).values({
-          matchesWon: data.matchesWon,
-          totalMatches: data.totalMatches,
-          totalRuns: data.totalRuns,
-          wicketsTaken: data.wicketsTaken,
-          totalOvers: data.totalOvers,
-          runsAgainst: data.runsAgainst,
-          oversAgainst: data.oversAgainst,
-          nrr: nrr
-        });
-      }
+      // Always insert new record
+      await db.insert(teamStats).values({
+        matchesWon: data.matchesWon,
+        totalMatches: data.totalMatches,
+        totalRuns: data.totalRuns,
+        wicketsTaken: data.wicketsTaken,
+        totalOvers: data.totalOvers,
+        runsAgainst: data.runsAgainst,
+        oversAgainst: data.oversAgainst,
+        nrr: nrr
+      });
     } catch (error) {
       console.error('Error updating team stats:', error);
       throw error;
