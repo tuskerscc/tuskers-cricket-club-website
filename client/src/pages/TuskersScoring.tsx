@@ -219,7 +219,6 @@ export default function TuskersScoring() {
       showBatsmanModal: false
     });
     setShowSetup(false);
-    setShowPlayerSelection(false);
   };
 
   const switchStriker = (newState: MatchState) => {
