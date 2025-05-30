@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import type { Player, Match, Article, Team, Venue, Competition } from '@shared/schema';
-import { insertPlayerSchema, insertMatchSchema, insertArticleSchema } from '@shared/schema';
+import type { Player, Match, Article, Team, Venue, Competition, GalleryItem } from '@shared/schema';
+import { insertPlayerSchema, insertMatchSchema, insertArticleSchema, insertGallerySchema } from '@shared/schema';
 
 import AdminProtected from '@/components/AdminProtected';
 
@@ -31,6 +31,10 @@ function AdminContent() {
     queryKey: ['/api/teams']
   });
 
+  const { data: galleryItems = [] } = useQuery<GalleryItem[]>({
+    queryKey: ['/api/gallery']
+  });
+
   // Player form
   const playerForm = useForm({
     defaultValues: {
@@ -43,6 +47,17 @@ function AdminContent() {
       isCaptain: false,
       isViceCaptain: false,
       photo: ''
+    }
+  });
+
+  // Gallery form
+  const galleryForm = useForm({
+    defaultValues: {
+      title: '',
+      description: '',
+      category: 'match',
+      imageUrl: '',
+      matchId: null
     }
   });
 
@@ -136,6 +151,32 @@ function AdminContent() {
     }
   });
 
+  // Gallery mutations
+  const addGalleryItemMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', '/api/gallery', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/gallery'] });
+      galleryForm.reset();
+      toast({ title: "Success", description: "Gallery item added successfully" });
+    },
+    onError: (error) => {
+      console.error('Add gallery item error:', error);
+      toast({ title: "Error", description: "Failed to add gallery item", variant: "destructive" });
+    }
+  });
+
+  const deleteGalleryItemMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/gallery/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/gallery'] });
+      toast({ title: "Success", description: "Gallery item deleted successfully" });
+    },
+    onError: (error) => {
+      console.error('Delete gallery item error:', error);
+      toast({ title: "Error", description: "Failed to delete gallery item", variant: "destructive" });
+    }
+  });
+
   const onPlayerSubmit = (data: any) => {
     // Handle file upload
     const formData = { ...data };
@@ -151,6 +192,23 @@ function AdminContent() {
     } else {
       formData.photo = '';
       addPlayerMutation.mutate(formData);
+    }
+  };
+
+  const onGallerySubmit = (data: any) => {
+    // Handle image upload
+    const formData = { ...data };
+    
+    // If an image file is selected, convert to base64 or URL
+    if (data.imageUrl && data.imageUrl[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        formData.imageUrl = e.target?.result as string;
+        addGalleryItemMutation.mutate(formData);
+      };
+      reader.readAsDataURL(data.imageUrl[0]);
+    } else {
+      addGalleryItemMutation.mutate(formData);
     }
   };
 
@@ -228,6 +286,7 @@ function AdminContent() {
                 { id: 'players', name: 'Players', icon: '👤' },
                 { id: 'matches', name: 'Matches', icon: '🏏' },
                 { id: 'articles', name: 'Articles', icon: '📰' },
+                { id: 'gallery', name: 'Gallery', icon: '🖼️' },
                 { id: 'analytics', name: 'Analytics', icon: '📊' }
               ].map((tab) => (
                 <button
