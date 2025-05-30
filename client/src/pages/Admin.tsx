@@ -563,7 +563,6 @@ function AdminContent() {
             <nav className="flex space-x-8 px-6" aria-label="Tabs">
               {[
                 { id: 'players', name: 'Players', icon: '👤' },
-                { id: 'playerstats', name: 'Player Stats', icon: '🏏' },
                 { id: 'matchperformance', name: 'Match Performance', icon: '⚾' },
                 { id: 'articles', name: 'Articles', icon: '📰' },
                 { id: 'gallery', name: 'Gallery', icon: '🖼️' },
@@ -740,28 +739,120 @@ function AdminContent() {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-[#1e3a8a]">Match Performance</h2>
+                <h2 className="text-2xl font-bold text-[#1e3a8a]">Match Performance Entry</h2>
                 <p className="text-gray-600 mt-1">
-                  Record match results and update player statistics
+                  Record match results and update team statistics
                 </p>
               </div>
             </div>
             
-            <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 mb-6">
-              <p className="text-blue-800 dark:text-blue-200">
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <p className="text-blue-800">
                 <strong>Instructions:</strong> Enter match details manually, select your playing 11, 
                 and record individual player performances. Performance fields are optional - 
                 only fill in the statistics that are relevant for each player.
               </p>
             </div>
 
-            <div className="space-y-6">
-              <iframe
-                src="/match-performance"
-                className="w-full h-[800px] border border-gray-200 rounded-lg"
-                title="Match Performance Entry"
-              />
-            </div>
+            {/* Match Details Form */}
+            <form onSubmit={matchForm.handleSubmit(onMatchSubmit)} className="grid gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Opponent Team</label>
+                  <input
+                    {...matchForm.register('opponent')}
+                    type="text"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    placeholder="Enter opponent team name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
+                  <input
+                    {...matchForm.register('venue')}
+                    type="text"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    placeholder="Enter venue name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Match Date</label>
+                  <input
+                    {...matchForm.register('date')}
+                    type="date"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Match Result</label>
+                  <select 
+                    {...matchForm.register('result')}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                  >
+                    <option value="Won">Won</option>
+                    <option value="Lost">Lost</option>
+                    <option value="Draw">Draw</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Quick Team Stats Update */}
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold text-[#1e3a8a] mb-4">Quick Team Stats Update</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Team Runs Scored</label>
+                    <input
+                      {...matchForm.register('teamRuns', { valueAsNumber: true })}
+                      type="number"
+                      min="0"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      placeholder="150"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Wickets Taken</label>
+                    <input
+                      {...matchForm.register('wicketsTaken', { valueAsNumber: true })}
+                      type="number"
+                      min="0"
+                      max="10"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      placeholder="5"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Overs Faced</label>
+                    <input
+                      {...matchForm.register('oversFaced', { valueAsNumber: true })}
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      placeholder="20.0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Runs Conceded</label>
+                    <input
+                      {...matchForm.register('runsConceded', { valueAsNumber: true })}
+                      type="number"
+                      min="0"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      placeholder="140"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={recordMatchMutation.isPending}
+                className="w-full bg-[#1e3a8a] text-white py-3 px-4 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors disabled:opacity-50"
+              >
+                {recordMatchMutation.isPending ? 'Recording Match...' : 'Record Match & Update Team Stats'}
+              </button>
+            </form>
           </div>
         )}
 
