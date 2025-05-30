@@ -183,6 +183,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/players/all", async (req, res) => {
+    try {
+      await storage.deleteAllPlayers();
+      res.json({ success: true, message: "All players deleted successfully" });
+    } catch (error) {
+      console.error("Delete all players error:", error);
+      res.status(500).json({ error: "Failed to delete all players" });
+    }
+  });
+
   app.delete("/api/players/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -195,16 +205,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Delete player error:", error);
       res.status(500).json({ error: "Failed to delete player" });
-    }
-  });
-
-  app.delete("/api/players/all", async (req, res) => {
-    try {
-      await storage.deleteAllPlayers();
-      res.json({ success: true, message: "All players deleted successfully" });
-    } catch (error) {
-      console.error("Delete all players error:", error);
-      res.status(500).json({ error: "Failed to delete all players" });
     }
   });
 
