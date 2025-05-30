@@ -1,7 +1,7 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPlayerSchema, insertMatchSchema, insertArticleSchema, insertPollSchema, insertGallerySchema } from "@shared/schema";
+import { insertPlayerSchema, insertMatchSchema, insertArticleSchema, insertPollSchema, insertGallerySchema, insertAnnouncementSchema } from "@shared/schema";
 import { generateCricketPoll, generateCricketQuiz } from "./cricket-api";
 
 // Extend Express Request type to include session
@@ -579,6 +579,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting gallery item:', error);
       res.status(500).json({ error: 'Failed to delete gallery item' });
+    }
+  });
+
+  // Announcements endpoints
+  app.get("/api/announcements", async (req, res) => {
+    try {
+      const announcements = await storage.getAnnouncements();
+      res.json(announcements);
+    } catch (error) {
+      console.error('Error fetching announcements:', error);
+      res.status(500).json({ error: 'Failed to fetch announcements' });
+    }
+  });
+
+  app.post("/api/announcements", async (req, res) => {
+    try {
+      const validatedData = insertAnnouncementSchema.parse(req.body);
+      const announcement = await storage.createAnnouncement(validatedData);
+      res.status(201).json(announcement);
+    } catch (error) {
+      console.error('Error creating announcement:', error);
+      res.status(400).json({ error: 'Invalid announcement data' });
+    }
+  });
+
+  // Player stats endpoints
+  app.put("/api/players/:id/stats", async (req, res) => {
+    try {
+      const playerId = parseInt(req.params.id);
+      if (isNaN(playerId)) {
+        return res.status(400).json({ error: "Invalid player ID" });
+      }
+
+      await storage.updatePlayerStats(playerId, req.body);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error updating player stats:', error);
+      res.status(500).json({ error: 'Failed to update player stats' });
     }
   });
 
