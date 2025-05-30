@@ -199,6 +199,12 @@ function AdminContent() {
   const [activeTab, setActiveTab] = useState('players');
   const [editingPlayer, setEditingPlayer] = useState<number | null>(null);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [selectedPlayers, setSelectedPlayers] = useState<number[]>([]);
+  const [playerPerformances, setPlayerPerformances] = useState<{[key: number]: {
+    batting: { runs: number; balls: number; fours: number; sixes: number };
+    bowling: { wickets: number; runs: number; overs: number };
+    fielding: { catches: number; stumpings: number; runOuts: number };
+  }}>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -302,11 +308,7 @@ function AdminContent() {
       opponent: '',
       venue: '',
       date: '',
-      result: 'Won',
-      teamRuns: 0,
-      wicketsTaken: 0,
-      oversFaced: 0,
-      runsConceded: 0
+      result: 'Won'
     }
   });
 
@@ -443,15 +445,18 @@ function AdminContent() {
 
   // Match recording mutation
   const recordMatchMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/record-match', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/record-match-performance', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/stats/team'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/players'] });
       matchForm.reset();
-      toast({ title: "Success", description: "Match recorded and team stats updated successfully" });
+      setSelectedPlayers([]);
+      setPlayerPerformances({});
+      toast({ title: "Success", description: "Match recorded and player performances updated successfully" });
     },
     onError: (error) => {
       console.error('Record match error:', error);
-      toast({ title: "Error", description: "Failed to record match", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to record match performance", variant: "destructive" });
     }
   });
 
@@ -503,13 +508,35 @@ function AdminContent() {
   };
 
   const onMatchSubmit = (data: any) => {
-    // Calculate additional stats for team statistics
+    // Validate that playing 11 is selected
+    if (selectedPlayers.length !== 11) {
+      toast({
+        title: "Error",
+        description: "Please select exactly 11 players for the match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Convert player performances to the format expected by the backend
+    const playerPerformanceArray = selectedPlayers.map(playerId => ({
+      playerId,
+      runsScored: playerPerformances[playerId]?.batting?.runs || 0,
+      ballsFaced: playerPerformances[playerId]?.batting?.balls || 0,
+      fours: playerPerformances[playerId]?.batting?.fours || 0,
+      sixes: playerPerformances[playerId]?.batting?.sixes || 0,
+      wicketsTaken: playerPerformances[playerId]?.bowling?.wickets || 0,
+      runsConceded: playerPerformances[playerId]?.bowling?.runs || 0,
+      ballsBowled: Math.round((playerPerformances[playerId]?.bowling?.overs || 0) * 6),
+      catches: playerPerformances[playerId]?.fielding?.catches || 0,
+      stumpings: playerPerformances[playerId]?.fielding?.stumpings || 0,
+      runOuts: playerPerformances[playerId]?.fielding?.runOuts || 0,
+    }));
+
     const matchData = {
       ...data,
-      // Determine if match was won for stats calculation
-      matchResult: data.result,
-      // Calculate overs bowled (assume equal to overs faced for simplicity)
-      oversBowled: data.oversFaced || 20
+      selectedPlayers,
+      playerPerformances: playerPerformanceArray
     };
     
     recordMatchMutation.mutate(matchData);
@@ -837,53 +864,263 @@ function AdminContent() {
                 </div>
               </div>
 
-              {/* Quick Team Stats Update */}
+              {/* Playing 11 Selection */}
               <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold text-[#1e3a8a] mb-4">Quick Team Stats Update</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Team Runs Scored</label>
-                    <input
-                      {...matchForm.register('teamRuns', { valueAsNumber: true })}
-                      type="number"
-                      min="0"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      placeholder="150"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Wickets Taken</label>
-                    <input
-                      {...matchForm.register('wicketsTaken', { valueAsNumber: true })}
-                      type="number"
-                      min="0"
-                      max="10"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      placeholder="5"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Overs Faced</label>
-                    <input
-                      {...matchForm.register('oversFaced', { valueAsNumber: true })}
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      placeholder="20.0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Runs Conceded</label>
-                    <input
-                      {...matchForm.register('runsConceded', { valueAsNumber: true })}
-                      type="number"
-                      min="0"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      placeholder="140"
-                    />
-                  </div>
+                <h3 className="text-lg font-semibold text-[#1e3a8a] mb-4">Select Playing 11</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                  {players.map((player) => (
+                    <label key={player.id} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedPlayers.includes(player.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            if (selectedPlayers.length < 11) {
+                              setSelectedPlayers([...selectedPlayers, player.id]);
+                            }
+                          } else {
+                            setSelectedPlayers(selectedPlayers.filter(id => id !== player.id));
+                          }
+                        }}
+                        disabled={!selectedPlayers.includes(player.id) && selectedPlayers.length >= 11}
+                        className="h-4 w-4 text-[#1e3a8a] focus:ring-[#1e3a8a] border-gray-300 rounded"
+                      />
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-[#1e3a8a] text-white rounded-full flex items-center justify-center text-xs font-bold">
+                          {player.jerseyNumber || player.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{player.name}</div>
+                          <div className="text-xs text-gray-500">{player.role}</div>
+                        </div>
+                      </div>
+                    </label>
+                  ))}
                 </div>
+                <div className="text-sm text-gray-600 mb-4">
+                  Selected: {selectedPlayers.length}/11 players
+                </div>
+
+                {/* Player Performance Entry */}
+                {selectedPlayers.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="text-md font-semibold text-[#1e3a8a]">Player Performance Entry</h4>
+                    {selectedPlayers.map((playerId) => {
+                      const player = players.find(p => p.id === playerId);
+                      if (!player) return null;
+
+                      return (
+                        <div key={playerId} className="border border-gray-200 rounded-lg p-4">
+                          <div className="flex items-center space-x-3 mb-4">
+                            <div className="w-10 h-10 bg-[#1e3a8a] text-white rounded-full flex items-center justify-center font-bold">
+                              {player.jerseyNumber || player.name.charAt(0)}
+                            </div>
+                            <div>
+                              <h5 className="font-semibold text-gray-900">{player.name}</h5>
+                              <p className="text-sm text-gray-600">{player.role}</p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Batting Stats */}
+                            <div>
+                              <h6 className="text-sm font-medium text-gray-700 mb-2">Batting</h6>
+                              <div className="space-y-2">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="Runs"
+                                  value={playerPerformances[playerId]?.batting?.runs || ''}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 0;
+                                    setPlayerPerformances(prev => ({
+                                      ...prev,
+                                      [playerId]: {
+                                        ...prev[playerId],
+                                        batting: { ...prev[playerId]?.batting, runs: value }
+                                      }
+                                    }));
+                                  }}
+                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                />
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="Balls Faced"
+                                  value={playerPerformances[playerId]?.batting?.balls || ''}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 0;
+                                    setPlayerPerformances(prev => ({
+                                      ...prev,
+                                      [playerId]: {
+                                        ...prev[playerId],
+                                        batting: { ...prev[playerId]?.batting, balls: value }
+                                      }
+                                    }));
+                                  }}
+                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                />
+                                <div className="grid grid-cols-2 gap-1">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="4s"
+                                    value={playerPerformances[playerId]?.batting?.fours || ''}
+                                    onChange={(e) => {
+                                      const value = parseInt(e.target.value) || 0;
+                                      setPlayerPerformances(prev => ({
+                                        ...prev,
+                                        [playerId]: {
+                                          ...prev[playerId],
+                                          batting: { ...prev[playerId]?.batting, fours: value }
+                                        }
+                                      }));
+                                    }}
+                                    className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                  />
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="6s"
+                                    value={playerPerformances[playerId]?.batting?.sixes || ''}
+                                    onChange={(e) => {
+                                      const value = parseInt(e.target.value) || 0;
+                                      setPlayerPerformances(prev => ({
+                                        ...prev,
+                                        [playerId]: {
+                                          ...prev[playerId],
+                                          batting: { ...prev[playerId]?.batting, sixes: value }
+                                        }
+                                      }));
+                                    }}
+                                    className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Bowling Stats */}
+                            <div>
+                              <h6 className="text-sm font-medium text-gray-700 mb-2">Bowling</h6>
+                              <div className="space-y-2">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="Wickets"
+                                  value={playerPerformances[playerId]?.bowling?.wickets || ''}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 0;
+                                    setPlayerPerformances(prev => ({
+                                      ...prev,
+                                      [playerId]: {
+                                        ...prev[playerId],
+                                        bowling: { ...prev[playerId]?.bowling, wickets: value }
+                                      }
+                                    }));
+                                  }}
+                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                />
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="Runs Conceded"
+                                  value={playerPerformances[playerId]?.bowling?.runs || ''}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 0;
+                                    setPlayerPerformances(prev => ({
+                                      ...prev,
+                                      [playerId]: {
+                                        ...prev[playerId],
+                                        bowling: { ...prev[playerId]?.bowling, runs: value }
+                                      }
+                                    }));
+                                  }}
+                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                />
+                                <input
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  placeholder="Overs Bowled"
+                                  value={playerPerformances[playerId]?.bowling?.overs || ''}
+                                  onChange={(e) => {
+                                    const value = parseFloat(e.target.value) || 0;
+                                    setPlayerPerformances(prev => ({
+                                      ...prev,
+                                      [playerId]: {
+                                        ...prev[playerId],
+                                        bowling: { ...prev[playerId]?.bowling, overs: value }
+                                      }
+                                    }));
+                                  }}
+                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Fielding Stats */}
+                            <div>
+                              <h6 className="text-sm font-medium text-gray-700 mb-2">Fielding</h6>
+                              <div className="space-y-2">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="Catches"
+                                  value={playerPerformances[playerId]?.fielding?.catches || ''}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 0;
+                                    setPlayerPerformances(prev => ({
+                                      ...prev,
+                                      [playerId]: {
+                                        ...prev[playerId],
+                                        fielding: { ...prev[playerId]?.fielding, catches: value }
+                                      }
+                                    }));
+                                  }}
+                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                />
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="Stumpings"
+                                  value={playerPerformances[playerId]?.fielding?.stumpings || ''}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 0;
+                                    setPlayerPerformances(prev => ({
+                                      ...prev,
+                                      [playerId]: {
+                                        ...prev[playerId],
+                                        fielding: { ...prev[playerId]?.fielding, stumpings: value }
+                                      }
+                                    }));
+                                  }}
+                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                />
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="Run Outs"
+                                  value={playerPerformances[playerId]?.fielding?.runOuts || ''}
+                                  onChange={(e) => {
+                                    const value = parseInt(e.target.value) || 0;
+                                    setPlayerPerformances(prev => ({
+                                      ...prev,
+                                      [playerId]: {
+                                        ...prev[playerId],
+                                        fielding: { ...prev[playerId]?.fielding, runOuts: value }
+                                      }
+                                    }));
+                                  }}
+                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <button
