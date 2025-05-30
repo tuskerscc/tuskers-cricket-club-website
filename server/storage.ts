@@ -502,22 +502,44 @@ export class DatabaseStorage implements IStorage {
     oversAgainst: number;
   }): Promise<void> {
     try {
-      // Calculate NRR: (Total runs scored / Total overs faced) - (Total runs conceded / Total overs bowled)
-      const runRate = data.totalOvers > 0 ? data.totalRuns / data.totalOvers : 0;
-      const concededRate = data.oversAgainst > 0 ? data.runsAgainst / data.oversAgainst : 0;
-      const nrr = runRate - concededRate;
-
+      console.log('Storage received data:', data);
+      
+      // Ensure all values are valid numbers
+      const cleanData = {
+        matchesWon: Number(data.matchesWon) || 0,
+        totalMatches: Number(data.totalMatches) || 1,
+        totalRuns: Number(data.totalRuns) || 0,
+        wicketsTaken: Number(data.wicketsTaken) || 0,
+        totalOvers: Number(data.totalOvers) || 0,
+        runsAgainst: Number(data.runsAgainst) || 0,
+        oversAgainst: Number(data.oversAgainst) || 0
+      };
+      
+      // Calculate NRR with proper validation
+      const runRate = cleanData.totalOvers > 0 ? cleanData.totalRuns / cleanData.totalOvers : 0;
+      const concededRate = cleanData.oversAgainst > 0 ? cleanData.runsAgainst / cleanData.oversAgainst : 0;
+      let nrr = runRate - concededRate;
+      
+      // Ensure NRR is a valid number
+      if (isNaN(nrr) || !isFinite(nrr)) {
+        nrr = 0;
+      }
+      
+      const insertData = {
+        matchesWon: cleanData.matchesWon,
+        totalMatches: cleanData.totalMatches,
+        totalRuns: cleanData.totalRuns,
+        wicketsTaken: cleanData.wicketsTaken,
+        totalOvers: cleanData.totalOvers,
+        runsAgainst: cleanData.runsAgainst,
+        oversAgainst: cleanData.oversAgainst,
+        nrr: parseFloat(nrr.toFixed(3))
+      };
+      
+      console.log('Inserting clean data:', insertData);
+      
       // Always insert new record
-      await db.insert(teamStats).values({
-        matchesWon: data.matchesWon,
-        totalMatches: data.totalMatches,
-        totalRuns: data.totalRuns,
-        wicketsTaken: data.wicketsTaken,
-        totalOvers: data.totalOvers,
-        runsAgainst: data.runsAgainst,
-        oversAgainst: data.oversAgainst,
-        nrr: nrr
-      });
+      await db.insert(teamStats).values(insertData);
     } catch (error) {
       console.error('Error updating team stats:', error);
       throw error;
