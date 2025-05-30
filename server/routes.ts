@@ -486,17 +486,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { matchResult, totalRuns, wicketsTaken, totalOvers, runsAgainst, oversAgainst } = req.body;
       
-      // Validate and parse input values
-      const parsedTotalRuns = parseInt(totalRuns) || 0;
-      const parsedWicketsTaken = parseInt(wicketsTaken) || 0;
-      const parsedTotalOvers = parseFloat(totalOvers) || 0;
-      const parsedRunsAgainst = parseInt(runsAgainst) || 0;
-      const parsedOversAgainst = parseFloat(oversAgainst) || 0;
+      // Robust validation with logging
+      console.log('Raw input values:', { matchResult, totalRuns, wicketsTaken, totalOvers, runsAgainst, oversAgainst });
       
-      // For individual match records, we store the match data as-is (not cumulative)
+      // Convert to numbers with proper fallbacks
+      const parsedTotalRuns = Number(totalRuns) || 0;
+      const parsedWicketsTaken = Number(wicketsTaken) || 0;
+      const parsedTotalOvers = Number(totalOvers) || 0;
+      const parsedRunsAgainst = Number(runsAgainst) || 0;
+      const parsedOversAgainst = Number(oversAgainst) || 0;
+      
+      // Ensure matchWon is always 0 or 1
       const matchWon = matchResult === 'won' ? 1 : 0;
       
-      await storage.updateTeamStats({
+      const statsData = {
         matchesWon: matchWon,
         totalMatches: 1,
         totalRuns: parsedTotalRuns,
@@ -504,7 +507,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalOvers: parsedTotalOvers,
         runsAgainst: parsedRunsAgainst,
         oversAgainst: parsedOversAgainst
-      });
+      };
+      
+      console.log('Processed stats data:', statsData);
+      
+      // Validate no NaN values before sending to database
+      for (const [key, value] of Object.entries(statsData)) {
+        if (isNaN(value)) {
+          console.error(`NaN detected in ${key}:`, value);
+          return res.status(400).json({ error: `Invalid value for ${key}` });
+        }
+      }
+      
+      await storage.updateTeamStats(statsData);
       
       res.json({ success: true });
     } catch (error) {
