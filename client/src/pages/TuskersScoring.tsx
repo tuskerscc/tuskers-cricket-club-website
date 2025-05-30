@@ -676,147 +676,208 @@ export default function TuskersScoring() {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-6xl mx-auto">
-        {/* Match Header */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold text-blue-900">
-              {matchState.battingTeam === 1 ? matchState.team1 : matchState.team2} Batting
-            </h1>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-blue-900">
-                {matchState.totalRuns}/{matchState.wickets}
-              </div>
-              <div className="text-gray-600">
-                {matchState.overs}.{matchState.balls} overs
-                {matchState.target && ` | Target: ${matchState.target}`}
-              </div>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-            <div>{matchState.venue}</div>
-            <div>{matchState.format} Match</div>
-            <div>{matchState.matchDate}</div>
+        {/* Header */}
+        <div className="bg-blue-600 text-white p-4 rounded-t-2xl flex justify-between items-center">
+          <button 
+            onClick={() => setShowSetup(true)}
+            className="flex items-center gap-2 text-white hover:bg-blue-700 px-3 py-2 rounded-lg transition-colors"
+          >
+            <span>← Back to Setup</span>
+          </button>
+          <h1 className="text-lg font-semibold">Tuskers CC Official Scoring</h1>
+          <div className="flex gap-2">
+            <button className="text-white hover:bg-blue-700 p-2 rounded">⚙</button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Scoring */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Current Batsmen */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Current Batsmen</h3>
-              <div className="space-y-3">
-                {matchState.batsmen.map((batsman, index) => (
-                  <div key={index} className={`flex justify-between items-center p-3 rounded-lg ${
-                    matchState.striker === index ? 'bg-green-50 border-l-4 border-green-500' : 'bg-gray-50'
-                  }`}>
-                    <div>
-                      <div className="font-semibold">{batsman.name} {matchState.striker === index && '(Strike)'}</div>
-                      <div className="text-sm text-gray-600">
-                        {batsman.runs} ({batsman.balls}) | 4s: {batsman.fours} | 6s: {batsman.sixes}
-                      </div>
+        <div className="bg-white rounded-b-2xl shadow-lg">
+          {/* Match Header */}
+          <div className="bg-gray-50 p-4 border-b">
+            <div className="flex justify-between items-center">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                    {(matchState.battingTeam === 1 ? matchState.team1 : matchState.team2).substring(0, 2).toUpperCase()}
+                  </div>
+                  <span className="font-semibold">{matchState.battingTeam === 1 ? matchState.team1 : matchState.team2} batting</span>
+                </div>
+                {matchState.innings === 2 && matchState.target && (
+                  <div className="text-sm space-y-1">
+                    <div className="text-blue-600 font-semibold">
+                      Target: {matchState.target}
                     </div>
-                    <button
-                      onClick={() => setMatchState(prev => prev ? { ...prev, showBatsmanModal: true } : null)}
-                      className="text-blue-600 hover:text-blue-800 text-sm"
-                    >
-                      Change
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Current Bowler */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Current Bowler</h3>
-              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                <div>
-                  <div className="font-semibold">{matchState.currentBowler.name}</div>
-                  <div className="text-sm text-gray-600">
-                    {matchState.currentBowler.overs}-{matchState.currentBowler.maidens}-{matchState.currentBowler.runs}-{matchState.currentBowler.wickets}
-                    {matchState.format !== 'Test' && (
-                      <span className="ml-2 text-xs">
-                        (Max: {getBowlerMaxOvers(matchState.format)} overs)
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <button
-                  onClick={changeBowler}
-                  className="text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  Change
-                </button>
-              </div>
-            </div>
-
-            {/* Scoring Buttons */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Score Runs</h3>
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                {[0, 1, 2, 3, 4, 6].map((runs) => (
-                  <button
-                    key={runs}
-                    onClick={() => addRuns(runs)}
-                    className={`py-3 px-4 rounded-lg font-semibold transition-colors ${
-                      runs === 0 ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' :
-                      runs === 4 ? 'bg-green-500 text-white hover:bg-green-600' :
-                      runs === 6 ? 'bg-purple-500 text-white hover:bg-purple-600' :
-                      'bg-blue-500 text-white hover:bg-blue-600'
-                    }`}
-                  >
-                    {runs}
-                  </button>
-                ))}
-              </div>
-              
-              <div className="space-y-2">
-                <h4 className="font-semibold text-gray-700">Dismissals</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {['bowled', 'caught', 'lbw', 'stumped', 'run_out', 'retired_out'].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => handleDismissal(type)}
-                      className="py-2 px-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
-                    >
-                      {type.replace('_', ' ').toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              {(matchState.format === 'ODI' || matchState.format === 'Test') && matchState.innings === 1 && (
-                <div className="mt-4 pt-4 border-t">
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={declareInnings}
-                      className="bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors"
-                    >
-                      Declare Innings
-                    </button>
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm">Break Duration:</label>
-                      <select
-                        value={inningsBreakDuration}
-                        onChange={(e) => setInningsBreakDuration(Number(e.target.value))}
-                        className="border rounded px-2 py-1 text-sm"
-                      >
-                        <option value={1}>1 min</option>
-                        <option value={3}>3 min</option>
-                        <option value={5}>5 min</option>
-                        <option value={10}>10 min</option>
-                      </select>
+                    <div className="text-orange-600 font-semibold">
+                      Need: {Math.max(0, matchState.target - matchState.totalRuns)} runs in {((matchState.maxOvers - matchState.overs) * 6 - matchState.balls)} balls
+                    </div>
+                    <div className="text-red-600 font-semibold">
+                      RRR: {(() => {
+                        const ballsLeft = (matchState.maxOvers - matchState.overs) * 6 - matchState.balls;
+                        const runsNeeded = matchState.target - matchState.totalRuns;
+                        const oversLeft = ballsLeft / 6;
+                        return oversLeft > 0 ? (runsNeeded / oversLeft).toFixed(2) : '0.00';
+                      })()}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">{matchState.totalRuns}/{matchState.wickets}</div>
+                <div className="text-sm text-gray-600">Over {matchState.overs}.{matchState.balls} / {matchState.maxOvers}</div>
+                <div className="text-xs text-blue-600 font-semibold">{matchState.format} Format • {matchState.venue}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-600">Official Scoring</div>
+                <div className="text-xs text-green-600">CRR: {matchState.overs > 0 || matchState.balls > 0 ? (matchState.totalRuns / (matchState.overs + matchState.balls/6)).toFixed(2) : '0.00'}</div>
+                <div className="text-xs text-gray-500">Innings {matchState.innings}</div>
+              </div>
             </div>
           </div>
 
-          {/* Right Column - Statistics */}
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
+            {/* Left Panel - Main Scoring */}
+            <div className="lg:col-span-2 space-y-4">
+              {/* Batsmen Stats */}
+              <div className="p-4 border-b bg-gray-50">
+                <div className="text-sm text-gray-600 mb-2">{matchState.battingTeam === 1 ? matchState.team1 : matchState.team2} batting</div>
+                
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold text-gray-500 grid grid-cols-7 gap-2">
+                    <span className="col-span-2">BATTER</span>
+                    <span className="text-center">R</span>
+                    <span className="text-center">B</span>
+                    <span className="text-center">4s</span>
+                    <span className="text-center">6s</span>
+                    <span className="text-center">SR</span>
+                  </div>
+                  
+                  {matchState.batsmen.map((batsman, index) => (
+                    <div key={index} className={`grid grid-cols-7 gap-2 py-2 border-b border-gray-200 ${index === matchState.striker ? 'bg-yellow-50' : ''}`}>
+                      <div className="col-span-2 flex items-center gap-2">
+                        <span className="font-medium">{batsman.name}</span>
+                        {index === matchState.striker && <span className="text-xs bg-yellow-400 text-yellow-800 px-1 rounded">*</span>}
+                      </div>
+                      <div className="text-center">{batsman.runs}</div>
+                      <div className="text-center">{batsman.balls}</div>
+                      <div className="text-center">{batsman.fours}</div>
+                      <div className="text-center">{batsman.sixes}</div>
+                      <div className="text-center">{batsman.balls > 0 ? ((batsman.runs / batsman.balls) * 100).toFixed(1) : '0.0'}</div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-2 flex gap-2">
+                  <button
+                    onClick={() => setMatchState(prev => prev ? { ...prev, showBatsmanModal: true } : null)}
+                    className="text-blue-600 hover:text-blue-800 text-sm underline"
+                  >
+                    Change Batsman
+                  </button>
+                </div>
+              </div>
+
+              {/* Bowling Stats */}
+              <div className="p-4 border-b bg-gray-50">
+                <div className="text-sm text-gray-600 mb-2">Current Bowler</div>
+                <div className="grid grid-cols-5 gap-2 text-xs font-semibold text-gray-500 mb-2">
+                  <span>BOWLER</span>
+                  <span className="text-center">O</span>
+                  <span className="text-center">M</span>
+                  <span className="text-center">R</span>
+                  <span className="text-center">W</span>
+                </div>
+                <div className="grid grid-cols-5 gap-2 py-2">
+                  <span className="font-medium">{matchState.currentBowler.name}</span>
+                  <div className="text-center">{matchState.currentBowler.overs}.{matchState.balls}</div>
+                  <div className="text-center">{matchState.currentBowler.maidens}</div>
+                  <div className="text-center">{matchState.currentBowler.runs}</div>
+                  <div className="text-center">{matchState.currentBowler.wickets}</div>
+                </div>
+                
+                <div className="mt-2 flex gap-2">
+                  <button
+                    onClick={changeBowler}
+                    className="text-blue-600 hover:text-blue-800 text-sm underline"
+                  >
+                    Change Bowler
+                  </button>
+                  {matchState.format !== 'Test' && (
+                    <span className="text-xs text-gray-500">
+                      (Max: {getBowlerMaxOvers(matchState.format)} overs)
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Scoring Buttons */}
+              <div className="p-4 space-y-4">
+                <div className="text-sm font-semibold text-gray-700 mb-2">Score Runs</div>
+                <div className="grid grid-cols-4 gap-3">
+                  {[0, 1, 2, 3, 4, 6].map(runs => (
+                    <button
+                      key={runs}
+                      onClick={() => addRuns(runs)}
+                      className={`p-4 rounded-xl font-bold text-lg transition-all ${
+                        runs === 4 ? 'bg-green-500 text-white hover:bg-green-600' :
+                        runs === 6 ? 'bg-blue-500 text-white hover:bg-blue-600' :
+                        'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                      }`}
+                    >
+                      {runs}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="space-y-3">
+                  <button
+                    onClick={() => handleDismissal('bowled')}
+                    className="w-full p-4 bg-red-600 text-white rounded-xl font-bold text-lg hover:bg-red-700 transition-colors"
+                  >
+                    WICKET
+                  </button>
+                  
+                  <div className="grid grid-cols-3 gap-2">
+                    {['caught', 'lbw', 'stumped', 'run_out', 'hit_wicket', 'retired_out'].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => handleDismissal(type)}
+                        className="py-2 px-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-xs"
+                      >
+                        {type.replace('_', ' ').toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {(matchState.format === 'ODI' || matchState.format === 'Test') && matchState.innings === 1 && (
+                    <div className="pt-4 border-t">
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={declareInnings}
+                          className="bg-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-purple-700 transition-colors"
+                        >
+                          DECLARE INNINGS
+                        </button>
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm">Break Duration:</label>
+                          <select
+                            value={inningsBreakDuration}
+                            onChange={(e) => setInningsBreakDuration(Number(e.target.value))}
+                            className="border rounded px-2 py-1 text-sm"
+                          >
+                            <option value={1}>1 min</option>
+                            <option value={3}>3 min</option>
+                            <option value={5}>5 min</option>
+                            <option value={10}>10 min</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Statistics */}
+            <div className="space-y-4">
             {/* Dismissed Batsmen */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Dismissed Batsmen</h3>
