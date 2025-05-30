@@ -1,6 +1,6 @@
 import { 
   users, teams, venues, competitions, players, matches, lineups, playerStats, 
-  articles, socialPosts, polls, quizzes, gallery, triviaQuestions, triviaLeaderboard,
+  articles, socialPosts, polls, quizzes, gallery, announcements, triviaQuestions, triviaLeaderboard,
   forumCategories, forumTopics, forumPosts, forumPostLikes, userProfiles, 
   communityEvents, eventParticipants,
   type User, type InsertUser, type Team, type InsertTeam, type Venue, type InsertVenue,
@@ -9,6 +9,7 @@ import {
   type PlayerStats, type InsertPlayerStats, type Article, type InsertArticle,
   type SocialPost, type InsertSocialPost, type Poll, type InsertPoll,
   type Quiz, type InsertQuiz, type GalleryItem, type InsertGalleryItem,
+  type Announcement, type InsertAnnouncement,
   type TriviaQuestion, type InsertTriviaQuestion, type TriviaLeaderboard, type InsertTriviaLeaderboard,
   type ForumCategory, type InsertForumCategory, type ForumTopic, type InsertForumTopic,
   type ForumPost, type InsertForumPost, type ForumPostLike, type InsertForumPostLike,

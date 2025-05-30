@@ -9,13 +9,196 @@ import { insertPlayerSchema, insertMatchSchema, insertArticleSchema, insertGalle
 
 import AdminProtected from '@/components/AdminProtected';
 
+// Player Stats Form Component
+function PlayerStatsForm({ playerId, stats, onClose }: { 
+  playerId: number; 
+  stats?: any; 
+  onClose: () => void; 
+}) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const updateStatsMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest(`/api/players/${playerId}/stats`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    },
+    onSuccess: () => {
+      toast({ title: "Statistics updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/players'] });
+      onClose();
+    },
+    onError: () => {
+      toast({ title: "Failed to update statistics", variant: "destructive" });
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = {
+      runsScored: parseInt(formData.get('runsScored') as string) || 0,
+      ballsFaced: parseInt(formData.get('ballsFaced') as string) || 0,
+      fours: parseInt(formData.get('fours') as string) || 0,
+      sixes: parseInt(formData.get('sixes') as string) || 0,
+      wicketsTaken: parseInt(formData.get('wicketsTaken') as string) || 0,
+      ballsBowled: parseInt(formData.get('ballsBowled') as string) || 0,
+      runsConceded: parseInt(formData.get('runsConceded') as string) || 0,
+      catches: parseInt(formData.get('catches') as string) || 0,
+      stumpings: parseInt(formData.get('stumpings') as string) || 0,
+      runOuts: parseInt(formData.get('runOuts') as string) || 0,
+    };
+    updateStatsMutation.mutate(data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-4 p-4 bg-gray-50 rounded-lg space-y-4">
+      <h5 className="font-medium text-gray-900 mb-3">Edit Player Statistics</h5>
+      
+      {/* Batting Stats */}
+      <div>
+        <h6 className="text-sm font-medium text-gray-700 mb-2">Batting</h6>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs text-gray-600">Runs</label>
+            <input
+              name="runsScored"
+              type="number"
+              defaultValue={stats?.runsScored || 0}
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600">Balls Faced</label>
+            <input
+              name="ballsFaced"
+              type="number"
+              defaultValue={stats?.ballsFaced || 0}
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600">4s</label>
+            <input
+              name="fours"
+              type="number"
+              defaultValue={stats?.fours || 0}
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600">6s</label>
+            <input
+              name="sixes"
+              type="number"
+              defaultValue={stats?.sixes || 0}
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Bowling Stats */}
+      <div>
+        <h6 className="text-sm font-medium text-gray-700 mb-2">Bowling</h6>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs text-gray-600">Wickets</label>
+            <input
+              name="wicketsTaken"
+              type="number"
+              defaultValue={stats?.wicketsTaken || 0}
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600">Balls Bowled</label>
+            <input
+              name="ballsBowled"
+              type="number"
+              defaultValue={stats?.ballsBowled || 0}
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600">Runs Conceded</label>
+            <input
+              name="runsConceded"
+              type="number"
+              defaultValue={stats?.runsConceded || 0}
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Fielding Stats */}
+      <div>
+        <h6 className="text-sm font-medium text-gray-700 mb-2">Fielding</h6>
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="block text-xs text-gray-600">Catches</label>
+            <input
+              name="catches"
+              type="number"
+              defaultValue={stats?.catches || 0}
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600">Stumpings</label>
+            <input
+              name="stumpings"
+              type="number"
+              defaultValue={stats?.stumpings || 0}
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600">Run Outs</label>
+            <input
+              name="runOuts"
+              type="number"
+              defaultValue={stats?.runOuts || 0}
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex space-x-2 pt-2">
+        <button
+          type="submit"
+          disabled={updateStatsMutation.isPending}
+          className="bg-[#1e3a8a] text-white px-3 py-1 rounded text-sm hover:bg-[#1e40af] transition-colors disabled:opacity-50"
+        >
+          {updateStatsMutation.isPending ? 'Saving...' : 'Save Changes'}
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
+
 function AdminContent() {
   const [activeTab, setActiveTab] = useState('players');
+  const [editingPlayer, setEditingPlayer] = useState<number | null>(null);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: players = [] } = useQuery<Player[]>({
+  const { data: players = [] } = useQuery<(Player & { stats?: any })[]>({
     queryKey: ['/api/players']
   });
 
@@ -575,6 +758,98 @@ function AdminContent() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Matches Tab */}
+        {activeTab === 'matches' && (
+          <div className="space-y-8">
+            {/* Matches & Player Stats Header */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-bold text-[#1e3a8a] mb-4">Matches & Player Statistics</h2>
+              <p className="text-gray-600">Manage match details and update player performance statistics</p>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Player Statistics Management */}
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-bold text-[#1e3a8a] mb-4">Player Statistics</h3>
+                <div className="space-y-4">
+                  {players.map((player) => (
+                    <div key={player.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{player.name}</h4>
+                          <p className="text-sm text-gray-600">#{player.jerseyNumber} • {player.role}</p>
+                        </div>
+                        <button
+                          onClick={() => setEditingPlayer(editingPlayer === player.id ? null : player.id)}
+                          className="bg-[#1e3a8a] text-white px-3 py-1 rounded text-sm hover:bg-[#1e40af] transition-colors"
+                        >
+                          {editingPlayer === player.id ? 'Cancel' : 'Edit Stats'}
+                        </button>
+                      </div>
+
+                      {player.stats && (
+                        <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 mb-3">
+                          <div>
+                            <span className="block font-medium">Batting</span>
+                            <span>{player.stats.runsScored || 0} runs</span>
+                          </div>
+                          <div>
+                            <span className="block font-medium">Bowling</span>
+                            <span>{player.stats.wicketsTaken || 0} wickets</span>
+                          </div>
+                          <div>
+                            <span className="block font-medium">Fielding</span>
+                            <span>{player.stats.catches || 0} catches</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {editingPlayer === player.id && (
+                        <PlayerStatsForm 
+                          playerId={player.id} 
+                          stats={player.stats}
+                          onClose={() => setEditingPlayer(null)}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Match Management */}
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-bold text-[#1e3a8a] mb-4">Match Management</h3>
+                <div className="space-y-4">
+                  {matches.length === 0 ? (
+                    <p className="text-gray-500 text-center py-8">No matches scheduled</p>
+                  ) : (
+                    matches.map((match) => (
+                      <div key={match.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-gray-900">
+                            {match.homeTeam.name} vs {match.awayTeam.name}
+                          </h4>
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            match.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            match.status === 'live' ? 'bg-red-100 text-red-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {match.status}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <p>{match.venue.name}</p>
+                          <p>{new Date(match.scheduledAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
