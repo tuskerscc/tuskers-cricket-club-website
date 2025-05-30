@@ -55,7 +55,7 @@ export default function FanZone() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-[#1e3a8a] mb-4">Fan Zone</h2>
-          <p className="text-xl text-gray-600">Join the Tuskers community and engage with fellow cricket enthusiasts</p>
+          <p className="text-xl text-gray-600">Join the TUSKERS Cricket Club community and engage with fellow cricket enthusiasts</p>
         </div>
 
         {/* Poll and Quiz Side by Side */}
