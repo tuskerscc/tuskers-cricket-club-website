@@ -1128,7 +1128,7 @@ function AdminContent() {
                 disabled={recordMatchMutation.isPending}
                 className="w-full bg-[#1e3a8a] text-white py-3 px-4 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors disabled:opacity-50"
               >
-                {recordMatchMutation.isPending ? 'Recording Match...' : 'Record Match & Update Team Stats'}
+                {recordMatchMutation.isPending ? 'Recording Match...' : 'Record Match & Update Player Performance'}
               </button>
             </form>
           </div>

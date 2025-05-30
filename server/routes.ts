@@ -544,6 +544,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Record match with player performances
+  app.post("/api/record-match-performance", async (req, res) => {
+    try {
+      const { opponent, venue, date, result, selectedPlayers, playerPerformances } = req.body;
+      
+      if (!selectedPlayers || selectedPlayers.length !== 11) {
+        return res.status(400).json({ error: "Exactly 11 players must be selected" });
+      }
+
+      if (!playerPerformances || !Array.isArray(playerPerformances)) {
+        return res.status(400).json({ error: "Player performances data is required" });
+      }
+
+      // Calculate team totals from individual performances
+      const teamRuns = playerPerformances.reduce((total, perf) => total + (perf.runsScored || 0), 0);
+      const teamWickets = playerPerformances.reduce((total, perf) => total + (perf.wicketsTaken || 0), 0);
+      const totalRunsConceded = playerPerformances.reduce((total, perf) => total + (perf.runsConceded || 0), 0);
+      const totalBallsBowled = playerPerformances.reduce((total, perf) => total + (perf.ballsBowled || 0), 0);
+      const oversBowled = totalBallsBowled / 6;
+
+      // Get current team stats
+      const currentStats = await storage.getTeamStats();
+      
+      // Calculate new team statistics
+      const newMatchesWon = currentStats.matchesWon + (result === 'Won' ? 1 : 0);
+      const newTotalMatches = currentStats.totalMatches + 1;
+      const newTotalRuns = currentStats.totalRuns + teamRuns;
+      const newWicketsTaken = currentStats.wicketsTaken + teamWickets;
+      
+      // Estimate overs faced (assume 20 overs for T20 format)
+      const oversFaced = 20;
+      const newTotalOvers = (currentStats.totalMatches * 20) + oversFaced;
+      const newRunsAgainst = currentStats.totalRuns + totalRunsConceded;
+      const newOversAgainst = (currentStats.totalMatches * 20) + oversBowled;
+      
+      // Update team statistics
+      await storage.updateTeamStats({
+        matchesWon: newMatchesWon,
+        totalMatches: newTotalMatches,
+        totalRuns: newTotalRuns,
+        wicketsTaken: newWicketsTaken,
+        totalOvers: newTotalOvers,
+        runsAgainst: newRunsAgainst,
+        oversAgainst: newOversAgainst
+      });
+
+      // Update individual player statistics
+      for (const performance of playerPerformances) {
+        await storage.updatePlayerStats(performance.playerId, {
+          runsScored: performance.runsScored || 0,
+          ballsFaced: performance.ballsFaced || 0,
+          fours: performance.fours || 0,
+          sixes: performance.sixes || 0,
+          wicketsTaken: performance.wicketsTaken || 0,
+          runsConceded: performance.runsConceded || 0,
+          ballsBowled: performance.ballsBowled || 0,
+          catches: performance.catches || 0,
+          stumpings: performance.stumpings || 0,
+          runOuts: performance.runOuts || 0
+        });
+      }
+      
+      console.log(`Match performance recorded: ${result} vs ${opponent} at ${venue} on ${date}`);
+      console.log(`Team totals: ${teamRuns} runs, ${teamWickets} wickets taken`);
+      
+      res.json({ 
+        success: true, 
+        message: "Match and player performances recorded successfully",
+        teamTotals: {
+          runs: teamRuns,
+          wickets: teamWickets,
+          result: result
+        }
+      });
+    } catch (error) {
+      console.error("Error recording match performance:", error);
+      res.status(500).json({ error: "Failed to record match performance" });
+    }
+  });
+
   // Cricket data endpoints
 
   app.get("/api/cricket/live-poll", async (req, res) => {
