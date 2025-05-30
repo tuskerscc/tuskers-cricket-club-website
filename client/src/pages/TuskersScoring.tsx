@@ -162,7 +162,7 @@ export default function TuskersScoring() {
       return;
     }
 
-    if (oppositionPlayers.length !== 11) {
+    if (oppositionPlayers.filter(p => p.trim()).length !== 11) {
       toast({ title: "Error", description: "Please add exactly 11 opposition players" });
       return;
     }
@@ -213,7 +213,7 @@ export default function TuskersScoring() {
       matchDate: matchDate,
       selectedPlayers: players.filter(player => selectedTuskersPlayers.includes(player.id)),
       tossWinner: tossWinner === 'tuskers' ? tuskersName : oppositionName,
-      tossChoice: tossChoice,
+      tossChoice: tossChoice as 'bat' | 'bowl',
       isComplete: false,
       dismissedBatsmen: [],
       showBatsmanModal: false
