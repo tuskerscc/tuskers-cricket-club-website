@@ -33,12 +33,12 @@ function AdminContent() {
 
   // Player form
   const playerForm = useForm({
-    resolver: zodResolver(insertPlayerSchema),
     defaultValues: {
       name: '',
       role: '',
       battingStyle: '',
       bowlingStyle: '',
+      bio: '',
       jerseyNumber: 1,
       isCaptain: false,
       isViceCaptain: false,
@@ -138,7 +138,21 @@ function AdminContent() {
   });
 
   const onPlayerSubmit = (data: any) => {
-    addPlayerMutation.mutate(data);
+    // Handle file upload
+    const formData = { ...data };
+    
+    // If a photo file is selected, convert to base64 or URL
+    if (data.photo && data.photo[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        formData.photo = e.target?.result as string;
+        addPlayerMutation.mutate(formData);
+      };
+      reader.readAsDataURL(data.photo[0]);
+    } else {
+      formData.photo = '';
+      addPlayerMutation.mutate(formData);
+    }
   };
 
   // Effect to populate form when editing an article
@@ -267,6 +281,27 @@ function AdminContent() {
                       max="99"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Player Photo</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    {...playerForm.register('photo')}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload player photo (JPG, PNG, WebP)</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                  <textarea
+                    {...playerForm.register('bio')}
+                    rows={3}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    placeholder="Player biography..."
+                  />
                 </div>
 
                 <div className="flex space-x-4">
