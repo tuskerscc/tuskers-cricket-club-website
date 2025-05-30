@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Link } from 'wouter';
 import type { Article } from '@shared/schema';
 
 export default function News() {
@@ -107,9 +108,11 @@ export default function News() {
                 </div>
 
                 <div className="mt-4">
-                  <button className="w-full bg-[#1e3a8a] text-white py-2 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors">
-                    Read More
-                  </button>
+                  <Link href={`/news/${article.slug}`}>
+                    <button className="w-full bg-[#1e3a8a] text-white py-2 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors">
+                      Read More
+                    </button>
+                  </Link>
                 </div>
               </div>
             </article>

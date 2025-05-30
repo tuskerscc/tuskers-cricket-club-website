@@ -10,6 +10,7 @@ import NotFound from "@/pages/not-found";
 import FanScoring from "@/pages/FanScoring";
 import TuskersScoring from "@/pages/TuskersScoring";
 import News from "@/pages/News";
+import Article from "@/pages/Article";
 import Gallery from "@/pages/Gallery";
 import Forum from "@/pages/Forum";
 import Community from "@/pages/Community";
@@ -20,6 +21,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/news" component={News} />
+      <Route path="/news/:slug" component={Article} />
       <Route path="/gallery" component={Gallery} />
       <Route path="/contact" component={Contact} />
       <Route path="/admin/login" component={AdminLogin} />
