@@ -486,27 +486,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { matchResult, totalRuns, wicketsTaken, totalOvers, runsAgainst, oversAgainst } = req.body;
       
-      // Get current team stats for cumulative calculation
-      const currentStats = await storage.getTeamStats();
+      // Validate and parse input values
+      const parsedTotalRuns = parseInt(totalRuns) || 0;
+      const parsedWicketsTaken = parseInt(wicketsTaken) || 0;
+      const parsedTotalOvers = parseFloat(totalOvers) || 0;
+      const parsedRunsAgainst = parseInt(runsAgainst) || 0;
+      const parsedOversAgainst = parseFloat(oversAgainst) || 0;
       
-      // Calculate new cumulative values
+      // For individual match records, we store the match data as-is (not cumulative)
       const matchWon = matchResult === 'won' ? 1 : 0;
-      const newMatchesWon = currentStats.matchesWon + matchWon;
-      const newTotalMatches = currentStats.totalMatches + 1;
-      const newTotalRuns = currentStats.totalRuns + parseInt(totalRuns);
-      const newWicketsTaken = currentStats.wicketsTaken + parseInt(wicketsTaken);
-      const newTotalOvers = currentStats.totalOvers + parseFloat(totalOvers);
-      const newRunsAgainst = currentStats.runsAgainst + parseInt(runsAgainst);
-      const newOversAgainst = currentStats.oversAgainst + parseFloat(oversAgainst);
       
       await storage.updateTeamStats({
-        matchesWon: newMatchesWon,
-        totalMatches: newTotalMatches,
-        totalRuns: newTotalRuns,
-        wicketsTaken: newWicketsTaken,
-        totalOvers: newTotalOvers,
-        runsAgainst: newRunsAgainst,
-        oversAgainst: newOversAgainst
+        matchesWon: matchWon,
+        totalMatches: 1,
+        totalRuns: parsedTotalRuns,
+        wicketsTaken: parsedWicketsTaken,
+        totalOvers: parsedTotalOvers,
+        runsAgainst: parsedRunsAgainst,
+        oversAgainst: parsedOversAgainst
       });
       
       res.json({ success: true });
