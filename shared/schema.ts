@@ -81,7 +81,7 @@ export const lineups = pgTable("lineups", {
   battingOrder: integer("batting_order"),
 });
 
-// Player statistics
+// Player statistics (aggregated)
 export const playerStats = pgTable("player_stats", {
   id: serial("id").primaryKey(),
   playerId: integer("player_id").references(() => players.id),
@@ -96,6 +96,26 @@ export const playerStats = pgTable("player_stats", {
   catches: integer("catches").default(0),
   stumpings: integer("stumpings").default(0),
   runOuts: integer("run_outs").default(0),
+});
+
+// Individual match performances for players
+export const matchPerformances = pgTable("match_performances", {
+  id: serial("id").primaryKey(),
+  matchId: integer("match_id").references(() => matches.id),
+  playerId: integer("player_id").references(() => players.id),
+  runsScored: integer("runs_scored").default(0),
+  ballsFaced: integer("balls_faced").default(0),
+  fours: integer("fours").default(0),
+  sixes: integer("sixes").default(0),
+  wicketsTaken: integer("wickets_taken").default(0),
+  ballsBowled: integer("balls_bowled").default(0),
+  runsConceded: integer("runs_conceded").default(0),
+  catches: integer("catches").default(0),
+  stumpings: integer("stumpings").default(0),
+  runOuts: integer("run_outs").default(0),
+  isOut: boolean("is_out").default(false),
+  dismissalType: text("dismissal_type"), // bowled, caught, lbw, run out, etc.
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Articles/News table
@@ -374,6 +394,7 @@ export const playersRelations = relations(players, ({ many, one }) => ({
   stats: one(playerStats),
   lineups: many(lineups),
   matchesWon: many(matches, { relationName: "playerOfMatch" }),
+  matchPerformances: many(matchPerformances),
 }));
 
 export const matchesRelations = relations(matches, ({ one, many }) => ({
@@ -402,6 +423,18 @@ export const matchesRelations = relations(matches, ({ one, many }) => ({
   }),
   lineups: many(lineups),
   galleryItems: many(gallery),
+  performances: many(matchPerformances),
+}));
+
+export const matchPerformancesRelations = relations(matchPerformances, ({ one }) => ({
+  match: one(matches, {
+    fields: [matchPerformances.matchId],
+    references: [matches.id],
+  }),
+  player: one(players, {
+    fields: [matchPerformances.playerId],
+    references: [players.id],
+  }),
 }));
 
 export const lineupsRelations = relations(lineups, ({ one }) => ({
@@ -534,6 +567,11 @@ export const insertPlayerStatsSchema = createInsertSchema(playerStats).omit({
   id: true,
 });
 
+export const insertMatchPerformanceSchema = createInsertSchema(matchPerformances).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertArticleSchema = createInsertSchema(articles).omit({
   id: true,
   createdAt: true,
@@ -658,6 +696,9 @@ export type InsertLineup = z.infer<typeof insertLineupSchema>;
 
 export type PlayerStats = typeof playerStats.$inferSelect;
 export type InsertPlayerStats = z.infer<typeof insertPlayerStatsSchema>;
+
+export type MatchPerformance = typeof matchPerformances.$inferSelect;
+export type InsertMatchPerformance = z.infer<typeof insertMatchPerformanceSchema>;
 
 export type Article = typeof articles.$inferSelect;
 export type InsertArticle = z.infer<typeof insertArticleSchema>;
