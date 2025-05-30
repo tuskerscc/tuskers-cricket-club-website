@@ -78,8 +78,7 @@ export default function TuskersScoring() {
   const [matchDate, setMatchDate] = useState('');
   const [tossWinner, setTossWinner] = useState<'tuskers' | 'opposition' | ''>('');
   const [tossChoice, setTossChoice] = useState<'bat' | 'bowl' | ''>('');
-  const [showPlayerSelection, setShowPlayerSelection] = useState(false);
-  const [selectedTuskersPlayers, setSelectedTuskersPlayers] = useState<Player[]>([]);
+  const [selectedTuskersPlayers, setSelectedTuskersPlayers] = useState<number[]>([]);
   const [oppositionPlayers, setOppositionPlayers] = useState<string[]>(['', '', '', '', '', '', '', '', '', '', '']);
   const { toast } = useToast();
 
@@ -141,15 +140,6 @@ export default function TuskersScoring() {
   };
 
   const initializeMatch = () => {
-    console.log('Validation check:', {
-      selectedTeam: !!selectedTeam,
-      oppositionName: !!oppositionName,
-      venue: !!venue,
-      matchDate: !!matchDate,
-      tossWinner: !!tossWinner,
-      tossChoice: !!tossChoice
-    });
-
     if (!selectedTeam || !oppositionName || !venue || !matchDate || !tossWinner || !tossChoice) {
       const missingFields = [];
       if (!selectedTeam) missingFields.push('Team');
@@ -166,15 +156,19 @@ export default function TuskersScoring() {
       return;
     }
 
-    // Show player selection window
-    console.log('Setting showPlayerSelection to true');
-    setShowPlayerSelection(true);
-    console.log('showPlayerSelection should now be:', true);
-    
-    // Add a slight delay to ensure state updates
-    setTimeout(() => {
-      console.log('Modal should be visible now. showPlayerSelection =', showPlayerSelection);
-    }, 100);
+    // Check if players are selected
+    if (selectedTuskersPlayers.length !== 11) {
+      toast({ title: "Error", description: "Please select exactly 11 Tuskers players from the team section" });
+      return;
+    }
+
+    if (oppositionPlayers.length !== 11) {
+      toast({ title: "Error", description: "Please add exactly 11 opposition players" });
+      return;
+    }
+
+    // Start the match directly - navigate to scoring interface
+    startMatchWithPlayers();
   };
 
   const startMatchWithPlayers = () => {
@@ -217,7 +211,7 @@ export default function TuskersScoring() {
       striker: 0,
       venue: venue,
       matchDate: matchDate,
-      selectedPlayers: selectedTuskersPlayers,
+      selectedPlayers: players.filter(player => selectedTuskersPlayers.includes(player.id)),
       tossWinner: tossWinner === 'tuskers' ? tuskersName : oppositionName,
       tossChoice: tossChoice,
       isComplete: false,
@@ -665,14 +659,73 @@ Generated: ${new Date().toLocaleString()}
 
               {selectedTeam && (
                 <div className="bg-blue-50 p-4 rounded-xl">
-                  <h3 className="font-semibold text-blue-900 mb-2">Team Details:</h3>
-                  <p className="text-blue-800">
+                  <h3 className="font-semibold text-blue-900 mb-4">Team Details & Player Selection</h3>
+                  <p className="text-blue-800 mb-4">
                     {selectedTeam.name} ({selectedTeam.shortName})
                     {selectedTeam.homeGround && ` - Home: ${selectedTeam.homeGround}`}
                   </p>
-                  <p className="text-sm text-blue-700 mt-1">
-                    Squad: {players.length} players available
-                  </p>
+                  
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Tuskers Players */}
+                    <div>
+                      <h4 className="font-medium text-blue-800 mb-3">
+                        {selectedTeam.name} Players ({selectedTuskersPlayers.length}/11)
+                      </h4>
+                      <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3 bg-white">
+                        {players.map(player => (
+                          <label
+                            key={player.id}
+                            className={`flex items-center space-x-2 p-2 rounded cursor-pointer hover:bg-gray-50 ${
+                              selectedTuskersPlayers.includes(player.id) ? 'bg-blue-50' : ''
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedTuskersPlayers.includes(player.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  if (selectedTuskersPlayers.length < 11) {
+                                    setSelectedTuskersPlayers([...selectedTuskersPlayers, player.id]);
+                                  }
+                                } else {
+                                  setSelectedTuskersPlayers(selectedTuskersPlayers.filter(id => id !== player.id));
+                                }
+                              }}
+                              disabled={!selectedTuskersPlayers.includes(player.id) && selectedTuskersPlayers.length >= 11}
+                              className="w-4 h-4 text-blue-600"
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">{player.name}</div>
+                              <div className="text-xs text-gray-500">{player.position}</div>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Opposition Players */}
+                    <div>
+                      <h4 className="font-medium text-blue-800 mb-3">
+                        {oppositionName || 'Opposition'} Players ({oppositionPlayers.filter(p => p.trim()).length}/11)
+                      </h4>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {oppositionPlayers.map((player, index) => (
+                          <input
+                            key={index}
+                            type="text"
+                            value={player}
+                            onChange={(e) => {
+                              const newPlayers = [...oppositionPlayers];
+                              newPlayers[index] = e.target.value;
+                              setOppositionPlayers(newPlayers);
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            placeholder={`Player ${index + 1} name`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
               
