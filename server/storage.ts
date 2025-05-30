@@ -538,8 +538,20 @@ export class DatabaseStorage implements IStorage {
       
       console.log('Inserting clean data:', insertData);
       
+      // Final validation before database insert
+      const finalData = {};
+      for (const [key, value] of Object.entries(insertData)) {
+        if (typeof value === 'number') {
+          finalData[key] = isNaN(value) || !isFinite(value) ? 0 : value;
+        } else {
+          finalData[key] = value;
+        }
+      }
+      
+      console.log('Final validated data for database:', finalData);
+      
       // Always insert new record
-      await db.insert(teamStats).values(insertData);
+      await db.insert(teamStats).values(finalData);
     } catch (error) {
       console.error('Error updating team stats:', error);
       throw error;
