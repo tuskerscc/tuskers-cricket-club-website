@@ -84,30 +84,29 @@ function performanceReducer(state: Record<number, PerformanceData>, action: Perf
 export default function MatchPerformance() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
   const [performances, dispatch] = useReducer(performanceReducer, {});
-
-  const { data: matches = [] } = useQuery<Match[]>({
-    queryKey: ["/api/matches"],
+  const [matchData, setMatchData] = useState({
+    opponent: "",
+    venue: "",
+    date: "",
+    result: "Won" as "Won" | "Lost" | "Draw",
   });
 
   const { data: players = [] } = useQuery<Player[]>({
     queryKey: ["/api/players"],
   });
 
-  const { data: existingPerformances = [] } = useQuery({
-    queryKey: ["/api/matches", selectedMatchId, "performances"],
-    enabled: !!selectedMatchId,
-  });
-
   const updateStatsMutation = useMutation({
-    mutationFn: async (data: { matchId: number; playerPerformances: PerformanceData[] }) => {
-      const response = await fetch(`/api/matches/${data.matchId}/performances`, {
+    mutationFn: async (data: { matchData: typeof matchData; playerPerformances: PerformanceData[] }) => {
+      const response = await fetch(`/api/matches/performance-entry`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ playerPerformances: data.playerPerformances }),
+        body: JSON.stringify({ 
+          matchData: data.matchData,
+          playerPerformances: data.playerPerformances 
+        }),
       });
       
       if (!response.ok) {
@@ -124,7 +123,12 @@ export default function MatchPerformance() {
       queryClient.invalidateQueries({ queryKey: ["/api/players"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       dispatch({ type: 'RESET_ALL' });
-      setSelectedMatchId(null);
+      setMatchData({
+        opponent: "",
+        venue: "",
+        date: "",
+        result: "Won",
+      });
     },
     onError: () => {
       toast({
@@ -147,10 +151,10 @@ export default function MatchPerformance() {
   };
 
   const handleSubmit = () => {
-    if (!selectedMatchId) {
+    if (!matchData.opponent || !matchData.venue || !matchData.date) {
       toast({
         title: "Error",
-        description: "Please select a match first",
+        description: "Please fill in all match details",
         variant: "destructive",
       });
       return;
@@ -171,12 +175,10 @@ export default function MatchPerformance() {
     }
 
     updateStatsMutation.mutate({
-      matchId: selectedMatchId,
+      matchData,
       playerPerformances
     });
   };
-
-  const selectedMatch = matches.find(m => m.id === selectedMatchId);
 
   return (
     <div className="container mx-auto px-4 py-8">
