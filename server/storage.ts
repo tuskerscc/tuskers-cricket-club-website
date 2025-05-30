@@ -77,6 +77,13 @@ export interface IStorage {
   createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem>;
   deleteGalleryItem(id: number): Promise<void>;
 
+  // Announcements
+  getAnnouncements(): Promise<Announcement[]>;
+  createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement>;
+
+  // Player Stats
+  updatePlayerStats(playerId: number, stats: Partial<PlayerStats>): Promise<void>;
+
   // Statistics
   getTeamStats(): Promise<{
     matchesWon: number;
@@ -382,6 +389,23 @@ export class DatabaseStorage implements IStorage {
 
   async deleteGalleryItem(id: number): Promise<void> {
     await db.delete(gallery).where(eq(gallery.id, id));
+  }
+
+  async getAnnouncements(): Promise<Announcement[]> {
+    return await db
+      .select()
+      .from(announcements)
+      .where(eq(announcements.isActive, true))
+      .orderBy(desc(announcements.createdAt));
+  }
+
+  async createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement> {
+    const [newAnnouncement] = await db.insert(announcements).values(announcement).returning();
+    return newAnnouncement;
+  }
+
+  async updatePlayerStats(playerId: number, stats: Partial<PlayerStats>): Promise<void> {
+    await db.update(playerStats).set(stats).where(eq(playerStats.playerId, playerId));
   }
 
   async getTeamStats(): Promise<{

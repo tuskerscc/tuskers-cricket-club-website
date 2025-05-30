@@ -162,6 +162,17 @@ export const gallery = pgTable("gallery", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Announcements
+export const announcements = pgTable("announcements", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  type: text("type").notNull(), // general, match, achievement, training
+  priority: text("priority").notNull(), // low, medium, high
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Trivia questions table
 export const triviaQuestions = pgTable("trivia_questions", {
   id: serial("id").primaryKey(),
@@ -534,6 +545,11 @@ export const insertGallerySchema = createInsertSchema(gallery).omit({
   createdAt: true,
 });
 
+export const insertAnnouncementSchema = createInsertSchema(announcements).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertTriviaQuestionSchema = createInsertSchema(triviaQuestions).omit({
   id: true,
   createdAt: true,
@@ -643,6 +659,9 @@ export type InsertQuiz = z.infer<typeof insertQuizSchema>;
 
 export type GalleryItem = typeof gallery.$inferSelect;
 export type InsertGalleryItem = z.infer<typeof insertGallerySchema>;
+
+export type Announcement = typeof announcements.$inferSelect;
+export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
 
 export type TriviaQuestion = typeof triviaQuestions.$inferSelect;
 export type InsertTriviaQuestion = z.infer<typeof insertTriviaQuestionSchema>;
