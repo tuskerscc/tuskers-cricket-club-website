@@ -317,19 +317,24 @@ export default function TuskersScoring() {
     if (!matchState || !newBatsmanName.trim()) return;
 
     const newState = { ...matchState };
-    const dismissedBatsmanIndex = newState.striker;
-    const dismissedBatsman = newState.batsmen[dismissedBatsmanIndex];
     
-    newState.dismissedBatsmen.push(dismissedBatsman);
+    // Find the out batsman and add to dismissed list if not already added
+    const outBatsmanIndex = newState.batsmen.findIndex(b => b.isOut);
+    if (outBatsmanIndex !== -1 && !newState.dismissedBatsmen.some(db => db.name === newState.batsmen[outBatsmanIndex].name)) {
+      newState.dismissedBatsmen.push({ ...newState.batsmen[outBatsmanIndex] });
+    }
     
-    newState.batsmen[dismissedBatsmanIndex] = {
-      name: newBatsmanName,
-      runs: 0,
-      balls: 0,
-      fours: 0,
-      sixes: 0,
-      isOut: false
-    };
+    // Replace the out batsman with new batsman
+    if (outBatsmanIndex !== -1) {
+      newState.batsmen[outBatsmanIndex] = {
+        name: newBatsmanName,
+        runs: 0,
+        balls: 0,
+        fours: 0,
+        sixes: 0,
+        isOut: false
+      };
+    }
     
     newState.showBatsmanModal = false;
     
@@ -437,9 +442,19 @@ export default function TuskersScoring() {
       newState.balls = 0;
       newState.currentBowler.overs += 1;
       
+      // Update bowler in bowlers array
+      const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
+      if (bowlerIndex !== -1) {
+        newState.bowlers[bowlerIndex].overs = newState.currentBowler.overs;
+      } else {
+        newState.bowlers.push({ ...newState.currentBowler });
+      }
+      
       newState.striker = newState.striker === 0 ? 1 : 0;
       
-      if (!canBowlerBowl(newState.currentBowler.name, newState.format)) {
+      // Check if bowler has reached maximum overs
+      const maxOvers = getBowlerMaxOvers(newState.format);
+      if (newState.currentBowler.overs >= maxOvers) {
         newState.showBowlerSelection = true;
       }
     }
