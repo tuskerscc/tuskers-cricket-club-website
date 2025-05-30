@@ -480,6 +480,10 @@ function AdminContent() {
     }
   };
 
+  const onAnnouncementSubmit = (data: any) => {
+    addAnnouncementMutation.mutate(data);
+  };
+
   return (
     <div className="py-8">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -991,6 +995,108 @@ function AdminContent() {
                   <div className="text-center py-8 text-gray-500">
                     <div className="text-4xl mb-2">📷</div>
                     <p>No gallery items yet. Add your first image above!</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Announcements Tab */}
+        {activeTab === 'announcements' && (
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Create Announcement Form */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-bold text-[#1e3a8a] mb-4">Create New Announcement</h2>
+              <form onSubmit={announcementForm.handleSubmit(onAnnouncementSubmit)} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input
+                    type="text"
+                    {...announcementForm.register('title', { required: 'Title is required' })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    placeholder="Enter announcement title"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                  <textarea
+                    {...announcementForm.register('content', { required: 'Content is required' })}
+                    rows={4}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    placeholder="Enter announcement content"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select
+                      {...announcementForm.register('type')}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    >
+                      <option value="general">General</option>
+                      <option value="match">Match</option>
+                      <option value="achievement">Achievement</option>
+                      <option value="training">Training</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                    <select
+                      {...announcementForm.register('priority')}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={addAnnouncementMutation.isPending}
+                  className="w-full bg-[#1e3a8a] text-white py-2 px-4 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors disabled:opacity-50"
+                >
+                  {addAnnouncementMutation.isPending ? 'Creating...' : 'Create Announcement'}
+                </button>
+              </form>
+            </div>
+
+            {/* Announcements List */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-bold text-[#1e3a8a] mb-4">Recent Announcements ({announcements.length})</h2>
+              <div className="max-h-96 overflow-y-auto space-y-3">
+                {announcements.map((announcement) => (
+                  <div key={announcement.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-semibold text-gray-900">{announcement.title}</h4>
+                      <div className="flex gap-2">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          announcement.priority === 'high' ? 'bg-red-100 text-red-800' :
+                          announcement.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {announcement.priority}
+                        </span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {announcement.type}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 text-sm mb-2">{announcement.content}</p>
+                    <p className="text-xs text-gray-500">
+                      Posted {announcement.createdAt ? new Date(announcement.createdAt).toLocaleDateString() : 'recently'}
+                    </p>
+                  </div>
+                ))}
+                {announcements.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <div className="text-4xl mb-2">📢</div>
+                    <p>No announcements yet. Create your first announcement!</p>
                   </div>
                 )}
               </div>
