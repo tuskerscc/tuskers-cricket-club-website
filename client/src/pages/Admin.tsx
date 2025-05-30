@@ -296,6 +296,20 @@ function AdminContent() {
     }
   });
 
+  // Match recording form
+  const matchForm = useForm({
+    defaultValues: {
+      opponent: '',
+      venue: '',
+      date: '',
+      result: 'Won',
+      teamRuns: 0,
+      wicketsTaken: 0,
+      oversFaced: 0,
+      runsConceded: 0
+    }
+  });
+
   const addPlayerMutation = useMutation({
     mutationFn: (data: any) => apiRequest('POST', '/api/players', data),
     onSuccess: () => {
@@ -427,6 +441,20 @@ function AdminContent() {
     }
   });
 
+  // Match recording mutation
+  const recordMatchMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', '/api/record-match', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/stats/team'] });
+      matchForm.reset();
+      toast({ title: "Success", description: "Match recorded and team stats updated successfully" });
+    },
+    onError: (error) => {
+      console.error('Record match error:', error);
+      toast({ title: "Error", description: "Failed to record match", variant: "destructive" });
+    }
+  });
+
   const deleteGalleryItemMutation = useMutation({
     mutationFn: (id: number) => apiRequest('DELETE', `/api/gallery/${id}`),
     onSuccess: () => {
@@ -472,6 +500,19 @@ function AdminContent() {
     } else {
       addGalleryItemMutation.mutate(formData);
     }
+  };
+
+  const onMatchSubmit = (data: any) => {
+    // Calculate additional stats for team statistics
+    const matchData = {
+      ...data,
+      // Determine if match was won for stats calculation
+      matchResult: data.result,
+      // Calculate overs bowled (assume equal to overs faced for simplicity)
+      oversBowled: data.oversFaced || 20
+    };
+    
+    recordMatchMutation.mutate(matchData);
   };
 
   // Effect to populate form when editing an article

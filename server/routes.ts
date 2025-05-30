@@ -503,6 +503,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Record match and update team statistics
+  app.post("/api/record-match", async (req, res) => {
+    try {
+      const { opponent, venue, date, result, teamRuns, wicketsTaken, oversFaced, runsConceded } = req.body;
+      
+      // Get current team stats
+      const currentStats = await storage.getTeamStats();
+      
+      // Calculate new statistics
+      const newMatchesWon = currentStats.matchesWon + (result === 'Won' ? 1 : 0);
+      const newTotalMatches = currentStats.totalMatches + 1;
+      const newTotalRuns = currentStats.totalRuns + (teamRuns || 0);
+      const newWicketsTaken = currentStats.wicketsTaken + (wicketsTaken || 0);
+      
+      // Calculate NRR components - use actual match data
+      const newTotalOvers = (currentStats.totalMatches * 20) + (oversFaced || 20);
+      const newRunsAgainst = currentStats.totalRuns + (runsConceded || 0);
+      const newOversAgainst = newTotalOvers;
+      
+      // Update team statistics
+      await storage.updateTeamStats({
+        matchesWon: newMatchesWon,
+        totalMatches: newTotalMatches,
+        totalRuns: newTotalRuns,
+        wicketsTaken: newWicketsTaken,
+        totalOvers: newTotalOvers,
+        runsAgainst: newRunsAgainst,
+        oversAgainst: newOversAgainst
+      });
+      
+      console.log(`Match recorded: ${result} vs ${opponent} at ${venue} on ${date}`);
+      res.json({ 
+        success: true, 
+        message: "Match recorded and team statistics updated successfully"
+      });
+    } catch (error) {
+      console.error("Error recording match:", error);
+      res.status(500).json({ error: "Failed to record match" });
+    }
+  });
+
   // Cricket data endpoints
 
   app.get("/api/cricket/live-poll", async (req, res) => {
