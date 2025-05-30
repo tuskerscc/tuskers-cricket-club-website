@@ -443,6 +443,12 @@ export default function TuskersScoring() {
     newState.target = newState.totalRuns + 1;
     newState.innings = 2;
     newState.battingTeam = newState.battingTeam === 1 ? 2 : 1;
+    
+    // Swap team names for display
+    const tempTeam = newState.team1;
+    newState.team1 = newState.team2;
+    newState.team2 = tempTeam;
+    
     newState.totalRuns = 0;
     newState.wickets = 0;
     newState.overs = 0;
@@ -469,23 +475,29 @@ export default function TuskersScoring() {
     setMatchState(newState);
   };
 
-  const addRuns = (runs: number) => {
+  const addRuns = (runs: number, isExtra = false) => {
     if (!matchState) return;
 
     const newState = { ...matchState };
     const strikerIndex = newState.striker;
     
-    newState.batsmen[strikerIndex].runs += runs;
-    newState.batsmen[strikerIndex].balls += 1;
-    
-    if (runs === 4) newState.batsmen[strikerIndex].fours += 1;
-    if (runs === 6) newState.batsmen[strikerIndex].sixes += 1;
+    // Only add to batsman stats if not an extra
+    if (!isExtra) {
+      newState.batsmen[strikerIndex].runs += runs;
+      newState.batsmen[strikerIndex].balls += 1;
+      
+      if (runs === 4) newState.batsmen[strikerIndex].fours += 1;
+      if (runs === 6) newState.batsmen[strikerIndex].sixes += 1;
+      
+      // Only count valid balls towards over completion
+      newState.balls += 1;
+    }
     
     newState.totalRuns += runs;
     newState.currentBowler.runs += runs;
     
-    newState.balls += 1;
-    if (newState.balls === 6) {
+    // Check for over completion (only on valid balls)
+    if (!isExtra && newState.balls === 6) {
       newState.overs += 1;
       newState.balls = 0;
       newState.currentBowler.overs += 1;
@@ -493,11 +505,12 @@ export default function TuskersScoring() {
       // Update bowler in bowlers array
       const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
       if (bowlerIndex !== -1) {
-        newState.bowlers[bowlerIndex].overs = newState.currentBowler.overs;
+        newState.bowlers[bowlerIndex] = { ...newState.currentBowler };
       } else {
         newState.bowlers.push({ ...newState.currentBowler });
       }
       
+      // Switch striker at end of over
       newState.striker = newState.striker === 0 ? 1 : 0;
       
       // Check if bowler has reached maximum overs
@@ -507,7 +520,8 @@ export default function TuskersScoring() {
       }
     }
     
-    if (runs % 2 === 1) {
+    // Switch strike on odd runs (only for valid balls)
+    if (!isExtra && runs % 2 === 1) {
       newState.striker = newState.striker === 0 ? 1 : 0;
     }
     
@@ -525,6 +539,10 @@ export default function TuskersScoring() {
     }
     
     setMatchState(newState);
+  };
+
+  const addExtra = (type: 'wide' | 'noball' | 'bye' | 'legbye', runs = 1) => {
+    addRuns(runs, true);
   };
 
   if (!isAuthenticated) {
@@ -997,6 +1015,34 @@ export default function TuskersScoring() {
                   ))}
                 </div>
                 
+                <div className="text-sm font-semibold text-gray-700 mb-2">Extras</div>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  <button
+                    onClick={() => addExtra('wide')}
+                    className="p-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition-colors text-sm"
+                  >
+                    Wide
+                  </button>
+                  <button
+                    onClick={() => addExtra('noball')}
+                    className="p-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors text-sm"
+                  >
+                    No Ball
+                  </button>
+                  <button
+                    onClick={() => addExtra('bye')}
+                    className="p-2 bg-purple-500 text-white rounded-lg font-semibold hover:bg-purple-600 transition-colors text-sm"
+                  >
+                    Bye
+                  </button>
+                  <button
+                    onClick={() => addExtra('legbye')}
+                    className="p-2 bg-pink-500 text-white rounded-lg font-semibold hover:bg-pink-600 transition-colors text-sm"
+                  >
+                    Leg Bye
+                  </button>
+                </div>
+
                 <div className="space-y-3">
                   <button
                     onClick={() => handleDismissal('bowled')}
