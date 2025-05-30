@@ -56,6 +56,10 @@ interface MatchState {
   showInningsDeclaration: boolean;
   inningsBreakTimer: number;
   availablePlayers: string[];
+  tuskersPlayers: string[];
+  oppositionPlayersList: string[];
+  battingTeamPlayers: string[];
+  bowlingTeamPlayers: string[];
   target?: number;
   format: 'T20' | 'ODI' | 'Test';
   maxOvers: number;
@@ -263,7 +267,11 @@ export default function TuskersScoring() {
       showBowlerSelection: false,
       showInningsDeclaration: false,
       inningsBreakTimer: 0,
-      availablePlayers: shouldTuskersBatFirst ? oppositionPlayers.filter(name => name.trim() !== '') : players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name)
+      availablePlayers: shouldTuskersBatFirst ? oppositionPlayers.filter(name => name.trim() !== '') : players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name),
+      tuskersPlayers: players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name),
+      oppositionPlayersList: oppositionPlayers.filter(name => name.trim() !== ''),
+      battingTeamPlayers: shouldTuskersBatFirst ? oppositionPlayers.filter(name => name.trim() !== '') : players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name),
+      bowlingTeamPlayers: shouldTuskersBatFirst ? players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name) : oppositionPlayers.filter(name => name.trim() !== '')
     });
     setShowSetup(false);
   };
@@ -398,9 +406,12 @@ export default function TuskersScoring() {
     newState.showInningsDeclaration = false;
     newState.showBatsmanModal = true;
     
-    newState.availablePlayers = newState.battingTeam === 1 ? 
-      oppositionPlayers.filter(name => name.trim() !== '') : 
-      players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name);
+    // Swap batting and bowling team players for second innings
+    const tempBattingPlayers = newState.battingTeamPlayers;
+    newState.battingTeamPlayers = newState.bowlingTeamPlayers;
+    newState.bowlingTeamPlayers = tempBattingPlayers;
+    
+    newState.availablePlayers = newState.battingTeamPlayers;
 
     setMatchState(newState);
   };
@@ -1094,7 +1105,10 @@ export default function TuskersScoring() {
                 className="w-full p-3 border rounded-lg mb-4"
               >
                 <option value="">Select Batsman</option>
-                {matchState.availablePlayers.map((player, index) => (
+                {matchState.battingTeamPlayers.filter(player => 
+                  !matchState.batsmen.some(b => b.name === player) && 
+                  !matchState.dismissedBatsmen.some(db => db.name === player)
+                ).map((player, index) => (
                   <option key={index} value={player}>{player}</option>
                 ))}
               </select>
@@ -1129,9 +1143,9 @@ export default function TuskersScoring() {
                 className="w-full p-3 border rounded-lg mb-4"
               >
                 <option value="">Select Bowler</option>
-                {matchState.availablePlayers.filter(player => 
+                {matchState.bowlingTeamPlayers.filter((player: string) => 
                   canBowlerBowl(player, matchState.format)
-                ).map((player, index) => (
+                ).map((player: string, index: number) => (
                   <option key={index} value={player}>{player}</option>
                 ))}
               </select>
