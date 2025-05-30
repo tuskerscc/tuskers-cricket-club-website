@@ -187,10 +187,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteAllPlayers(): Promise<void> {
-    // First delete all player stats
+    // First clear any player references in matches (player of match)
+    await db.update(matches).set({ playerOfMatch: null });
+    
+    // Delete lineup entries
+    await db.delete(lineups);
+    
+    // Delete player stats
     await db.delete(playerStats);
     
-    // Then delete all players
+    // Finally delete all players
     await db.delete(players);
   }
 
