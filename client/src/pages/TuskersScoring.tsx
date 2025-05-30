@@ -267,11 +267,11 @@ export default function TuskersScoring() {
       showBowlerSelection: false,
       showInningsDeclaration: false,
       inningsBreakTimer: 0,
-      availablePlayers: shouldTuskersBatFirst ? oppositionPlayers.filter(name => name.trim() !== '') : players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name),
+      availablePlayers: shouldTuskersBatFirst ? players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name) : oppositionPlayers.filter(name => name.trim() !== ''),
       tuskersPlayers: players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name),
       oppositionPlayersList: oppositionPlayers.filter(name => name.trim() !== ''),
-      battingTeamPlayers: shouldTuskersBatFirst ? oppositionPlayers.filter(name => name.trim() !== '') : players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name),
-      bowlingTeamPlayers: shouldTuskersBatFirst ? players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name) : oppositionPlayers.filter(name => name.trim() !== '')
+      battingTeamPlayers: shouldTuskersBatFirst ? players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name) : oppositionPlayers.filter(name => name.trim() !== ''),
+      bowlingTeamPlayers: shouldTuskersBatFirst ? oppositionPlayers.filter(name => name.trim() !== '') : players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name)
     });
     setShowSetup(false);
   };
