@@ -50,13 +50,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Initialize database with sample data
-  try {
-    await seedDatabase();
-    log("Database initialized successfully");
-  } catch (error) {
-    log("Database already initialized");
-  }
+  // Database seeding disabled - admin will manually add data
+  log("Database seeding disabled - ready for manual data entry");
 
   const server = await registerRoutes(app);
 
