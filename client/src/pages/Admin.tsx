@@ -11,6 +11,7 @@ import AdminProtected from '@/components/AdminProtected';
 
 function AdminContent() {
   const [activeTab, setActiveTab] = useState('players');
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -99,7 +100,26 @@ function AdminContent() {
     mutationFn: (id: number) => apiRequest('DELETE', `/api/articles/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/articles/featured'] });
       toast({ title: "Success", description: "Article deleted successfully" });
+    },
+    onError: (error) => {
+      console.error('Delete article error:', error);
+      toast({ title: "Error", description: "Failed to delete article", variant: "destructive" });
+    }
+  });
+
+  const updateArticleMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => apiRequest('PATCH', `/api/articles/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/articles/featured'] });
+      setEditingArticle(null);
+      toast({ title: "Success", description: "Article updated successfully" });
+    },
+    onError: (error) => {
+      console.error('Update article error:', error);
+      toast({ title: "Error", description: "Failed to update article", variant: "destructive" });
     }
   });
 
@@ -120,7 +140,11 @@ function AdminContent() {
   };
 
   const onArticleSubmit = (data: any) => {
-    addArticleMutation.mutate(data);
+    if (editingArticle) {
+      updateArticleMutation.mutate({ id: editingArticle.id, data });
+    } else {
+      addArticleMutation.mutate(data);
+    }
   };
 
   return (
@@ -289,9 +313,21 @@ function AdminContent() {
         {/* Articles Tab */}
         {activeTab === 'articles' && (
           <div className="grid lg:grid-cols-2 gap-8">
-            {/* Add Article Form */}
+            {/* Add/Edit Article Form */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-[#1e3a8a] mb-4">Add New Article</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-[#1e3a8a]">
+                  {editingArticle ? 'Edit Article' : 'Add New Article'}
+                </h2>
+                {editingArticle && (
+                  <button
+                    onClick={() => setEditingArticle(null)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
               <form onSubmit={articleForm.handleSubmit(onArticleSubmit)} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
@@ -362,15 +398,23 @@ function AdminContent() {
                       <div className="font-semibold">{article.title}</div>
                       <div className="text-sm text-gray-600">
                         {article.isFeatured && '⭐ Featured • '}
-                        {new Date(article.publishedAt).toLocaleDateString()}
+                        {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : 'No date'}
                       </div>
                     </div>
-                    <button
-                      onClick={() => deleteArticleMutation.mutate(article.id)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => setEditingArticle(article)}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteArticleMutation.mutate(article.id)}
+                        className="text-red-600 hover:text-red-800 text-sm font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
