@@ -30,8 +30,9 @@ export default function AdminLogin() {
 
       if (response.ok) {
         sessionStorage.setItem('adminLoggedIn', 'true');
-        setLocation('/admin');
         toast({ title: "Success", description: "Welcome to admin panel" });
+        // Force page reload to ensure session is properly established
+        window.location.href = '/admin';
       } else {
         const error = await response.json();
         toast({ 
