@@ -258,6 +258,19 @@ function AdminContent() {
     }
   });
 
+  // Team statistics form
+  const statsForm = useForm({
+    defaultValues: {
+      matchesWon: 0,
+      totalMatches: 0,
+      totalRuns: 0,
+      wicketsTaken: 0,
+      totalOvers: 0,
+      runsAgainst: 0,
+      oversAgainst: 0
+    }
+  });
+
   // Article form
   const articleForm = useForm({
     defaultValues: {
@@ -376,6 +389,19 @@ function AdminContent() {
     }
   });
 
+  // Team statistics mutations
+  const updateStatsMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('PUT', '/api/stats/team', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/stats/team'] });
+      toast({ title: "Success", description: "Team statistics updated successfully" });
+    },
+    onError: (error) => {
+      console.error('Update stats error:', error);
+      toast({ title: "Error", description: "Failed to update team statistics", variant: "destructive" });
+    }
+  });
+
   const deleteGalleryItemMutation = useMutation({
     mutationFn: (id: number) => apiRequest('DELETE', `/api/gallery/${id}`),
     onSuccess: () => {
@@ -484,6 +510,19 @@ function AdminContent() {
     addAnnouncementMutation.mutate(data);
   };
 
+  const onStatsSubmit = (data: any) => {
+    const statsData = {
+      matchesWon: parseInt(data.matchesWon),
+      totalMatches: parseInt(data.totalMatches),
+      totalRuns: parseInt(data.totalRuns),
+      wicketsTaken: parseInt(data.wicketsTaken),
+      totalOvers: parseFloat(data.totalOvers),
+      runsAgainst: parseInt(data.runsAgainst),
+      oversAgainst: parseFloat(data.oversAgainst)
+    };
+    updateStatsMutation.mutate(statsData);
+  };
+
   return (
     <div className="py-8">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -502,6 +541,7 @@ function AdminContent() {
                 { id: 'articles', name: 'Articles', icon: '📰' },
                 { id: 'gallery', name: 'Gallery', icon: '🖼️' },
                 { id: 'announcements', name: 'Announcements', icon: '📢' },
+                { id: 'statistics', name: 'Team Stats', icon: '📈' },
                 { id: 'analytics', name: 'Analytics', icon: '📊' }
               ].map((tab) => (
                 <button
@@ -1099,6 +1139,144 @@ function AdminContent() {
                     <p>No announcements yet. Create your first announcement!</p>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Team Statistics Tab */}
+        {activeTab === 'statistics' && (
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Update Statistics Form */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-bold text-[#1e3a8a] mb-4">Update Team Statistics</h2>
+              <form onSubmit={statsForm.handleSubmit(onStatsSubmit)} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Matches Won</label>
+                    <input
+                      type="number"
+                      {...statsForm.register('matchesWon', { required: true, min: 0 })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      placeholder="15"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Matches</label>
+                    <input
+                      type="number"
+                      {...statsForm.register('totalMatches', { required: true, min: 0 })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      placeholder="20"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Runs Scored</label>
+                    <input
+                      type="number"
+                      {...statsForm.register('totalRuns', { required: true, min: 0 })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      placeholder="2850"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Wickets Taken</label>
+                    <input
+                      type="number"
+                      {...statsForm.register('wicketsTaken', { required: true, min: 0 })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      placeholder="125"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Overs Faced</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      {...statsForm.register('totalOvers', { required: true, min: 0 })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      placeholder="320.0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Runs Conceded</label>
+                    <input
+                      type="number"
+                      {...statsForm.register('runsAgainst', { required: true, min: 0 })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      placeholder="2650"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Overs Bowled</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    {...statsForm.register('oversAgainst', { required: true, min: 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    placeholder="300.0"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={updateStatsMutation.isPending}
+                  className="w-full bg-[#1e3a8a] text-white py-2 px-4 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors disabled:opacity-50"
+                >
+                  {updateStatsMutation.isPending ? 'Updating...' : 'Update Statistics'}
+                </button>
+              </form>
+            </div>
+
+            {/* Current Statistics Display */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-bold text-[#1e3a8a] mb-4">Current Team Statistics</h2>
+              {stats && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-blue-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-[#1e3a8a] mb-1">{stats.matchesWon}</div>
+                    <div className="text-sm text-gray-600">Matches Won</div>
+                  </div>
+                  
+                  <div className="bg-orange-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-orange-600 mb-1">
+                      {stats.totalMatches ? Math.round((stats.matchesWon / stats.totalMatches) * 100) : 0}%
+                    </div>
+                    <div className="text-sm text-gray-600">Win %</div>
+                  </div>
+                  
+                  <div className="bg-yellow-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-yellow-600 mb-1">{stats.totalRuns}</div>
+                    <div className="text-sm text-gray-600">Total Runs</div>
+                  </div>
+                  
+                  <div className="bg-green-50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-green-600 mb-1">{stats.wicketsTaken}</div>
+                    <div className="text-sm text-gray-600">Wickets Taken</div>
+                  </div>
+                  
+                  <div className="bg-purple-50 rounded-lg p-4 text-center col-span-2">
+                    <div className="text-2xl font-bold text-purple-600 mb-1">
+                      {stats.nrr >= 0 ? '+' : ''}{stats.nrr?.toFixed(3) || '0.000'}
+                    </div>
+                    <div className="text-sm text-gray-600">Net Run Rate (NRR)</div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-semibold text-gray-900 mb-2">NRR Calculation Formula:</h3>
+                <p className="text-sm text-gray-600">
+                  NRR = (Total runs scored ÷ Total overs faced) - (Total runs conceded ÷ Total overs bowled)
+                </p>
               </div>
             </div>
           </div>
