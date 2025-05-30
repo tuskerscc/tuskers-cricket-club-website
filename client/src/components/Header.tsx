@@ -34,19 +34,7 @@ export default function Header() {
             <a href="#matches" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
               Fixtures
             </a>
-            <div className="relative group">
-              <button className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors flex items-center">
-                Scoring <i className="fas fa-chevron-down ml-1 text-xs"></i>
-              </button>
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <Link href="/scoring/fan" className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-[#1e3a8a] transition-colors rounded-t-lg">
-                  <i className="fas fa-users mr-2"></i>Fan Scoring
-                </Link>
-                <Link href="/scoring/tuskers" className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-[#1e3a8a] transition-colors rounded-b-lg">
-                  <i className="fas fa-shield-alt mr-2"></i>Official Scoring
-                </Link>
-              </div>
-            </div>
+
             <a href="#trivia" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
               Trivia
             </a>
@@ -101,34 +89,7 @@ export default function Header() {
                 <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
               </a>
 
-              {/* Scoring Section */}
-              <div className="my-4">
-                <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cricket Scoring</div>
-                <div className="mt-2 space-y-1">
-                  <Link 
-                    href="/scoring/fan" 
-                    className="flex items-center px-4 py-3 text-gray-700 hover:text-[#1e3a8a] hover:bg-blue-50 rounded-xl transition-all duration-200 font-medium ml-2"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                      <i className="fas fa-users text-purple-600 text-sm"></i>
-                    </div>
-                    <span>Fan Scoring</span>
-                    <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
-                  </Link>
-                  <Link 
-                    href="/scoring/tuskers" 
-                    className="flex items-center px-4 py-3 text-gray-700 hover:text-[#1e3a8a] hover:bg-blue-50 rounded-xl transition-all duration-200 font-medium ml-2"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
-                      <i className="fas fa-shield-alt text-yellow-600 text-sm"></i>
-                    </div>
-                    <span>Official Scoring</span>
-                    <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
-                  </Link>
-                </div>
-              </div>
+
 
               {/* Other Sections */}
               <a 

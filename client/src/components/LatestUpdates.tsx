@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
 import type { Article } from '@shared/schema';
 
 export default function LatestUpdates() {
@@ -71,9 +72,12 @@ export default function LatestUpdates() {
                     {featuredArticle.excerpt}
                   </p>
                   <div className="flex items-center space-x-4">
-                    <button className="bg-[#1e3a8a] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors">
+                    <Link 
+                      href={`/news/${featuredArticle.slug}`}
+                      className="bg-[#1e3a8a] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
+                    >
                       Read Full Story
-                    </button>
+                    </Link>
                     <div className="flex space-x-3">
                       <button className="text-gray-400 hover:text-[#1e3a8a] transition-colors">
                         <i className="fab fa-facebook text-xl"></i>
@@ -140,9 +144,12 @@ export default function LatestUpdates() {
                       </div>
                       <span className="text-sm text-gray-700 font-medium">{article.author}</span>
                     </div>
-                    <button className="text-[#1e3a8a] font-semibold hover:text-[#f59e0b] transition-colors">
+                    <Link 
+                      href={`/news/${article.slug}`}
+                      className="text-[#1e3a8a] font-semibold hover:text-[#f59e0b] transition-colors"
+                    >
                       Read More <i className="fas fa-arrow-right ml-1"></i>
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </article>
