@@ -1,5 +1,6 @@
 import { Link } from 'wouter';
 import { useState } from 'react';
+import logoPath from '@assets/Tuskers CC Logo.png';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -16,7 +17,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             <img 
-              src="/attached_assets/Tuskers CC Logo.png" 
+              src={logoPath} 
               alt="Tuskers CC" 
               className="w-12 h-12 rounded-lg object-contain"
             />
