@@ -1,6 +1,6 @@
-import { Link } from 'wouter';
-import { useState } from 'react';
-import logoPath from '@assets/Tuskers CC Logo.png';
+import { Link } from "wouter";
+import { useState } from "react";
+import logoPath from "@assets/Tuskers CC Logo.png";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -16,55 +16,75 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
-            <img 
-              src={logoPath} 
-              alt="TUSKERS Cricket Club" 
+            <img
+              src={logoPath}
+              alt="TUSKERS CRICKET CLUB"
               className="w-12 h-12 rounded-lg object-contain"
             />
             <div>
-              <h1 className="text-2xl font-bold text-[#1e3a8a]">TUSKERS Cricket Club</h1>
+              <h1 className="text-2xl font-bold text-[#1e3a8a]">
+                TUSKERS CRICKET CLUB
+              </h1>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
-            <a href="#squad" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
+            <a
+              href="#squad"
+              className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors"
+            >
               Squad
             </a>
 
-
-            <a href="#trivia" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
+            <a
+              href="#trivia"
+              className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors"
+            >
               Trivia
             </a>
-            <Link href="/news" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
+            <Link
+              href="/news"
+              className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors"
+            >
               News
             </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
+            <Link
+              href="/contact"
+              className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors"
+            >
               Contact
             </Link>
-            <a href="#fanzone" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
+            <a
+              href="#fanzone"
+              className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors"
+            >
               Fan Zone
             </a>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden">
-            <button 
+            <button
               onClick={toggleMobileMenu}
               className="text-gray-700 hover:text-[#1e3a8a] focus:outline-none"
             >
-              <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'} text-xl`}></i>
+              <i
+                className={`fas ${isMobileMenuOpen ? "fa-times" : "fa-bars"} text-xl`}
+              ></i>
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation Menu */}
-        <div className={`lg:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-screen opacity-100 visible' : 'max-h-0 opacity-0 invisible overflow-hidden'}`}>
+        <div
+          className={`lg:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? "max-h-screen opacity-100 visible" : "max-h-0 opacity-0 invisible overflow-hidden"}`}
+        >
           <div className="py-6 px-4 border-t border-gray-100 bg-gradient-to-b from-white to-gray-50">
             <div className="space-y-1">
               {/* Main Navigation Items */}
-              <a 
-                href="#squad" 
+              <a
+                href="#squad"
                 className="flex items-center px-4 py-3 text-gray-700 hover:text-[#1e3a8a] hover:bg-blue-50 rounded-xl transition-all duration-200 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -74,14 +94,10 @@ export default function Header() {
                 <span>Squad</span>
                 <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
               </a>
-              
-
-
-
 
               {/* Other Sections */}
-              <a 
-                href="#trivia" 
+              <a
+                href="#trivia"
                 className="flex items-center px-4 py-3 text-gray-700 hover:text-[#1e3a8a] hover:bg-blue-50 rounded-xl transition-all duration-200 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -91,9 +107,9 @@ export default function Header() {
                 <span>Cricket Trivia</span>
                 <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
               </a>
-              
-              <Link 
-                href="/news" 
+
+              <Link
+                href="/news"
                 className="flex items-center px-4 py-3 text-gray-700 hover:text-[#1e3a8a] hover:bg-blue-50 rounded-xl transition-all duration-200 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -104,8 +120,8 @@ export default function Header() {
                 <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
               </Link>
 
-              <Link 
-                href="/contact" 
+              <Link
+                href="/contact"
                 className="flex items-center px-4 py-3 text-gray-700 hover:text-[#1e3a8a] hover:bg-blue-50 rounded-xl transition-all duration-200 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -115,9 +131,9 @@ export default function Header() {
                 <span>Contact Us</span>
                 <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
               </Link>
-              
-              <a 
-                href="#fanzone" 
+
+              <a
+                href="#fanzone"
                 className="flex items-center px-4 py-3 text-gray-700 hover:text-[#1e3a8a] hover:bg-blue-50 rounded-xl transition-all duration-200 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -132,7 +148,9 @@ export default function Header() {
             {/* Bottom Section */}
             <div className="mt-6 pt-4 border-t border-gray-200">
               <div className="text-center">
-                <div className="text-[#1e3a8a] font-bold text-lg">TUSKERS Cricket Club</div>
+                <div className="text-[#1e3a8a] font-bold text-lg">
+                  TUSKERS CRICKET CLUB
+                </div>
               </div>
             </div>
           </div>

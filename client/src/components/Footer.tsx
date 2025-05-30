@@ -11,7 +11,7 @@ export default function Footer() {
                 <span className="text-[#1e3a8a] font-bold text-lg">TC</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-[#fcd34d]">TUSKERS Cricket Club</h3>
+                <h3 className="text-xl font-bold text-[#fcd34d]">TUSKERS CRICKET CLUB</h3>
               </div>
             </div>
             <p className="text-[#bfdbfe] mb-4 leading-relaxed">
