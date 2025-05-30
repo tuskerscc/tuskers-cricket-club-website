@@ -482,6 +482,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/stats/team", async (req, res) => {
+    try {
+      const { matchesWon, totalMatches, totalRuns, wicketsTaken, totalOvers, runsAgainst, oversAgainst } = req.body;
+      
+      await storage.updateTeamStats({
+        matchesWon: parseInt(matchesWon),
+        totalMatches: parseInt(totalMatches),
+        totalRuns: parseInt(totalRuns),
+        wicketsTaken: parseInt(wicketsTaken),
+        totalOvers: parseFloat(totalOvers),
+        runsAgainst: parseInt(runsAgainst),
+        oversAgainst: parseFloat(oversAgainst)
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error updating team stats:', error);
+      res.status(500).json({ error: "Failed to update team statistics" });
+    }
+  });
+
   // Cricket data endpoints
 
   app.get("/api/cricket/live-poll", async (req, res) => {

@@ -1,5 +1,5 @@
 import { 
-  users, teams, venues, competitions, players, matches, lineups, playerStats, 
+  users, teams, venues, competitions, players, matches, lineups, playerStats, teamStats,
   articles, socialPosts, polls, quizzes, gallery, announcements, triviaQuestions, triviaLeaderboard,
   forumCategories, forumTopics, forumPosts, forumPostLikes, userProfiles, 
   communityEvents, eventParticipants,
