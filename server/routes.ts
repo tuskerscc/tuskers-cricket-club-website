@@ -339,10 +339,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertArticleSchema.parse(req.body);
       // Set publishedAt to current date if the article is published
-      if (validatedData.isPublished && !validatedData.publishedAt) {
-        validatedData.publishedAt = new Date();
-      }
-      const article = await storage.createArticle(validatedData);
+      const articleData = {
+        ...validatedData,
+        publishedAt: validatedData.isPublished ? new Date() : null
+      };
+      const article = await storage.createArticle(articleData);
       res.status(201).json(article);
     } catch (error) {
       res.status(400).json({ error: "Invalid article data" });

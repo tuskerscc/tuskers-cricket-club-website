@@ -512,7 +512,6 @@ export const insertPlayerStatsSchema = createInsertSchema(playerStats).omit({
 export const insertArticleSchema = createInsertSchema(articles).omit({
   id: true,
   createdAt: true,
-  publishedAt: true,
 });
 
 export const insertSocialPostSchema = createInsertSchema(socialPosts).omit({

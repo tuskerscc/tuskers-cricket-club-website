@@ -122,13 +122,35 @@ export default function Article() {
             <div className="mt-12 pt-8 border-t">
               <h3 className="text-lg font-semibold text-[#1e3a8a] mb-4">Share this article</h3>
               <div className="flex gap-3">
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <button 
+                  onClick={() => {
+                    const url = encodeURIComponent(window.location.href);
+                    const text = encodeURIComponent(article.title);
+                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+                  }}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
                   <i className="fab fa-facebook mr-2"></i>Facebook
                 </button>
-                <button className="bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors">
+                <button 
+                  onClick={() => {
+                    const url = encodeURIComponent(window.location.href);
+                    const text = encodeURIComponent(`${article.title} - ${article.excerpt || ''}`);
+                    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+                  }}
+                  className="bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors"
+                >
                   <i className="fab fa-twitter mr-2"></i>Twitter
                 </button>
-                <button className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors">
+                <button 
+                  onClick={() => {
+                    const url = encodeURIComponent(window.location.href);
+                    const title = encodeURIComponent(article.title);
+                    const summary = encodeURIComponent(article.excerpt || '');
+                    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}&summary=${summary}`, '_blank');
+                  }}
+                  className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
+                >
                   <i className="fab fa-linkedin mr-2"></i>LinkedIn
                 </button>
               </div>
