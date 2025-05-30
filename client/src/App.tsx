@@ -12,8 +12,7 @@ import TuskersScoring from "@/pages/TuskersScoring";
 import News from "@/pages/News";
 import Article from "@/pages/Article";
 import Gallery from "@/pages/Gallery";
-import Forum from "@/pages/Forum";
-import Community from "@/pages/Community";
+
 import Contact from "@/pages/Contact";
 
 function Router() {
@@ -29,8 +28,6 @@ function Router() {
       <Route path="/fan-scoring" component={FanScoring} />
       <Route path="/scoring/fan" component={FanScoring} />
       <Route path="/scoring/tuskers" component={TuskersScoring} />
-      <Route path="/forum" component={Forum} />
-      <Route path="/community" component={Community} />
       <Route component={NotFound} />
     </Switch>
   );
