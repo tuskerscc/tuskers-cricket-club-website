@@ -709,7 +709,7 @@ export default function TuskersScoring() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Tuskers CC Players */}
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-3">Select Tuskers CC Players (9-15 players)</h4>
+                  <h4 className="font-semibold text-gray-800 mb-3">Select TUSKERS Cricket Club Players (9-15 players)</h4>
                   <p className="text-sm text-gray-600 mb-3">
                     {selectedTuskersPlayers.length > 0 ? (
                       `${selectedTuskersPlayers.length - getRequiredReserveCount(selectedTuskersPlayers.length) - 2} playing + 1 captain + 1 keeper + ${getRequiredReserveCount(selectedTuskersPlayers.length)} reserves`
@@ -885,7 +885,7 @@ export default function TuskersScoring() {
           >
             <span>← Back to Setup</span>
           </button>
-          <h1 className="text-lg font-semibold">Tuskers CC Official Scoring</h1>
+          <h1 className="text-lg font-semibold">TUSKERS Cricket Club Official Scoring</h1>
           <div className="flex gap-2">
             <button className="text-white hover:bg-blue-700 p-2 rounded">⚙</button>
           </div>

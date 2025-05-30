@@ -18,7 +18,7 @@ export default function Header() {
           <Link href="/" className="flex items-center space-x-3">
             <img 
               src={logoPath} 
-              alt="Tuskers CC" 
+              alt="TUSKERS Cricket Club" 
               className="w-12 h-12 rounded-lg object-contain"
             />
             <div>

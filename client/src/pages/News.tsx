@@ -22,7 +22,7 @@ export default function News() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-[#1e3a8a] mb-4">Latest News</h1>
-            <p className="text-xl text-gray-600">Stay updated with Tuskers CC news and updates</p>
+            <p className="text-xl text-gray-600">Stay updated with TUSKERS Cricket Club news and updates</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
@@ -46,7 +46,7 @@ export default function News() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-[#1e3a8a] mb-4">Latest News</h1>
-          <p className="text-xl text-gray-600">Stay updated with Tuskers CC news and updates</p>
+          <p className="text-xl text-gray-600">Stay updated with TUSKERS Cricket Club news and updates</p>
         </div>
 
         {/* Category Filter */}

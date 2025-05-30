@@ -71,8 +71,8 @@ export default function Forum() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-[#1e3a8a] mb-2">Tuskers Community Forum</h1>
-              <p className="text-gray-600">Connect with fellow cricket enthusiasts and Tuskers supporters</p>
+              <h1 className="text-3xl font-bold text-[#1e3a8a] mb-2">TUSKERS Cricket Club Community Forum</h1>
+              <p className="text-gray-600">Connect with fellow cricket enthusiasts and TUSKERS supporters</p>
             </div>
             
             <div className="flex gap-3">
