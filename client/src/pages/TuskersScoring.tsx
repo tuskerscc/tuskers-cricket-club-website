@@ -524,7 +524,6 @@ Generated: ${new Date().toLocaleString()}
           
           <div className="mt-6 text-center text-sm text-gray-500">
             <p>Authorized Personnel Only</p>
-            <p className="text-xs">Username: tuskers | Password: tuskers2024</p>
           </div>
         </div>
       </div>
