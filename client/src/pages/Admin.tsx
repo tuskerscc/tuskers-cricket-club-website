@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -55,8 +55,10 @@ function AdminContent() {
       content: '',
       excerpt: '',
       featuredImage: '',
+      author: 'Admin',
+      category: 'news',
       isFeatured: false,
-      published: true
+      isPublished: true
     }
   });
 
@@ -138,6 +140,31 @@ function AdminContent() {
   const onPlayerSubmit = (data: any) => {
     addPlayerMutation.mutate(data);
   };
+
+  // Effect to populate form when editing an article
+  useEffect(() => {
+    if (editingArticle) {
+      articleForm.reset({
+        title: editingArticle.title,
+        slug: editingArticle.slug,
+        content: editingArticle.content,
+        excerpt: editingArticle.excerpt || '',
+        featuredImage: editingArticle.featuredImage || '',
+        isFeatured: editingArticle.isFeatured || false,
+        isPublished: editingArticle.isPublished || false
+      });
+    } else {
+      articleForm.reset({
+        title: '',
+        slug: '',
+        content: '',
+        excerpt: '',
+        featuredImage: '',
+        isFeatured: false,
+        published: true
+      });
+    }
+  }, [editingArticle, articleForm]);
 
   const onArticleSubmit = (data: any) => {
     if (editingArticle) {
@@ -380,10 +407,13 @@ function AdminContent() {
 
                 <button
                   type="submit"
-                  disabled={addArticleMutation.isPending}
+                  disabled={addArticleMutation.isPending || updateArticleMutation.isPending}
                   className="w-full bg-[#1e3a8a] text-white py-2 px-4 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors disabled:opacity-50"
                 >
-                  {addArticleMutation.isPending ? 'Publishing...' : 'Publish Article'}
+                  {editingArticle 
+                    ? (updateArticleMutation.isPending ? 'Updating...' : 'Update Article')
+                    : (addArticleMutation.isPending ? 'Publishing...' : 'Publish Article')
+                  }
                 </button>
               </form>
             </div>
