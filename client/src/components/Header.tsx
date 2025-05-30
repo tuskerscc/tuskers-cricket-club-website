@@ -22,8 +22,7 @@ export default function Header() {
               className="w-12 h-12 rounded-lg object-contain"
             />
             <div>
-              <h1 className="text-2xl font-bold text-[#1e3a8a]">TUSKERS CC</h1>
-              <p className="text-sm text-gray-600">Cricket Club</p>
+              <h1 className="text-2xl font-bold text-[#1e3a8a]">TUSKERS Cricket Club</h1>
             </div>
           </Link>
 
@@ -218,8 +217,7 @@ export default function Header() {
             {/* Bottom Section */}
             <div className="mt-6 pt-4 border-t border-gray-200">
               <div className="text-center">
-                <div className="text-[#1e3a8a] font-bold text-lg">TUSKERS CC</div>
-                <div className="text-gray-500 text-sm">Official Cricket Club</div>
+                <div className="text-[#1e3a8a] font-bold text-lg">TUSKERS Cricket Club</div>
               </div>
             </div>
           </div>
