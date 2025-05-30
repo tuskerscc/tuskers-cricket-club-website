@@ -167,7 +167,9 @@ export default function TuskersScoring() {
     }
 
     // Show player selection window
+    console.log('Setting showPlayerSelection to true');
     setShowPlayerSelection(true);
+    console.log('showPlayerSelection should now be:', true);
   };
 
   const startMatchWithPlayers = () => {
@@ -923,6 +925,7 @@ Generated: ${new Date().toLocaleString()}
 
       {/* Player Selection Modal */}
       {showPlayerSelection && (
+        console.log('Rendering player selection modal') ||
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
