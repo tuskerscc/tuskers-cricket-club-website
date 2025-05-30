@@ -9,7 +9,7 @@ import AdminLogin from "@/pages/AdminLogin";
 
 import NotFound from "@/pages/not-found";
 import FanScoring from "@/pages/FanScoring";
-import TuskersScoring from "@/pages/TuskersScoring";
+
 import News from "@/pages/News";
 import Article from "@/pages/Article";
 import Gallery from "@/pages/Gallery";
@@ -28,7 +28,7 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/fan-scoring" component={FanScoring} />
       <Route path="/scoring/fan" component={FanScoring} />
-      <Route path="/scoring/tuskers" component={TuskersScoring} />
+
       <Route component={NotFound} />
     </Switch>
   );
