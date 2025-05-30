@@ -484,16 +484,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/stats/team", async (req, res) => {
     try {
-      const { matchesWon, totalMatches, totalRuns, wicketsTaken, totalOvers, runsAgainst, oversAgainst } = req.body;
+      const { matchResult, totalRuns, wicketsTaken, totalOvers, runsAgainst, oversAgainst } = req.body;
+      
+      // Get current team stats for cumulative calculation
+      const currentStats = await storage.getTeamStats();
+      
+      // Calculate new cumulative values
+      const matchWon = matchResult === 'won' ? 1 : 0;
+      const newMatchesWon = currentStats.matchesWon + matchWon;
+      const newTotalMatches = currentStats.totalMatches + 1;
+      const newTotalRuns = currentStats.totalRuns + parseInt(totalRuns);
+      const newWicketsTaken = currentStats.wicketsTaken + parseInt(wicketsTaken);
+      const newTotalOvers = currentStats.totalOvers + parseFloat(totalOvers);
+      const newRunsAgainst = currentStats.runsAgainst + parseInt(runsAgainst);
+      const newOversAgainst = currentStats.oversAgainst + parseFloat(oversAgainst);
       
       await storage.updateTeamStats({
-        matchesWon: parseInt(matchesWon),
-        totalMatches: parseInt(totalMatches),
-        totalRuns: parseInt(totalRuns),
-        wicketsTaken: parseInt(wicketsTaken),
-        totalOvers: parseFloat(totalOvers),
-        runsAgainst: parseInt(runsAgainst),
-        oversAgainst: parseFloat(oversAgainst)
+        matchesWon: newMatchesWon,
+        totalMatches: newTotalMatches,
+        totalRuns: newTotalRuns,
+        wicketsTaken: newWicketsTaken,
+        totalOvers: newTotalOvers,
+        runsAgainst: newRunsAgainst,
+        oversAgainst: newOversAgainst
       });
       
       res.json({ success: true });

@@ -605,8 +605,7 @@ function AdminContent() {
 
   const onStatsSubmit = (data: any) => {
     const statsData = {
-      matchesWon: parseInt(data.matchesWon),
-      totalMatches: parseInt(data.totalMatches),
+      matchResult: data.matchResult, // 'won' or 'lost'
       totalRuns: parseInt(data.totalRuns),
       wicketsTaken: parseInt(data.wicketsTaken),
       totalOvers: parseFloat(data.totalOvers),
@@ -1790,13 +1789,15 @@ function AdminContent() {
               <form onSubmit={statsForm.handleSubmit(onStatsSubmit)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Matches Won</label>
-                    <input
-                      type="number"
-                      {...statsForm.register('matchesWon', { required: true, min: 0 })}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Match Result</label>
+                    <select
+                      {...statsForm.register('matchResult', { required: true })}
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      placeholder="15"
-                    />
+                    >
+                      <option value="">Select Result</option>
+                      <option value="won">Won</option>
+                      <option value="lost">Lost</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Total Matches</label>
