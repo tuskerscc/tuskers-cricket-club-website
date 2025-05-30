@@ -253,8 +253,8 @@ function AdminContent() {
     defaultValues: {
       title: '',
       content: '',
-      category: '',
-      priority: ''
+      type: 'general',
+      priority: 'medium'
     }
   });
 
@@ -359,6 +359,20 @@ function AdminContent() {
     onError: (error) => {
       console.error('Add gallery item error:', error);
       toast({ title: "Error", description: "Failed to add gallery item", variant: "destructive" });
+    }
+  });
+
+  // Announcement mutations
+  const addAnnouncementMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', '/api/announcements', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/announcements'] });
+      announcementForm.reset();
+      toast({ title: "Success", description: "Announcement created successfully" });
+    },
+    onError: (error) => {
+      console.error('Add announcement error:', error);
+      toast({ title: "Error", description: "Failed to create announcement", variant: "destructive" });
     }
   });
 

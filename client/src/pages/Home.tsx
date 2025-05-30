@@ -9,10 +9,15 @@ import FanZone from '@/components/FanZone';
 import CricketTrivia from '@/components/CricketTrivia';
 import Footer from '@/components/Footer';
 import type { TeamStats } from '@/lib/types';
+import type { Announcement } from '@shared/schema';
 
 export default function Home() {
   const { data: stats } = useQuery<TeamStats>({
     queryKey: ['/api/stats/team']
+  });
+
+  const { data: announcements = [] } = useQuery<Announcement[]>({
+    queryKey: ['/api/announcements']
   });
 
   return (
@@ -30,23 +35,26 @@ export default function Home() {
             <div className="text-center text-white">
               <h2 className="text-3xl font-bold mb-4">📢 Latest Announcements</h2>
               <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 max-w-4xl mx-auto">
-                <div className="space-y-4">
-                  <div className="border-b border-white border-opacity-20 pb-4">
-                    <h3 className="text-xl font-semibold text-[#fcd34d] mb-2">Team Selection for Championship Final</h3>
-                    <p className="text-white text-opacity-90">Final squad announced for the upcoming championship match. Practice sessions start tomorrow at 6 AM.</p>
-                    <span className="text-sm text-white text-opacity-70">Posted 2 hours ago</span>
+                {announcements.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-white text-opacity-90">No announcements at the moment.</p>
                   </div>
-                  <div className="border-b border-white border-opacity-20 pb-4">
-                    <h3 className="text-xl font-semibold text-[#fcd34d] mb-2">New Training Facility Opens</h3>
-                    <p className="text-white text-opacity-90">State-of-the-art training facility now available for all squad members. Book your slots online.</p>
-                    <span className="text-sm text-white text-opacity-70">Posted 1 day ago</span>
+                ) : (
+                  <div className="space-y-4">
+                    {announcements.slice(0, 3).map((announcement, index) => (
+                      <div 
+                        key={announcement.id}
+                        className={`${index < announcements.slice(0, 3).length - 1 ? 'border-b border-white border-opacity-20 pb-4' : ''}`}
+                      >
+                        <h3 className="text-xl font-semibold text-[#fcd34d] mb-2">{announcement.title}</h3>
+                        <p className="text-white text-opacity-90">{announcement.content}</p>
+                        <span className="text-sm text-white text-opacity-70">
+                          Posted {announcement.createdAt ? new Date(announcement.createdAt).toLocaleDateString() : 'recently'}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-[#fcd34d] mb-2">Registration Open for Youth Academy</h3>
-                    <p className="text-white text-opacity-90">Young cricketers aged 12-18 can now apply for our development program. Limited seats available.</p>
-                    <span className="text-sm text-white text-opacity-70">Posted 3 days ago</span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
