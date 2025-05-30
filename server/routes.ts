@@ -193,6 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deletePlayer(id);
       res.json({ success: true, message: "Player deleted successfully" });
     } catch (error) {
+      console.error("Delete player error:", error);
       res.status(500).json({ error: "Failed to delete player" });
     }
   });
