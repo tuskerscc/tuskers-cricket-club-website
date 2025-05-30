@@ -183,6 +183,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/players/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid player ID" });
+      }
+
+      await storage.deletePlayer(id);
+      res.json({ success: true, message: "Player deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete player" });
+    }
+  });
+
   // Matches endpoints
   app.get("/api/matches", async (req, res) => {
     try {

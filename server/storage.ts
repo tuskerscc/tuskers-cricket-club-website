@@ -35,6 +35,7 @@ export interface IStorage {
   getPlayer(id: number): Promise<(Player & { stats?: PlayerStats }) | undefined>;
   createPlayer(player: InsertPlayer): Promise<Player>;
   updatePlayer(id: number, player: Partial<InsertPlayer>): Promise<void>;
+  deletePlayer(id: number): Promise<void>;
   getStartingLineup(matchId: number): Promise<(Lineup & { player: Player })[]>;
 
   // Matches
@@ -174,6 +175,10 @@ export class DatabaseStorage implements IStorage {
 
   async updatePlayer(id: number, player: Partial<InsertPlayer>): Promise<void> {
     await db.update(players).set(player).where(eq(players.id, id));
+  }
+
+  async deletePlayer(id: number): Promise<void> {
+    await db.delete(players).where(eq(players.id, id));
   }
 
   async getStartingLineup(matchId: number): Promise<(Lineup & { player: Player })[]> {
