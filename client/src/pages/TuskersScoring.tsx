@@ -129,12 +129,12 @@ export default function TuskersScoring() {
 
   // Innings break timer effect
   useEffect(() => {
-    if (matchState?.inningsBreakTimer > 0) {
+    if (matchState && matchState.inningsBreakTimer > 0) {
       const timer = setTimeout(() => {
         setMatchState(prev => prev ? { ...prev, inningsBreakTimer: prev.inningsBreakTimer - 1 } : null);
       }, 1000);
       return () => clearTimeout(timer);
-    } else if (matchState?.inningsBreakTimer === 0 && matchState?.showInningsDeclaration) {
+    } else if (matchState && matchState.inningsBreakTimer === 0 && matchState.showInningsDeclaration) {
       setMatchState(prev => prev ? { ...prev, showInningsDeclaration: false, showBatsmanModal: true } : null);
     }
   }, [matchState?.inningsBreakTimer]);
@@ -154,16 +154,16 @@ export default function TuskersScoring() {
     switch(format) {
       case 'T20': return 20;
       case 'ODI': return 50;
-      case 'Test': return 90; // Approximate for Test cricket
+      case 'Test': return 90;
       default: return 20;
     }
   };
 
   const getBowlerMaxOvers = (format: string) => {
     switch(format) {
-      case 'T20': return 4; // T20: Max 4 overs per bowler (20/5)
-      case 'ODI': return 10; // ODI: Max 10 overs per bowler (50/5)
-      case 'Test': return 999; // Test: No restriction
+      case 'T20': return 4;
+      case 'ODI': return 10;
+      case 'Test': return 999;
       default: return 4;
     }
   };
@@ -192,7 +192,6 @@ export default function TuskersScoring() {
 
     const maxOvers = getMaxOvers(selectedFormat);
     
-    // Determine which team bats first based on toss
     const tuskersName = selectedTeam!.name;
     const shouldTuskersBatFirst = (tossWinner === 'tuskers' && tossChoice === 'bat') || 
                                   (tossWinner === 'opposition' && tossChoice === 'bowl');
@@ -233,30 +232,6 @@ export default function TuskersScoring() {
     setShowSetup(false);
   };
 
-  const switchStriker = (newState: MatchState) => {
-    return { ...newState, striker: newState.striker === 0 ? 1 : 0 };
-  };
-
-  const addNewBatsman = (newState: MatchState) => {
-    const dismissedBatsmanIndex = newState.striker;
-    const dismissedBatsman = newState.batsmen[dismissedBatsmanIndex];
-    
-    // Add to dismissed batsmen list
-    newState.dismissedBatsmen.push(dismissedBatsman);
-    
-    // Update the batsman
-    newState.batsmen[dismissedBatsmanIndex] = {
-      name: newBatsmanName,
-      runs: 0,
-      balls: 0,
-      fours: 0,
-      sixes: 0,
-      isOut: false
-    };
-    
-    return newState;
-  };
-
   const handleDismissal = (type: string) => {
     if (!matchState) return;
     
@@ -270,7 +245,6 @@ export default function TuskersScoring() {
     const newState = { ...matchState };
     const strikerIndex = newState.striker;
     
-    // Update the dismissed batsman
     newState.batsmen[strikerIndex] = {
       ...newState.batsmen[strikerIndex],
       isOut: true,
@@ -279,7 +253,6 @@ export default function TuskersScoring() {
       bowler: dismissalData.bowler || undefined
     };
 
-    // Update bowler stats for wicket
     if (dismissalData.type !== 'run_out') {
       const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
       if (bowlerIndex !== -1) {
@@ -299,7 +272,21 @@ export default function TuskersScoring() {
   const addNewBatsmanToMatch = () => {
     if (!matchState || !newBatsmanName.trim()) return;
 
-    const newState = addNewBatsman({ ...matchState });
+    const newState = { ...matchState };
+    const dismissedBatsmanIndex = newState.striker;
+    const dismissedBatsman = newState.batsmen[dismissedBatsmanIndex];
+    
+    newState.dismissedBatsmen.push(dismissedBatsman);
+    
+    newState.batsmen[dismissedBatsmanIndex] = {
+      name: newBatsmanName,
+      runs: 0,
+      balls: 0,
+      fours: 0,
+      sixes: 0,
+      isOut: false
+    };
+    
     newState.showBatsmanModal = false;
     
     setMatchState(newState);
@@ -324,16 +311,13 @@ export default function TuskersScoring() {
 
     const newState = { ...matchState };
     
-    // Add current bowler to bowlers list if not already there
     if (!newState.bowlers.find(b => b.name === newState.currentBowler.name)) {
       newState.bowlers.push({ ...newState.currentBowler });
     } else {
-      // Update existing bowler stats
       const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
       newState.bowlers[bowlerIndex] = { ...newState.currentBowler };
     }
 
-    // Set new bowler
     const existingBowler = newState.bowlers.find(b => b.name === newBowlerName);
     newState.currentBowler = existingBowler ? 
       { ...existingBowler } : 
@@ -378,7 +362,6 @@ export default function TuskersScoring() {
     newState.showInningsDeclaration = false;
     newState.showBatsmanModal = true;
     
-    // Switch available players
     newState.availablePlayers = newState.battingTeam === 1 ? 
       oppositionPlayers.filter(name => name.trim() !== '') : 
       players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name);
@@ -392,41 +375,32 @@ export default function TuskersScoring() {
     const newState = { ...matchState };
     const strikerIndex = newState.striker;
     
-    // Update batsman stats
     newState.batsmen[strikerIndex].runs += runs;
     newState.batsmen[strikerIndex].balls += 1;
     
     if (runs === 4) newState.batsmen[strikerIndex].fours += 1;
     if (runs === 6) newState.batsmen[strikerIndex].sixes += 1;
     
-    // Update match stats
     newState.totalRuns += runs;
-    
-    // Update bowler stats
     newState.currentBowler.runs += runs;
     
-    // Update balls and overs
     newState.balls += 1;
     if (newState.balls === 6) {
       newState.overs += 1;
       newState.balls = 0;
       newState.currentBowler.overs += 1;
       
-      // Switch striker at end of over
       newState.striker = newState.striker === 0 ? 1 : 0;
       
-      // Check for bowler restriction at end of over
       if (!canBowlerBowl(newState.currentBowler.name, newState.format)) {
         newState.showBowlerSelection = true;
       }
     }
     
-    // Switch striker for odd runs
     if (runs % 2 === 1) {
       newState.striker = newState.striker === 0 ? 1 : 0;
     }
     
-    // Check if innings complete
     if (newState.overs >= newState.maxOvers || newState.wickets >= 10) {
       if (newState.innings === 1 && newState.format !== 'Test') {
         declareInnings();
@@ -436,7 +410,6 @@ export default function TuskersScoring() {
       }
     }
     
-    // Check if target reached in second innings
     if (newState.innings === 2 && newState.target && newState.totalRuns >= newState.target) {
       newState.isComplete = true;
     }
@@ -497,7 +470,6 @@ export default function TuskersScoring() {
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
             <h1 className="text-3xl font-bold text-blue-900 mb-6">Tuskers CC - Match Setup</h1>
             
-            {/* Match Format Selection */}
             <div className="bg-blue-50 p-4 rounded-xl border-l-4 border-blue-400 mb-6">
               <h3 className="font-semibold text-blue-800 mb-4">Match Format</h3>
               <div className="grid grid-cols-3 gap-4">
@@ -517,7 +489,6 @@ export default function TuskersScoring() {
               </div>
             </div>
 
-            {/* Team Information */}
             <div className="bg-green-50 p-4 rounded-xl border-l-4 border-green-400 mb-6">
               <h3 className="font-semibold text-green-800 mb-4">Team Information</h3>
               
@@ -571,7 +542,6 @@ export default function TuskersScoring() {
               </div>
             </div>
 
-            {/* Toss Information */}
             <div className="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-400 mb-6">
               <h3 className="font-semibold text-yellow-800 mb-4">Toss Information</h3>
               
@@ -605,11 +575,9 @@ export default function TuskersScoring() {
               </div>
             </div>
 
-            {/* Player Selection */}
             <div className="bg-purple-50 p-4 rounded-xl border-l-4 border-purple-400 mb-6">
               <h3 className="font-semibold text-purple-800 mb-4">Player Selection</h3>
               
-              {/* Tuskers Players */}
               <div className="mb-6">
                 <h4 className="font-semibold text-gray-800 mb-3">Select Tuskers CC Players (11 required)</h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-60 overflow-y-auto bg-gray-50 p-3 rounded-lg">
@@ -636,7 +604,6 @@ export default function TuskersScoring() {
                 <p className="text-sm text-gray-600 mt-2">Selected: {selectedTuskersPlayers.length}/11</p>
               </div>
 
-              {/* Opposition Players */}
               <div>
                 <h4 className="font-semibold text-gray-800 mb-3">Opposition Players (11 required)</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -676,7 +643,6 @@ export default function TuskersScoring() {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="bg-blue-600 text-white p-4 rounded-t-2xl flex justify-between items-center">
           <button 
             onClick={() => setShowSetup(true)}
@@ -691,7 +657,6 @@ export default function TuskersScoring() {
         </div>
 
         <div className="bg-white rounded-b-2xl shadow-lg">
-          {/* Match Header */}
           <div className="bg-gray-50 p-4 border-b">
             <div className="flex justify-between items-center">
               <div className="flex flex-col gap-2">
@@ -708,14 +673,6 @@ export default function TuskersScoring() {
                     </div>
                     <div className="text-orange-600 font-semibold">
                       Need: {Math.max(0, matchState.target - matchState.totalRuns)} runs in {((matchState.maxOvers - matchState.overs) * 6 - matchState.balls)} balls
-                    </div>
-                    <div className="text-red-600 font-semibold">
-                      RRR: {(() => {
-                        const ballsLeft = (matchState.maxOvers - matchState.overs) * 6 - matchState.balls;
-                        const runsNeeded = matchState.target - matchState.totalRuns;
-                        const oversLeft = ballsLeft / 6;
-                        return oversLeft > 0 ? (runsNeeded / oversLeft).toFixed(2) : '0.00';
-                      })()}
                     </div>
                   </div>
                 )}
@@ -734,9 +691,7 @@ export default function TuskersScoring() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
-            {/* Left Panel - Main Scoring */}
             <div className="lg:col-span-2 space-y-4">
-              {/* Batsmen Stats */}
               <div className="p-4 border-b bg-gray-50">
                 <div className="text-sm text-gray-600 mb-2">{matchState.battingTeam === 1 ? matchState.team1 : matchState.team2} batting</div>
                 
@@ -775,7 +730,6 @@ export default function TuskersScoring() {
                 </div>
               </div>
 
-              {/* Bowling Stats */}
               <div className="p-4 border-b bg-gray-50">
                 <div className="text-sm text-gray-600 mb-2">Current Bowler</div>
                 <div className="grid grid-cols-5 gap-2 text-xs font-semibold text-gray-500 mb-2">
@@ -808,7 +762,6 @@ export default function TuskersScoring() {
                 </div>
               </div>
 
-              {/* Scoring Buttons */}
               <div className="p-4 space-y-4">
                 <div className="text-sm font-semibold text-gray-700 mb-2">Score Runs</div>
                 <div className="grid grid-cols-4 gap-3">
@@ -876,217 +829,211 @@ export default function TuskersScoring() {
               </div>
             </div>
 
-            {/* Right Column - Statistics */}
             <div className="space-y-4">
-            {/* Dismissed Batsmen */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Dismissed Batsmen</h3>
-              <div className="space-y-2">
-                {matchState.dismissedBatsmen.map((batsman, index) => (
-                  <div key={index} className="p-2 bg-red-50 rounded text-sm">
-                    <div className="font-semibold">{batsman.name}</div>
-                    <div className="text-gray-600">
-                      {batsman.runs} ({batsman.balls})
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-lg font-semibold mb-4">Dismissed Batsmen</h3>
+                <div className="space-y-2">
+                  {matchState.dismissedBatsmen.map((batsman, index) => (
+                    <div key={index} className="p-2 bg-red-50 rounded text-sm">
+                      <div className="font-semibold">{batsman.name}</div>
+                      <div className="text-gray-600">
+                        {batsman.runs} ({batsman.balls})
+                      </div>
+                      <div className="text-red-600 text-xs">
+                        {batsman.dismissalType?.replace('_', ' ')}
+                        {batsman.bowler && ` b ${batsman.bowler}`}
+                        {batsman.fielder && ` c ${batsman.fielder}`}
+                      </div>
                     </div>
-                    <div className="text-red-600 text-xs">
-                      {batsman.dismissalType?.replace('_', ' ')}
-                      {batsman.bowler && ` b ${batsman.bowler}`}
-                      {batsman.fielder && ` c ${batsman.fielder}`}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Bowlers */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Bowlers</h3>
-              <div className="space-y-2">
-                {matchState.bowlers.map((bowler, index) => (
-                  <div key={index} className="p-2 bg-blue-50 rounded text-sm">
-                    <div className="font-semibold">{bowler.name}</div>
-                    <div className="text-gray-600">
-                      {bowler.overs}-{bowler.maidens}-{bowler.runs}-{bowler.wickets}
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-lg font-semibold mb-4">Bowlers</h3>
+                <div className="space-y-2">
+                  {matchState.bowlers.map((bowler, index) => (
+                    <div key={index} className="p-2 bg-blue-50 rounded text-sm">
+                      <div className="font-semibold">{bowler.name}</div>
+                      <div className="text-gray-600">
+                        {bowler.overs}-{bowler.maidens}-{bowler.runs}-{bowler.wickets}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Dismissal Modal */}
-      {matchState.showDismissalModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">Dismissal Details</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Dismissal Type</label>
-                <input
-                  type="text"
-                  value={dismissalData.type.replace('_', ' ').toUpperCase()}
-                  disabled
-                  className="w-full p-2 border rounded bg-gray-100"
-                />
-              </div>
+        {matchState.showDismissalModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">Dismissal Details</h3>
               
-              {(dismissalData.type === 'caught' || dismissalData.type === 'run_out') && (
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Fielder</label>
-                  <select
-                    value={dismissalData.fielder}
-                    onChange={(e) => setDismissalData(prev => ({ ...prev, fielder: e.target.value }))}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="">Select Fielder</option>
-                    {matchState.availablePlayers.map((player, index) => (
-                      <option key={index} value={player}>{player}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              
-              {dismissalData.type === 'stumped' && (
-                <div>
-                  <label className="block text-sm font-medium mb-1">Wicket Keeper</label>
+                  <label className="block text-sm font-medium mb-1">Dismissal Type</label>
                   <input
                     type="text"
-                    value={dismissalData.fielder}
-                    onChange={(e) => setDismissalData(prev => ({ ...prev, fielder: e.target.value }))}
-                    placeholder="Wicket keeper name"
+                    value={dismissalData.type.replace('_', ' ').toUpperCase()}
+                    disabled
+                    className="w-full p-2 border rounded bg-gray-100"
+                  />
+                </div>
+                
+                {(dismissalData.type === 'caught' || dismissalData.type === 'run_out') && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Fielder</label>
+                    <select
+                      value={dismissalData.fielder}
+                      onChange={(e) => setDismissalData(prev => ({ ...prev, fielder: e.target.value }))}
+                      className="w-full p-2 border rounded"
+                    >
+                      <option value="">Select Fielder</option>
+                      {matchState.availablePlayers.map((player, index) => (
+                        <option key={index} value={player}>{player}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                {dismissalData.type === 'stumped' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Wicket Keeper</label>
+                    <input
+                      type="text"
+                      value={dismissalData.fielder}
+                      onChange={(e) => setDismissalData(prev => ({ ...prev, fielder: e.target.value }))}
+                      placeholder="Wicket keeper name"
+                      className="w-full p-2 border rounded"
+                    />
+                  </div>
+                )}
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Bowler</label>
+                  <input
+                    type="text"
+                    value={dismissalData.bowler}
+                    onChange={(e) => setDismissalData(prev => ({ ...prev, bowler: e.target.value }))}
                     className="w-full p-2 border rounded"
                   />
                 </div>
-              )}
+              </div>
               
-              <div>
-                <label className="block text-sm font-medium mb-1">Bowler</label>
-                <input
-                  type="text"
-                  value={dismissalData.bowler}
-                  onChange={(e) => setDismissalData(prev => ({ ...prev, bowler: e.target.value }))}
-                  className="w-full p-2 border rounded"
-                />
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={confirmDismissal}
+                  className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setMatchState(prev => prev ? { ...prev, showDismissalModal: false } : null)}
+                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
-            
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={confirmDismissal}
-                className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={() => setMatchState(prev => prev ? { ...prev, showDismissalModal: false } : null)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* New Batsman Modal */}
-      {matchState.showBatsmanModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">Select New Batsman</h3>
-            
-            <select
-              value={newBatsmanName}
-              onChange={(e) => setNewBatsmanName(e.target.value)}
-              className="w-full p-3 border rounded-lg mb-4"
-            >
-              <option value="">Select Batsman</option>
-              {matchState.availablePlayers.map((player, index) => (
-                <option key={index} value={player}>{player}</option>
-              ))}
-            </select>
-            
-            <div className="flex gap-3">
-              <button
-                onClick={addNewBatsmanToMatch}
-                disabled={!newBatsmanName}
-                className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
+        {matchState.showBatsmanModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">Select New Batsman</h3>
+              
+              <select
+                value={newBatsmanName}
+                onChange={(e) => setNewBatsmanName(e.target.value)}
+                className="w-full p-3 border rounded-lg mb-4"
               >
-                Confirm
-              </button>
-              <button
-                onClick={() => setMatchState(prev => prev ? { ...prev, showBatsmanModal: false } : null)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
-              >
-                Cancel
-              </button>
+                <option value="">Select Batsman</option>
+                {matchState.availablePlayers.map((player, index) => (
+                  <option key={index} value={player}>{player}</option>
+                ))}
+              </select>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={addNewBatsmanToMatch}
+                  disabled={!newBatsmanName}
+                  className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setMatchState(prev => prev ? { ...prev, showBatsmanModal: false } : null)}
+                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Bowler Selection Modal */}
-      {matchState.showBowlerSelection && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">Select New Bowler</h3>
-            
-            <select
-              value={newBowlerName}
-              onChange={(e) => setNewBowlerName(e.target.value)}
-              className="w-full p-3 border rounded-lg mb-4"
-            >
-              <option value="">Select Bowler</option>
-              {matchState.availablePlayers.filter(player => 
-                canBowlerBowl(player, matchState.format)
-              ).map((player, index) => (
-                <option key={index} value={player}>{player}</option>
-              ))}
-            </select>
-            
-            <div className="flex gap-3">
-              <button
-                onClick={confirmBowlerChange}
-                disabled={!newBowlerName}
-                className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
+        {matchState.showBowlerSelection && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">Select New Bowler</h3>
+              
+              <select
+                value={newBowlerName}
+                onChange={(e) => setNewBowlerName(e.target.value)}
+                className="w-full p-3 border rounded-lg mb-4"
               >
-                Confirm
-              </button>
-              <button
-                onClick={() => setMatchState(prev => prev ? { ...prev, showBowlerSelection: false } : null)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
-              >
-                Cancel
-              </button>
+                <option value="">Select Bowler</option>
+                {matchState.availablePlayers.filter(player => 
+                  canBowlerBowl(player, matchState.format)
+                ).map((player, index) => (
+                  <option key={index} value={player}>{player}</option>
+                ))}
+              </select>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={confirmBowlerChange}
+                  disabled={!newBowlerName}
+                  className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setMatchState(prev => prev ? { ...prev, showBowlerSelection: false } : null)}
+                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Innings Break Modal */}
-      {matchState.showInningsDeclaration && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md text-center">
-            <h3 className="text-xl font-semibold mb-4">Innings Break</h3>
-            <div className="text-4xl font-bold text-blue-600 mb-4">
-              {Math.floor(matchState.inningsBreakTimer / 60)}:{(matchState.inningsBreakTimer % 60).toString().padStart(2, '0')}
+        {matchState.showInningsDeclaration && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md text-center">
+              <h3 className="text-xl font-semibold mb-4">Innings Break</h3>
+              <div className="text-4xl font-bold text-blue-600 mb-4">
+                {Math.floor(matchState.inningsBreakTimer / 60)}:{(matchState.inningsBreakTimer % 60).toString().padStart(2, '0')}
+              </div>
+              <p className="text-gray-600 mb-6">
+                {matchState.innings === 1 ? 'First innings complete' : 'Match complete'}
+              </p>
+              {matchState.inningsBreakTimer === 0 && (
+                <button
+                  onClick={startSecondInnings}
+                  className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600"
+                >
+                  Start Second Innings
+                </button>
+              )}
             </div>
-            <p className="text-gray-600 mb-6">
-              {matchState.innings === 1 ? 'First innings complete' : 'Match complete'}
-            </p>
-            {matchState.inningsBreakTimer === 0 && (
-              <button
-                onClick={startSecondInnings}
-                className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600"
-              >
-                Start Second Innings
-              </button>
-            )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
