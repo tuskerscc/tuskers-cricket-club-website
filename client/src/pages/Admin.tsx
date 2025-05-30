@@ -206,8 +206,8 @@ function AdminContent() {
     queryKey: ['/api/players']
   });
 
-  const { data: matches = [] } = useQuery<(Match & { homeTeam: Team; awayTeam: Team; venue: Venue; competition: Competition })[]>({
-    queryKey: ['/api/matches']
+  const { data: announcements = [] } = useQuery<any[]>({
+    queryKey: ['/api/announcements']
   });
 
   const { data: articles = [] } = useQuery<Article[]>({
@@ -245,6 +245,16 @@ function AdminContent() {
       category: 'match',
       imageUrl: '',
       matchId: null
+    }
+  });
+
+  // Announcement form
+  const announcementForm = useForm({
+    defaultValues: {
+      title: '',
+      content: '',
+      category: '',
+      priority: ''
     }
   });
 
@@ -471,9 +481,9 @@ function AdminContent() {
             <nav className="flex space-x-8 px-6" aria-label="Tabs">
               {[
                 { id: 'players', name: 'Players', icon: '👤' },
-                { id: 'matches', name: 'Matches', icon: '🏏' },
                 { id: 'articles', name: 'Articles', icon: '📰' },
                 { id: 'gallery', name: 'Gallery', icon: '🖼️' },
+                { id: 'announcements', name: 'Announcements', icon: '📢' },
                 { id: 'analytics', name: 'Analytics', icon: '📊' }
               ].map((tab) => (
                 <button
