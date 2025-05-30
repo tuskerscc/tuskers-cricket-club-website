@@ -808,6 +808,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual match performance entry endpoint
+  app.post("/api/match-performance/manual", adminAuth, async (req, res) => {
+    try {
+      const { matchData, playerPerformances } = req.body;
+      
+      if (!matchData || !Array.isArray(playerPerformances)) {
+        return res.status(400).json({ message: 'Match data and player performances are required' });
+      }
+
+      // Update individual player stats
+      for (const performance of playerPerformances) {
+        if (performance.playerId && Object.keys(performance).some(key => 
+          key !== 'playerId' && performance[key] > 0
+        )) {
+          // Only update if there are actual performance values
+          const statsUpdate: any = {};
+          if (performance.runsScored > 0) statsUpdate.runsScored = performance.runsScored;
+          if (performance.ballsFaced > 0) statsUpdate.ballsFaced = performance.ballsFaced;
+          if (performance.fours > 0) statsUpdate.fours = performance.fours;
+          if (performance.sixes > 0) statsUpdate.sixes = performance.sixes;
+          if (performance.wicketsTaken > 0) statsUpdate.wicketsTaken = performance.wicketsTaken;
+          if (performance.ballsBowled > 0) statsUpdate.ballsBowled = performance.ballsBowled;
+          if (performance.runsConceded > 0) statsUpdate.runsConceded = performance.runsConceded;
+          if (performance.catches > 0) statsUpdate.catches = performance.catches;
+          if (performance.stumpings > 0) statsUpdate.stumpings = performance.stumpings;
+          if (performance.runOuts > 0) statsUpdate.runOuts = performance.runOuts;
+
+          if (Object.keys(statsUpdate).length > 0) {
+            await storage.updatePlayerStats(performance.playerId, statsUpdate);
+          }
+        }
+      }
+
+      // Update team stats if match result is available
+      if (matchData.result && (matchData.result === 'Won' || matchData.result === 'Lost' || matchData.result === 'Draw')) {
+        const currentStats = await storage.getTeamStats();
+        const newTotalMatches = currentStats.totalMatches + 1;
+        const newMatchesWon = matchData.result === 'Won' ? currentStats.matchesWon + 1 : currentStats.matchesWon;
+        
+        // Calculate totals from this match
+        const totalRunsThisMatch = playerPerformances.reduce((sum, perf) => sum + (perf.runsScored || 0), 0);
+        const totalWicketsThisMatch = playerPerformances.reduce((sum, perf) => sum + (perf.wicketsTaken || 0), 0);
+
+        await storage.updateTeamStats({
+          matchesWon: newMatchesWon,
+          totalMatches: newTotalMatches,
+          totalRuns: currentStats.totalRuns + totalRunsThisMatch,
+          wicketsTaken: currentStats.wicketsTaken + totalWicketsThisMatch,
+          totalOvers: 20, // Default overs for manual entry
+          runsAgainst: 150, // Default opposition runs
+          oversAgainst: 20, // Default opposition overs
+        });
+      }
+      
+      res.json({ message: 'Match performance recorded successfully' });
+    } catch (error) {
+      console.error('Error recording manual match performance:', error);
+      res.status(500).json({ message: 'Failed to record match performance' });
+    }
+  });
+
   app.get("/api/matches/:matchId/performances", async (req, res) => {
     try {
       const matchId = parseInt(req.params.matchId);

@@ -99,7 +99,7 @@ export default function MatchPerformance() {
 
   const updateStatsMutation = useMutation({
     mutationFn: async (data: { matchData: typeof matchData; playerPerformances: PerformanceData[] }) => {
-      const response = await fetch(`/api/matches/performance-entry`, {
+      const response = await fetch(`/api/match-performance/manual`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
