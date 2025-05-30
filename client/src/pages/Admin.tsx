@@ -222,7 +222,13 @@ function AdminContent() {
     queryKey: ['/api/gallery']
   });
 
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<{
+    matchesWon: number;
+    totalMatches: number;
+    totalRuns: number;
+    wicketsTaken: number;
+    nrr: number;
+  }>({
     queryKey: ['/api/stats/team']
   });
 
@@ -390,6 +396,21 @@ function AdminContent() {
     onError: (error) => {
       console.error('Add announcement error:', error);
       toast({ title: "Error", description: "Failed to create announcement", variant: "destructive" });
+    }
+  });
+
+  // Player statistics mutation
+  const updatePlayerStatsMutation = useMutation({
+    mutationFn: ({ playerId, data }: { playerId: number; data: any }) => 
+      apiRequest('PUT', `/api/players/${playerId}/stats`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/players'] });
+      setEditingPlayer(null);
+      toast({ title: "Success", description: "Player statistics updated successfully" });
+    },
+    onError: (error) => {
+      console.error('Update player stats error:', error);
+      toast({ title: "Error", description: "Failed to update player statistics", variant: "destructive" });
     }
   });
 
