@@ -170,6 +170,11 @@ export default function TuskersScoring() {
     console.log('Setting showPlayerSelection to true');
     setShowPlayerSelection(true);
     console.log('showPlayerSelection should now be:', true);
+    
+    // Add a slight delay to ensure state updates
+    setTimeout(() => {
+      console.log('Modal should be visible now. showPlayerSelection =', showPlayerSelection);
+    }, 100);
   };
 
   const startMatchWithPlayers = () => {
@@ -923,10 +928,12 @@ Generated: ${new Date().toLocaleString()}
         </div>
       </div>
 
+      {/* Debug indicator */}
+      {showPlayerSelection && <div className="fixed top-0 left-0 bg-red-500 text-white p-2 z-[9999]">Modal should be visible</div>}
+      
       {/* Player Selection Modal */}
       {showPlayerSelection && (
-        console.log('Rendering player selection modal') ||
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
