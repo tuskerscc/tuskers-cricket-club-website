@@ -222,6 +222,10 @@ function AdminContent() {
     queryKey: ['/api/gallery']
   });
 
+  const { data: stats } = useQuery({
+    queryKey: ['/api/stats/team']
+  });
+
   // Player form
   const playerForm = useForm({
     defaultValues: {

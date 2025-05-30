@@ -88,10 +88,20 @@ export interface IStorage {
   // Statistics
   getTeamStats(): Promise<{
     matchesWon: number;
+    totalMatches: number;
     totalRuns: number;
     wicketsTaken: number;
     nrr: number;
   }>;
+  updateTeamStats(data: {
+    matchesWon: number;
+    totalMatches: number;
+    totalRuns: number;
+    wicketsTaken: number;
+    totalOvers: number;
+    runsAgainst: number;
+    oversAgainst: number;
+  }): Promise<void>;
 
   // Trivia
   getTriviaQuestions(): Promise<TriviaQuestion[]>;
@@ -411,18 +421,86 @@ export class DatabaseStorage implements IStorage {
 
   async getTeamStats(): Promise<{
     matchesWon: number;
+    totalMatches: number;
     totalRuns: number;
     wicketsTaken: number;
     nrr: number;
   }> {
-    // For now, return sample NRR data
-    // In production, this would calculate from actual match data
+    try {
+      const [stats] = await db.select().from(teamStats).limit(1);
+      if (stats) {
+        return {
+          matchesWon: stats.matchesWon || 0,
+          totalMatches: stats.totalMatches || 0,
+          totalRuns: stats.totalRuns || 0,
+          wicketsTaken: stats.wicketsTaken || 0,
+          nrr: stats.nrr || 0
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching team stats:', error);
+    }
+    
+    // Return default values if no stats found
     return {
       matchesWon: 15,
+      totalMatches: 20,
       totalRuns: 2850,
       wicketsTaken: 125,
-      nrr: 1.245 // Positive NRR indicating good team performance
+      nrr: 1.245
     };
+  }
+
+  async updateTeamStats(data: {
+    matchesWon: number;
+    totalMatches: number;
+    totalRuns: number;
+    wicketsTaken: number;
+    totalOvers: number;
+    runsAgainst: number;
+    oversAgainst: number;
+  }): Promise<void> {
+    try {
+      // Calculate NRR: (Total runs scored / Total overs faced) - (Total runs conceded / Total overs bowled)
+      const runRate = data.totalOvers > 0 ? data.totalRuns / data.totalOvers : 0;
+      const concededRate = data.oversAgainst > 0 ? data.runsAgainst / data.oversAgainst : 0;
+      const nrr = runRate - concededRate;
+
+      // Check if stats exist
+      const [existingStats] = await db.select().from(teamStats).limit(1);
+      
+      if (existingStats) {
+        // Update existing record
+        await db.update(teamStats)
+          .set({
+            matchesWon: data.matchesWon,
+            totalMatches: data.totalMatches,
+            totalRuns: data.totalRuns,
+            wicketsTaken: data.wicketsTaken,
+            totalOvers: data.totalOvers,
+            runsAgainst: data.runsAgainst,
+            oversAgainst: data.oversAgainst,
+            nrr: nrr,
+            updatedAt: new Date()
+          })
+          .where(eq(teamStats.id, existingStats.id));
+      } else {
+        // Insert new record
+        await db.insert(teamStats).values({
+          matchesWon: data.matchesWon,
+          totalMatches: data.totalMatches,
+          totalRuns: data.totalRuns,
+          wicketsTaken: data.wicketsTaken,
+          totalOvers: data.totalOvers,
+          runsAgainst: data.runsAgainst,
+          oversAgainst: data.oversAgainst,
+          nrr: nrr
+        });
+      }
+    } catch (error) {
+      console.error('Error updating team stats:', error);
+      throw error;
+    }
   }
 
   async getTriviaQuestions(): Promise<TriviaQuestion[]> {

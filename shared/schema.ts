@@ -173,6 +173,20 @@ export const announcements = pgTable("announcements", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Team statistics table
+export const teamStats = pgTable("team_stats", {
+  id: serial("id").primaryKey(),
+  matchesWon: integer("matches_won").default(0),
+  totalMatches: integer("total_matches").default(0),
+  totalRuns: integer("total_runs").default(0),
+  wicketsTaken: integer("wickets_taken").default(0),
+  totalOvers: real("total_overs").default(0.0),
+  runsAgainst: integer("runs_against").default(0),
+  oversAgainst: real("overs_against").default(0.0),
+  nrr: real("nrr").default(0.0),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Trivia questions table
 export const triviaQuestions = pgTable("trivia_questions", {
   id: serial("id").primaryKey(),
