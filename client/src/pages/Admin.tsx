@@ -563,6 +563,7 @@ function AdminContent() {
             <nav className="flex space-x-8 px-6" aria-label="Tabs">
               {[
                 { id: 'players', name: 'Players', icon: '👤' },
+                { id: 'playerstats', name: 'Player Stats', icon: '🏏' },
                 { id: 'articles', name: 'Articles', icon: '📰' },
                 { id: 'gallery', name: 'Gallery', icon: '🖼️' },
                 { id: 'announcements', name: 'Announcements', icon: '📢' },
@@ -947,6 +948,218 @@ function AdminContent() {
                     ))
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Player Statistics Tab */}
+        {activeTab === 'playerstats' && (
+          <div className="space-y-8">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-bold text-[#1e3a8a] mb-6">Player Statistics Management</h2>
+              
+              {/* Players Statistics Grid */}
+              <div className="grid gap-6">
+                {players.map((player) => (
+                  <div key={player.id} className="border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-[#1e3a8a] text-white rounded-full flex items-center justify-center font-bold">
+                          {player.jerseyNumber || player.name.charAt(0)}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">{player.name}</h3>
+                          <p className="text-sm text-gray-600">{player.role}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setEditingPlayer(editingPlayer === player.id ? null : player.id)}
+                        className="bg-[#1e3a8a] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#1e40af] transition-colors"
+                      >
+                        {editingPlayer === player.id ? 'Cancel' : 'Edit Stats'}
+                      </button>
+                    </div>
+
+                    {/* Current Statistics Display */}
+                    {player.stats ? (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div className="bg-blue-50 rounded-lg p-3 text-center">
+                          <div className="text-lg font-bold text-blue-600">{player.stats.runsScored || 0}</div>
+                          <div className="text-xs text-gray-600">Runs Scored</div>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-3 text-center">
+                          <div className="text-lg font-bold text-green-600">{player.stats.wicketsTaken || 0}</div>
+                          <div className="text-xs text-gray-600">Wickets</div>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-3 text-center">
+                          <div className="text-lg font-bold text-yellow-600">{player.stats.catches || 0}</div>
+                          <div className="text-xs text-gray-600">Catches</div>
+                        </div>
+                        <div className="bg-purple-50 rounded-lg p-3 text-center">
+                          <div className="text-lg font-bold text-purple-600">{player.stats.matches || 0}</div>
+                          <div className="text-xs text-gray-600">Matches</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-50 rounded-lg p-4 text-center text-gray-500 mb-4">
+                        No statistics recorded yet
+                      </div>
+                    )}
+
+                    {/* Edit Statistics Form */}
+                    {editingPlayer === player.id && (
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target as HTMLFormElement);
+                        const data = {
+                          playerId: player.id,
+                          matches: parseInt(formData.get('matches') as string) || 0,
+                          runsScored: parseInt(formData.get('runsScored') as string) || 0,
+                          ballsFaced: parseInt(formData.get('ballsFaced') as string) || 0,
+                          fours: parseInt(formData.get('fours') as string) || 0,
+                          sixes: parseInt(formData.get('sixes') as string) || 0,
+                          wicketsTaken: parseInt(formData.get('wicketsTaken') as string) || 0,
+                          ballsBowled: parseInt(formData.get('ballsBowled') as string) || 0,
+                          runsConceded: parseInt(formData.get('runsConceded') as string) || 0,
+                          catches: parseInt(formData.get('catches') as string) || 0,
+                          stumpings: parseInt(formData.get('stumpings') as string) || 0,
+                          runOuts: parseInt(formData.get('runOuts') as string) || 0
+                        };
+                        updatePlayerStatsMutation.mutate({ playerId: player.id, data });
+                      }} className="border-t pt-4 mt-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Matches</label>
+                            <input
+                              name="matches"
+                              type="number"
+                              defaultValue={player.stats?.matches || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Runs Scored</label>
+                            <input
+                              name="runsScored"
+                              type="number"
+                              defaultValue={player.stats?.runsScored || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Balls Faced</label>
+                            <input
+                              name="ballsFaced"
+                              type="number"
+                              defaultValue={player.stats?.ballsFaced || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Fours</label>
+                            <input
+                              name="fours"
+                              type="number"
+                              defaultValue={player.stats?.fours || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Sixes</label>
+                            <input
+                              name="sixes"
+                              type="number"
+                              defaultValue={player.stats?.sixes || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Wickets Taken</label>
+                            <input
+                              name="wicketsTaken"
+                              type="number"
+                              defaultValue={player.stats?.wicketsTaken || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Balls Bowled</label>
+                            <input
+                              name="ballsBowled"
+                              type="number"
+                              defaultValue={player.stats?.ballsBowled || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Runs Conceded</label>
+                            <input
+                              name="runsConceded"
+                              type="number"
+                              defaultValue={player.stats?.runsConceded || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Catches</label>
+                            <input
+                              name="catches"
+                              type="number"
+                              defaultValue={player.stats?.catches || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Stumpings</label>
+                            <input
+                              name="stumpings"
+                              type="number"
+                              defaultValue={player.stats?.stumpings || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Run Outs</label>
+                            <input
+                              name="runOuts"
+                              type="number"
+                              defaultValue={player.stats?.runOuts || ''}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              placeholder="0"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex space-x-2 mt-4">
+                          <button
+                            type="submit"
+                            disabled={updatePlayerStatsMutation.isPending}
+                            className="bg-[#1e3a8a] text-white px-4 py-2 rounded text-sm hover:bg-[#1e40af] transition-colors disabled:opacity-50"
+                          >
+                            {updatePlayerStatsMutation.isPending ? 'Saving...' : 'Save Statistics'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingPlayer(null)}
+                            className="bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
