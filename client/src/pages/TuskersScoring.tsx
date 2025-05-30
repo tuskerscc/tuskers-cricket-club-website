@@ -141,8 +141,28 @@ export default function TuskersScoring() {
   };
 
   const initializeMatch = () => {
+    console.log('Validation check:', {
+      selectedTeam: !!selectedTeam,
+      oppositionName: !!oppositionName,
+      venue: !!venue,
+      matchDate: !!matchDate,
+      tossWinner: !!tossWinner,
+      tossChoice: !!tossChoice
+    });
+
     if (!selectedTeam || !oppositionName || !venue || !matchDate || !tossWinner || !tossChoice) {
-      toast({ title: "Error", description: "Please fill all match details including toss information" });
+      const missingFields = [];
+      if (!selectedTeam) missingFields.push('Team');
+      if (!oppositionName) missingFields.push('Opposition Team');
+      if (!venue) missingFields.push('Venue');
+      if (!matchDate) missingFields.push('Match Date');
+      if (!tossWinner) missingFields.push('Toss Winner');
+      if (!tossChoice) missingFields.push('Toss Choice');
+      
+      toast({ 
+        title: "Error", 
+        description: `Please fill: ${missingFields.join(', ')}` 
+      });
       return;
     }
 
@@ -953,7 +973,7 @@ Generated: ${new Date().toLocaleString()}
                         <div className="flex-1">
                           <div className="font-medium">{player.name}</div>
                           <div className="text-sm text-gray-500">
-                            #{player.jerseyNumber} • {player.position}
+                            {player.position}
                           </div>
                         </div>
                       </label>
