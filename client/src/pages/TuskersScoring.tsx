@@ -1420,6 +1420,7 @@ export default function TuskersScoring() {
         </div>
       )}
       </div>
+      </div>
     </div>
   );
 }
