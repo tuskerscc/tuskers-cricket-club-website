@@ -20,13 +20,7 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
   
   const updateStatsMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`/api/players/${playerId}/stats`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      return apiRequest(`/api/players/${playerId}/stats`, 'PUT', data);
     },
     onSuccess: () => {
       toast({ title: "Statistics updated successfully" });
@@ -844,7 +838,7 @@ function AdminContent() {
                         </div>
                         <div className="text-sm text-gray-600">
                           <p>{match.venue.name}</p>
-                          <p>{new Date(match.scheduledAt).toLocaleDateString()}</p>
+                          <p>{new Date(match.matchDate).toLocaleDateString()}</p>
                         </div>
                       </div>
                     ))
