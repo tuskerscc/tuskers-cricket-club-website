@@ -75,7 +75,7 @@ export default function TuskersScoring() {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [oppositionName, setOppositionName] = useState('');
   const [venue, setVenue] = useState('');
-  const [matchDate, setMatchDate] = useState('');
+  const [matchDate, setMatchDate] = useState(new Date().toISOString().split('T')[0]);
   const [tossWinner, setTossWinner] = useState<'tuskers' | 'opposition' | ''>('');
   const [tossChoice, setTossChoice] = useState<'bat' | 'bowl' | ''>('');
   const [selectedTuskersPlayers, setSelectedTuskersPlayers] = useState<number[]>([]);
@@ -607,6 +607,7 @@ Generated: ${new Date().toLocaleString()}
                   <input
                     type="date"
                     value={matchDate}
+                    min={new Date().toISOString().split('T')[0]}
                     onChange={(e) => setMatchDate(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
