@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useCountdown } from '@/hooks/useCountdown';
 import type { MatchWithDetails } from '@/lib/types';
@@ -45,24 +45,24 @@ export default function MatchCenter() {
   });
 
   const nextMatch = upcomingMatches[0];
-  const matchDate = nextMatch?.matchDate || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString();
-  const countdown = useCountdown(new Date(matchDate));
 
-  const filteredMatches = matches.filter(match => {
-    const matchDate = new Date(match.matchDate);
-    const now = new Date();
-    
-    if (filter === 'upcoming') {
-      return matchDate > now;
-    }
-    if (filter === 'completed') {
-      return matchDate < now;
-    }
-    if (filter === 'home') {
-      return match.homeTeam.name.toLowerCase().includes('tuskers');
-    }
-    return false;
-  });
+  const filteredMatches = useMemo(() => {
+    return matches.filter(match => {
+      const matchDate = new Date(match.matchDate);
+      const now = new Date();
+      
+      if (filter === 'upcoming') {
+        return matchDate > now;
+      }
+      if (filter === 'completed') {
+        return matchDate < now;
+      }
+      if (filter === 'home') {
+        return match.homeTeam.name.toLowerCase().includes('tuskers');
+      }
+      return false;
+    });
+  }, [matches, filter]);
 
   if (isLoading) {
     return (

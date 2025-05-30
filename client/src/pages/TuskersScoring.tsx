@@ -92,6 +92,20 @@ export default function TuskersScoring() {
     }
   }, []);
 
+  // Auto-select Tuskers CC team when teams are loaded
+  useEffect(() => {
+    if (teams.length > 0 && !selectedTeam) {
+      const tuskersTeam = teams.find(team => 
+        team.name.toLowerCase().includes('tuskers') || 
+        team.shortName.toLowerCase().includes('tuskers') ||
+        team.name.toLowerCase().includes('tuskers cc')
+      );
+      if (tuskersTeam) {
+        setSelectedTeam(tuskersTeam);
+      }
+    }
+  }, [teams, selectedTeam]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
@@ -486,20 +500,27 @@ Generated: ${new Date().toLocaleString()}
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Select Tuskers CC Team</label>
-                <select
-                  value={selectedTeam?.id || ''}
-                  onChange={(e) => {
-                    const team = teams.find(t => t.id === parseInt(e.target.value));
-                    setSelectedTeam(team || null);
-                  }}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select Team</option>
-                  {teams.map(team => (
-                    <option key={team.id} value={team.id}>{team.name}</option>
-                  ))}
-                </select>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Your Team</label>
+                <div className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-blue-50 border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span className="text-yellow-400 font-bold text-sm">TC</span>
+                      </div>
+                      <div>
+                        <div className="font-semibold text-blue-900">
+                          {selectedTeam?.name || 'Tuskers CC'}
+                        </div>
+                        <div className="text-sm text-blue-700">
+                          Official Team Account
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
+                      OFFICIAL
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div>
