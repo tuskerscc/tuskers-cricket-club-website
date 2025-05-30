@@ -338,6 +338,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/articles", async (req, res) => {
     try {
       const validatedData = insertArticleSchema.parse(req.body);
+      // Set publishedAt to current date if the article is published
+      if (validatedData.isPublished && !validatedData.publishedAt) {
+        validatedData.publishedAt = new Date();
+      }
       const article = await storage.createArticle(validatedData);
       res.status(201).json(article);
     } catch (error) {
