@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Bat, Ball, Target, Users, Trophy, Calendar } from "lucide-react";
+import { Target, Users, Trophy, Calendar, Activity, Zap } from "lucide-react";
 
 interface Player {
   id: number;
@@ -102,10 +102,19 @@ export default function MatchPerformance() {
 
   const updateStatsMutation = useMutation({
     mutationFn: async (data: { matchId: number; playerPerformances: PerformanceData[] }) => {
-      return apiRequest(`/api/matches/${data.matchId}/performances`, {
+      const response = await fetch(`/api/matches/${data.matchId}/performances`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ playerPerformances: data.playerPerformances }),
       });
+      
+      if (!response.ok) {
+        throw new Error("Failed to update player statistics");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -279,11 +288,11 @@ export default function MatchPerformance() {
                         <Tabs defaultValue="batting" className="w-full">
                           <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="batting" className="flex items-center gap-2">
-                              <Bat className="h-4 w-4" />
+                              <Activity className="h-4 w-4" />
                               Batting
                             </TabsTrigger>
                             <TabsTrigger value="bowling" className="flex items-center gap-2">
-                              <Ball className="h-4 w-4" />
+                              <Zap className="h-4 w-4" />
                               Bowling
                             </TabsTrigger>
                             <TabsTrigger value="fielding" className="flex items-center gap-2">

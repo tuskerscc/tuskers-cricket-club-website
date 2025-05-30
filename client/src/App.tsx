@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import Admin from "@/pages/Admin";
 import AdminLogin from "@/pages/AdminLogin";
+import MatchPerformance from "@/pages/MatchPerformance";
 
 import NotFound from "@/pages/not-found";
 import FanScoring from "@/pages/FanScoring";
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={Admin} />
+      <Route path="/admin/match-performance" component={MatchPerformance} />
       <Route path="/fan-scoring" component={FanScoring} />
       <Route path="/scoring/fan" component={FanScoring} />
 
