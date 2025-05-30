@@ -98,6 +98,10 @@ export default function TuskersScoring() {
   const [newBatsmanName, setNewBatsmanName] = useState('');
   const [newBowlerName, setNewBowlerName] = useState('');
   const [inningsBreakDuration, setInningsBreakDuration] = useState(3);
+  const [showOpenersSelection, setShowOpenersSelection] = useState(false);
+  const [openingBatsman1, setOpeningBatsman1] = useState('');
+  const [openingBatsman2, setOpeningBatsman2] = useState('');
+  const [openingBowler, setOpeningBowler] = useState('');
 
   const { toast } = useToast();
 
@@ -230,6 +234,22 @@ export default function TuskersScoring() {
       return;
     }
 
+    // Show openers selection modal instead of starting match directly
+    setShowOpenersSelection(true);
+    setShowSetup(false);
+  };
+
+  const startMatchWithOpeners = () => {
+    if (!openingBatsman1 || !openingBatsman2 || !openingBowler) {
+      toast({ title: "Error", description: "Please select both opening batsmen and opening bowler" });
+      return;
+    }
+
+    if (openingBatsman1 === openingBatsman2) {
+      toast({ title: "Error", description: "Opening batsmen must be different players" });
+      return;
+    }
+
     const maxOvers = getMaxOvers(selectedFormat);
     
     const tuskersName = selectedTeam!.name;
@@ -246,10 +266,10 @@ export default function TuskersScoring() {
       overs: 0,
       balls: 0,
       batsmen: [
-        { name: 'Select Batsman', runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
-        { name: 'Select Batsman', runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
+        { name: openingBatsman1, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false },
+        { name: openingBatsman2, runs: 0, balls: 0, fours: 0, sixes: 0, isOut: false }
       ],
-      currentBowler: { name: 'Select Bowler', overs: 0, maidens: 0, runs: 0, wickets: 0 },
+      currentBowler: { name: openingBowler, overs: 0, maidens: 0, runs: 0, wickets: 0 },
       bowlers: [],
       recentOvers: [],
       format: selectedFormat,
@@ -273,12 +293,9 @@ export default function TuskersScoring() {
       battingTeamPlayers: shouldTuskersBatFirst ? players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name) : oppositionPlayers.filter(name => name.trim() !== ''),
       bowlingTeamPlayers: shouldTuskersBatFirst ? oppositionPlayers.filter(name => name.trim() !== '') : players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name)
     });
-    setShowSetup(false);
+    setShowOpenersSelection(false);
     
-    // Show initial player selection modal for openers and bowler
-    setTimeout(() => {
-      setMatchState(prev => prev ? { ...prev, showBatsmanModal: true } : null);
-    }, 100);
+    toast({ title: "Match Started!", description: `${tuskersName} vs ${oppositionName} - ${selectedFormat} match has begun!` });
   };
 
   const handleDismissal = (type: string) => {
@@ -1309,6 +1326,99 @@ export default function TuskersScoring() {
           </div>
         )}
       </div>
-    </div>
+
+      {/* Openers Selection Modal */}
+      {showOpenersSelection && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <div className="text-center mb-6">
+            <h2 className="text-xl font-bold text-[#1e3a8a] mb-2">Select Players</h2>
+            <p className="text-gray-600 text-sm">
+              {selectedTeam?.name} vs {oppositionName}
+            </p>
+            <p className="text-gray-500 text-xs">
+              {selectedFormat} • {getMaxOvers(selectedFormat)} overs
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Opening Batsman 1</label>
+              <select
+                value={openingBatsman1}
+                onChange={(e) => setOpeningBatsman1(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+              >
+                <option value="">Enter batsman name</option>
+                {(tossWinner === 'tuskers' && tossChoice === 'bat') || (tossWinner === 'opposition' && tossChoice === 'bowl') ? 
+                  players.filter(player => selectedTuskersPlayers.includes(player.id)).map(player => (
+                    <option key={player.id} value={player.name}>{player.name}</option>
+                  )) :
+                  oppositionPlayers.filter(name => name.trim() !== '').map((name, index) => (
+                    <option key={index} value={name}>{name}</option>
+                  ))
+                }
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Opening Batsman 2</label>
+              <select
+                value={openingBatsman2}
+                onChange={(e) => setOpeningBatsman2(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+              >
+                <option value="">Enter batsman name</option>
+                {(tossWinner === 'tuskers' && tossChoice === 'bat') || (tossWinner === 'opposition' && tossChoice === 'bowl') ? 
+                  players.filter(player => selectedTuskersPlayers.includes(player.id)).map(player => (
+                    <option key={player.id} value={player.name}>{player.name}</option>
+                  )) :
+                  oppositionPlayers.filter(name => name.trim() !== '').map((name, index) => (
+                    <option key={index} value={name}>{name}</option>
+                  ))
+                }
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Opening Bowler</label>
+              <select
+                value={openingBowler}
+                onChange={(e) => setOpeningBowler(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+              >
+                <option value="">Enter bowler name</option>
+                {(tossWinner === 'tuskers' && tossChoice === 'bowl') || (tossWinner === 'opposition' && tossChoice === 'bat') ? 
+                  players.filter(player => selectedTuskersPlayers.includes(player.id)).map(player => (
+                    <option key={player.id} value={player.name}>{player.name}</option>
+                  )) :
+                  oppositionPlayers.filter(name => name.trim() !== '').map((name, index) => (
+                    <option key={index} value={name}>{name}</option>
+                  ))
+                }
+              </select>
+            </div>
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={() => {
+                setShowOpenersSelection(false);
+                setShowSetup(true);
+              }}
+              className="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 font-medium"
+            >
+              Back
+            </button>
+            <button
+              onClick={startMatchWithOpeners}
+              className="flex-1 bg-[#1e3a8a] text-white py-3 rounded-lg hover:bg-[#1e40af] font-medium"
+            >
+              Start Match
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   );
 }
