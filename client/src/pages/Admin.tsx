@@ -36,16 +36,16 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const data = {
-      runsScored: parseInt(formData.get('runsScored') as string) || 0,
-      ballsFaced: parseInt(formData.get('ballsFaced') as string) || 0,
-      fours: parseInt(formData.get('fours') as string) || 0,
-      sixes: parseInt(formData.get('sixes') as string) || 0,
-      wicketsTaken: parseInt(formData.get('wicketsTaken') as string) || 0,
-      ballsBowled: parseInt(formData.get('ballsBowled') as string) || 0,
-      runsConceded: parseInt(formData.get('runsConceded') as string) || 0,
-      catches: parseInt(formData.get('catches') as string) || 0,
-      stumpings: parseInt(formData.get('stumpings') as string) || 0,
-      runOuts: parseInt(formData.get('runOuts') as string) || 0,
+      runsScored: formData.get('runsScored') ? parseInt(formData.get('runsScored') as string) : null,
+      ballsFaced: formData.get('ballsFaced') ? parseInt(formData.get('ballsFaced') as string) : null,
+      fours: formData.get('fours') ? parseInt(formData.get('fours') as string) : null,
+      sixes: formData.get('sixes') ? parseInt(formData.get('sixes') as string) : null,
+      wicketsTaken: formData.get('wicketsTaken') ? parseInt(formData.get('wicketsTaken') as string) : null,
+      ballsBowled: formData.get('ballsBowled') ? parseInt(formData.get('ballsBowled') as string) : null,
+      runsConceded: formData.get('runsConceded') ? parseInt(formData.get('runsConceded') as string) : null,
+      catches: formData.get('catches') ? parseInt(formData.get('catches') as string) : null,
+      stumpings: formData.get('stumpings') ? parseInt(formData.get('stumpings') as string) : null,
+      runOuts: formData.get('runOuts') ? parseInt(formData.get('runOuts') as string) : null,
     };
     updateStatsMutation.mutate(data);
   };
@@ -63,7 +63,8 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
             <input
               name="runsScored"
               type="number"
-              defaultValue={stats?.runsScored || 0}
+              defaultValue={stats?.runsScored || ''}
+              placeholder="Enter runs (optional)"
               className="w-full text-sm border border-gray-300 rounded px-2 py-1"
             />
           </div>
@@ -72,7 +73,8 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
             <input
               name="ballsFaced"
               type="number"
-              defaultValue={stats?.ballsFaced || 0}
+              defaultValue={stats?.ballsFaced || ''}
+              placeholder="Enter balls (optional)"
               className="w-full text-sm border border-gray-300 rounded px-2 py-1"
             />
           </div>
@@ -81,7 +83,8 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
             <input
               name="fours"
               type="number"
-              defaultValue={stats?.fours || 0}
+              defaultValue={stats?.fours || ''}
+              placeholder="Enter 4s (optional)"
               className="w-full text-sm border border-gray-300 rounded px-2 py-1"
             />
           </div>
@@ -90,7 +93,8 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
             <input
               name="sixes"
               type="number"
-              defaultValue={stats?.sixes || 0}
+              defaultValue={stats?.sixes || ''}
+              placeholder="Enter 6s (optional)"
               className="w-full text-sm border border-gray-300 rounded px-2 py-1"
             />
           </div>
@@ -106,7 +110,8 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
             <input
               name="wicketsTaken"
               type="number"
-              defaultValue={stats?.wicketsTaken || 0}
+              defaultValue={stats?.wicketsTaken || ''}
+              placeholder="Enter wickets (optional)"
               className="w-full text-sm border border-gray-300 rounded px-2 py-1"
             />
           </div>
@@ -115,7 +120,8 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
             <input
               name="ballsBowled"
               type="number"
-              defaultValue={stats?.ballsBowled || 0}
+              defaultValue={stats?.ballsBowled || ''}
+              placeholder="Enter balls (optional)"
               className="w-full text-sm border border-gray-300 rounded px-2 py-1"
             />
           </div>
@@ -124,7 +130,8 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
             <input
               name="runsConceded"
               type="number"
-              defaultValue={stats?.runsConceded || 0}
+              defaultValue={stats?.runsConceded || ''}
+              placeholder="Enter runs (optional)"
               className="w-full text-sm border border-gray-300 rounded px-2 py-1"
             />
           </div>
@@ -140,7 +147,8 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
             <input
               name="catches"
               type="number"
-              defaultValue={stats?.catches || 0}
+              defaultValue={stats?.catches || ''}
+              placeholder="Enter catches (optional)"
               className="w-full text-sm border border-gray-300 rounded px-2 py-1"
             />
           </div>
@@ -149,7 +157,8 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
             <input
               name="stumpings"
               type="number"
-              defaultValue={stats?.stumpings || 0}
+              defaultValue={stats?.stumpings || ''}
+              placeholder="Enter stumpings (optional)"
               className="w-full text-sm border border-gray-300 rounded px-2 py-1"
             />
           </div>
@@ -158,7 +167,8 @@ function PlayerStatsForm({ playerId, stats, onClose }: {
             <input
               name="runOuts"
               type="number"
-              defaultValue={stats?.runOuts || 0}
+              defaultValue={stats?.runOuts || ''}
+              placeholder="Enter run outs (optional)"
               className="w-full text-sm border border-gray-300 rounded px-2 py-1"
             />
           </div>
