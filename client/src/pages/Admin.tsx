@@ -1799,15 +1799,7 @@ function AdminContent() {
                       <option value="lost">Lost</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Matches</label>
-                    <input
-                      type="number"
-                      {...statsForm.register('totalMatches', { required: true, min: 0 })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      placeholder="20"
-                    />
-                  </div>
+
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
