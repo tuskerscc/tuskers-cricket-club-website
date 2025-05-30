@@ -91,6 +91,7 @@ export default function MatchPerformance() {
     date: "",
     result: "Won" as "Won" | "Lost" | "Draw",
   });
+  const [selectedPlayers, setSelectedPlayers] = useState<number[]>([]);
 
   const { data: players = [] } = useQuery<Player[]>({
     queryKey: ["/api/players"],
@@ -192,65 +193,101 @@ export default function MatchPerformance() {
       </div>
 
       <div className="grid gap-6">
-        {/* Match Selection */}
+        {/* Match Details Entry */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Select Match
+              Match Details
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="match-select">Choose a match to update statistics:</Label>
-                <Select 
-                  value={selectedMatchId?.toString() || ""} 
-                  onValueChange={(value) => setSelectedMatchId(parseInt(value))}
-                >
+                <Label htmlFor="opponent">Opponent Team</Label>
+                <Input
+                  id="opponent"
+                  value={matchData.opponent}
+                  onChange={(e) => setMatchData({...matchData, opponent: e.target.value})}
+                  placeholder="Enter opponent team name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="venue">Venue</Label>
+                <Input
+                  id="venue"
+                  value={matchData.venue}
+                  onChange={(e) => setMatchData({...matchData, venue: e.target.value})}
+                  placeholder="Enter venue name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="date">Match Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={matchData.date}
+                  onChange={(e) => setMatchData({...matchData, date: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="result">Match Result</Label>
+                <Select value={matchData.result} onValueChange={(value: "Won" | "Lost" | "Draw") => setMatchData({...matchData, result: value})}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a match..." />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {matches.map((match) => (
-                      <SelectItem key={match.id} value={match.id.toString()}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{match.title}</span>
-                          <Badge variant="outline">{match.status}</Badge>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="Won">Won</SelectItem>
+                    <SelectItem value="Lost">Lost</SelectItem>
+                    <SelectItem value="Draw">Draw</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-
-              {selectedMatch && (
-                <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                    {selectedMatch.title}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium">Home:</span> {selectedMatch.homeTeam.name}
-                    </div>
-                    <div>
-                      <span className="font-medium">Away:</span> {selectedMatch.awayTeam.name}
-                    </div>
-                    <div>
-                      <span className="font-medium">Venue:</span> {selectedMatch.venue.name}
-                    </div>
-                    <div>
-                      <span className="font-medium">Date:</span> {new Date(selectedMatch.date).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
 
+        {/* Playing 11 Selection */}
+        {matchData.opponent && matchData.venue && matchData.date && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Select Playing 11
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {players.map((player) => (
+                  <div
+                    key={player.id}
+                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      selectedPlayers.includes(player.id)
+                        ? "bg-blue-100 border-blue-500 dark:bg-blue-950"
+                        : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                    }`}
+                    onClick={() => {
+                      if (selectedPlayers.includes(player.id)) {
+                        setSelectedPlayers(selectedPlayers.filter(id => id !== player.id));
+                      } else if (selectedPlayers.length < 11) {
+                        setSelectedPlayers([...selectedPlayers, player.id]);
+                      }
+                    }}
+                  >
+                    <div className="text-sm font-medium">{player.name}</div>
+                    <div className="text-xs text-gray-500">#{player.jerseyNumber}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                Selected: {selectedPlayers.length}/11 players
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Player Performance Entry */}
-        {selectedMatchId && (
+        {selectedPlayers.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -260,7 +297,7 @@ export default function MatchPerformance() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {players.map((player) => {
+                {players.filter(player => selectedPlayers.includes(player.id)).map((player) => {
                   const performance = performances[player.id];
                   
                   return (

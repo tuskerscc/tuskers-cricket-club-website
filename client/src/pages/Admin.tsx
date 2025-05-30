@@ -564,6 +564,7 @@ function AdminContent() {
               {[
                 { id: 'players', name: 'Players', icon: '👤' },
                 { id: 'playerstats', name: 'Player Stats', icon: '🏏' },
+                { id: 'matchperformance', name: 'Match Performance', icon: '⚾' },
                 { id: 'articles', name: 'Articles', icon: '📰' },
                 { id: 'gallery', name: 'Gallery', icon: '🖼️' },
                 { id: 'announcements', name: 'Announcements', icon: '📢' },
@@ -730,6 +731,36 @@ function AdminContent() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Match Performance Tab */}
+        {activeTab === 'matchperformance' && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-[#1e3a8a]">Match Performance</h2>
+                <p className="text-gray-600 mt-1">
+                  Record match results and update player statistics
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 mb-6">
+              <p className="text-blue-800 dark:text-blue-200">
+                <strong>Instructions:</strong> Enter match details manually, select your playing 11, 
+                and record individual player performances. Performance fields are optional - 
+                only fill in the statistics that are relevant for each player.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <iframe
+                src="/match-performance"
+                className="w-full h-[800px] border border-gray-200 rounded-lg"
+                title="Match Performance Entry"
+              />
             </div>
           </div>
         )}
