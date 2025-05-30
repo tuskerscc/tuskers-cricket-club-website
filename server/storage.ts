@@ -96,6 +96,9 @@ export interface IStorage {
     totalMatches: number;
     totalRuns: number;
     wicketsTaken: number;
+    totalOvers: number;
+    runsAgainst: number;
+    oversAgainst: number;
     nrr: number;
   }>;
   updateTeamStats(data: {
@@ -429,6 +432,9 @@ export class DatabaseStorage implements IStorage {
     totalMatches: number;
     totalRuns: number;
     wicketsTaken: number;
+    totalOvers: number;
+    runsAgainst: number;
+    oversAgainst: number;
     nrr: number;
   }> {
     try {
@@ -439,6 +445,9 @@ export class DatabaseStorage implements IStorage {
           totalMatches: stats.totalMatches || 0,
           totalRuns: stats.totalRuns || 0,
           wicketsTaken: stats.wicketsTaken || 0,
+          totalOvers: stats.totalOvers || 0,
+          runsAgainst: stats.runsAgainst || 0,
+          oversAgainst: stats.oversAgainst || 0,
           nrr: stats.nrr || 0
         };
       }
@@ -448,11 +457,14 @@ export class DatabaseStorage implements IStorage {
     
     // Return default values if no stats found
     return {
-      matchesWon: 15,
-      totalMatches: 20,
-      totalRuns: 2850,
-      wicketsTaken: 125,
-      nrr: 1.245
+      matchesWon: 0,
+      totalMatches: 0,
+      totalRuns: 0,
+      wicketsTaken: 0,
+      totalOvers: 0,
+      runsAgainst: 0,
+      oversAgainst: 0,
+      nrr: 0
     };
   }
 

@@ -567,17 +567,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get current team stats
       const currentStats = await storage.getTeamStats();
       
-      // Calculate new team statistics
+      // Calculate new team statistics (cumulative)
       const newMatchesWon = currentStats.matchesWon + (result === 'Won' ? 1 : 0);
       const newTotalMatches = currentStats.totalMatches + 1;
       const newTotalRuns = currentStats.totalRuns + teamRuns;
       const newWicketsTaken = currentStats.wicketsTaken + teamWickets;
       
-      // Estimate overs faced (assume 20 overs for T20 format)
-      const oversFaced = 20;
-      const newTotalOvers = (currentStats.totalMatches * 20) + oversFaced;
-      const newRunsAgainst = currentStats.totalRuns + totalRunsConceded;
-      const newOversAgainst = (currentStats.totalMatches * 20) + oversBowled;
+      // Calculate overs properly for NRR
+      const oversFaced = 20; // Assume T20 format
+      const newTotalOvers = currentStats.totalOvers + oversFaced;
+      const newRunsAgainst = currentStats.runsAgainst + totalRunsConceded;
+      const newOversAgainst = currentStats.oversAgainst + oversBowled;
       
       // Update team statistics
       await storage.updateTeamStats({
