@@ -87,7 +87,9 @@ export default function TuskersScoring() {
   const [tossWinner, setTossWinner] = useState<'tuskers' | 'opposition' | ''>('');
   const [tossChoice, setTossChoice] = useState<'bat' | 'bowl' | ''>('');
   const [selectedTuskersPlayers, setSelectedTuskersPlayers] = useState<number[]>([]);
-  const [oppositionPlayers, setOppositionPlayers] = useState<string[]>(['', '', '', '', '', '', '', '', '', '', '']);
+  const [oppositionPlayers, setOppositionPlayers] = useState<string[]>(['', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+  const [tuskersRoles, setTuskersRoles] = useState<{[key: number]: 'captain' | 'wicket_keeper' | 'reserve' | 'playing'}>({});
+  const [oppositionRoles, setOppositionRoles] = useState<{[key: number]: 'captain' | 'wicket_keeper' | 'reserve' | 'playing'}>({});
   const [dismissalData, setDismissalData] = useState({ type: '', fielder: '', bowler: '' });
   const [newBatsmanName, setNewBatsmanName] = useState('');
   const [newBowlerName, setNewBowlerName] = useState('');
@@ -179,14 +181,38 @@ export default function TuskersScoring() {
   };
 
   const startMatchWithPlayers = () => {
-    if (selectedTuskersPlayers.length !== 11) {
-      toast({ title: "Error", description: "Please select exactly 11 Tuskers players" });
+    if (selectedTuskersPlayers.length !== 15) {
+      toast({ title: "Error", description: "Please select exactly 15 Tuskers players (11 playing + 4 reserves)" });
       return;
     }
 
     const emptyOppositionPlayers = oppositionPlayers.filter(name => name.trim() === '');
     if (emptyOppositionPlayers.length > 0) {
-      toast({ title: "Error", description: "Please enter all 11 opposition player names" });
+      toast({ title: "Error", description: "Please enter all 15 opposition player names" });
+      return;
+    }
+
+    // Validate role assignments
+    const tuskersRoleValues = Object.values(tuskersRoles);
+    const captainCount = tuskersRoleValues.filter(role => role === 'captain').length;
+    const wicketKeeperCount = tuskersRoleValues.filter(role => role === 'wicket_keeper').length;
+    const reserveCount = tuskersRoleValues.filter(role => role === 'reserve').length;
+    const playingCount = tuskersRoleValues.filter(role => role === 'playing').length;
+
+    if (captainCount !== 1) {
+      toast({ title: "Error", description: "Please select exactly 1 captain" });
+      return;
+    }
+    if (wicketKeeperCount !== 1) {
+      toast({ title: "Error", description: "Please select exactly 1 wicket keeper" });
+      return;
+    }
+    if (reserveCount !== 4) {
+      toast({ title: "Error", description: "Please select exactly 4 reserve players" });
+      return;
+    }
+    if (playingCount !== 9) {
+      toast({ title: "Error", description: "Please select exactly 9 playing members (excluding captain and wicket keeper)" });
       return;
     }
 
@@ -578,56 +604,140 @@ export default function TuskersScoring() {
             <div className="bg-purple-50 p-4 rounded-xl border-l-4 border-purple-400 mb-6">
               <h3 className="font-semibold text-purple-800 mb-4">Player Selection</h3>
               
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-800 mb-3">Select Tuskers CC Players (11 required)</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-60 overflow-y-auto bg-gray-50 p-3 rounded-lg">
-                  {players.map((player) => (
-                    <label key={player.id} className="flex items-center space-x-2 p-2 hover:bg-white rounded cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedTuskersPlayers.includes(player.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            if (selectedTuskersPlayers.length < 11) {
-                              setSelectedTuskersPlayers(prev => [...prev, player.id]);
-                            }
-                          } else {
-                            setSelectedTuskersPlayers(prev => prev.filter(id => id !== player.id));
-                          }
-                        }}
-                        className="text-purple-600"
-                      />
-                      <span className="text-sm text-gray-700">{player.name}</span>
-                    </label>
-                  ))}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Tuskers CC Players */}
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-3">Select Tuskers CC Players (15 required)</h4>
+                  <p className="text-sm text-gray-600 mb-3">11 playing + 1 captain + 1 wicket keeper + 4 reserves</p>
+                  
+                  <div className="max-h-80 overflow-y-auto bg-gray-50 p-3 rounded-lg">
+                    {players.map((player) => (
+                      <div key={player.id} className="flex items-center justify-between p-2 hover:bg-white rounded mb-2">
+                        <label className="flex items-center space-x-2 cursor-pointer flex-1">
+                          <input
+                            type="checkbox"
+                            checked={selectedTuskersPlayers.includes(player.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                if (selectedTuskersPlayers.length < 15) {
+                                  setSelectedTuskersPlayers(prev => [...prev, player.id]);
+                                  setTuskersRoles(prev => ({ ...prev, [player.id]: 'playing' }));
+                                }
+                              } else {
+                                setSelectedTuskersPlayers(prev => prev.filter(id => id !== player.id));
+                                setTuskersRoles(prev => {
+                                  const newRoles = { ...prev };
+                                  delete newRoles[player.id];
+                                  return newRoles;
+                                });
+                              }
+                            }}
+                            className="text-purple-600"
+                          />
+                          <span className="text-sm text-gray-700">{player.name}</span>
+                        </label>
+                        
+                        {selectedTuskersPlayers.includes(player.id) && (
+                          <select
+                            value={tuskersRoles[player.id] || 'playing'}
+                            onChange={(e) => setTuskersRoles(prev => ({ 
+                              ...prev, 
+                              [player.id]: e.target.value as 'captain' | 'wicket_keeper' | 'reserve' | 'playing'
+                            }))}
+                            className="text-xs border rounded px-2 py-1 ml-2"
+                          >
+                            <option value="playing">Playing</option>
+                            <option value="captain">Captain</option>
+                            <option value="wicket_keeper">Wicket Keeper</option>
+                            <option value="reserve">Reserve</option>
+                          </select>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p>Selected: {selectedTuskersPlayers.length}/15</p>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                        Captain: {Object.values(tuskersRoles).filter(r => r === 'captain').length}
+                      </span>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                        Keeper: {Object.values(tuskersRoles).filter(r => r === 'wicket_keeper').length}
+                      </span>
+                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
+                        Playing: {Object.values(tuskersRoles).filter(r => r === 'playing').length}
+                      </span>
+                      <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
+                        Reserve: {Object.values(tuskersRoles).filter(r => r === 'reserve').length}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Selected: {selectedTuskersPlayers.length}/11</p>
-              </div>
 
-              <div>
-                <h4 className="font-semibold text-gray-800 mb-3">Opposition Players (11 required)</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {oppositionPlayers.map((player, index) => (
-                    <input
-                      key={index}
-                      type="text"
-                      value={player}
-                      onChange={(e) => {
-                        const newPlayers = [...oppositionPlayers];
-                        newPlayers[index] = e.target.value;
-                        setOppositionPlayers(newPlayers);
-                      }}
-                      placeholder={`Player ${index + 1} name`}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-                    />
-                  ))}
+                {/* Opposition Players */}
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-3">Opposition Players (15 required)</h4>
+                  <p className="text-sm text-gray-600 mb-3">11 playing + 1 captain + 1 wicket keeper + 4 reserves</p>
+                  
+                  <div className="max-h-80 overflow-y-auto bg-gray-50 p-3 rounded-lg">
+                    {oppositionPlayers.map((player, index) => (
+                      <div key={index} className="flex items-center gap-2 mb-2">
+                        <input
+                          type="text"
+                          value={player}
+                          onChange={(e) => {
+                            const newPlayers = [...oppositionPlayers];
+                            newPlayers[index] = e.target.value;
+                            setOppositionPlayers(newPlayers);
+                          }}
+                          placeholder={`Player ${index + 1} name`}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        />
+                        
+                        {player.trim() && (
+                          <select
+                            value={oppositionRoles[index] || 'playing'}
+                            onChange={(e) => setOppositionRoles(prev => ({ 
+                              ...prev, 
+                              [index]: e.target.value as 'captain' | 'wicket_keeper' | 'reserve' | 'playing'
+                            }))}
+                            className="text-xs border rounded px-2 py-1"
+                          >
+                            <option value="playing">Playing</option>
+                            <option value="captain">Captain</option>
+                            <option value="wicket_keeper">Wicket Keeper</option>
+                            <option value="reserve">Reserve</option>
+                          </select>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p>Entered: {oppositionPlayers.filter(p => p.trim()).length}/15</p>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                        Captain: {Object.values(oppositionRoles).filter(r => r === 'captain').length}
+                      </span>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                        Keeper: {Object.values(oppositionRoles).filter(r => r === 'wicket_keeper').length}
+                      </span>
+                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
+                        Playing: {Object.values(oppositionRoles).filter(r => r === 'playing').length}
+                      </span>
+                      <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
+                        Reserve: {Object.values(oppositionRoles).filter(r => r === 'reserve').length}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <button
               onClick={startMatchWithPlayers}
-              disabled={!selectedTeam || !oppositionName || !venue || !matchDate || !tossWinner || !tossChoice || selectedTuskersPlayers.length !== 11}
+              disabled={!selectedTeam || !oppositionName || !venue || !matchDate || !tossWinner || !tossChoice || selectedTuskersPlayers.length !== 15}
               className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               Start Match
