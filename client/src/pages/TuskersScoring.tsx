@@ -78,6 +78,9 @@ export default function TuskersScoring() {
   const [matchDate, setMatchDate] = useState('');
   const [tossWinner, setTossWinner] = useState<'tuskers' | 'opposition' | ''>('');
   const [tossChoice, setTossChoice] = useState<'bat' | 'bowl' | ''>('');
+  const [showPlayerSelection, setShowPlayerSelection] = useState(false);
+  const [selectedTuskersPlayers, setSelectedTuskersPlayers] = useState<Player[]>([]);
+  const [oppositionPlayers, setOppositionPlayers] = useState<string[]>(['', '', '', '', '', '', '', '', '', '', '']);
   const { toast } = useToast();
 
   // Fetch teams and players from database
@@ -143,10 +146,26 @@ export default function TuskersScoring() {
       return;
     }
 
+    // Show player selection window
+    setShowPlayerSelection(true);
+  };
+
+  const startMatchWithPlayers = () => {
+    if (selectedTuskersPlayers.length !== 11) {
+      toast({ title: "Error", description: "Please select exactly 11 Tuskers players" });
+      return;
+    }
+
+    const emptyOppositionPlayers = oppositionPlayers.filter(name => name.trim() === '');
+    if (emptyOppositionPlayers.length > 0) {
+      toast({ title: "Error", description: "Please enter all 11 opposition player names" });
+      return;
+    }
+
     const maxOvers = getMaxOvers(selectedFormat);
     
     // Determine which team bats first based on toss
-    const tuskersName = selectedTeam.name;
+    const tuskersName = selectedTeam!.name;
     const shouldTuskersBatFirst = (tossWinner === 'tuskers' && tossChoice === 'bat') || 
                                   (tossWinner === 'opposition' && tossChoice === 'bowl');
     
@@ -171,7 +190,7 @@ export default function TuskersScoring() {
       striker: 0,
       venue: venue,
       matchDate: matchDate,
-      selectedPlayers: players.filter(p => p.id <= 15), // First 15 players as squad
+      selectedPlayers: selectedTuskersPlayers,
       tossWinner: tossWinner === 'tuskers' ? tuskersName : oppositionName,
       tossChoice: tossChoice,
       isComplete: false,
@@ -179,6 +198,7 @@ export default function TuskersScoring() {
       showBatsmanModal: false
     });
     setShowSetup(false);
+    setShowPlayerSelection(false);
   };
 
   const switchStriker = (newState: MatchState) => {
@@ -517,20 +537,27 @@ Generated: ${new Date().toLocaleString()}
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Select Your Team</label>
-                <select
-                  value={selectedTeam?.id || ''}
-                  onChange={(e) => {
-                    const team = teams.find(t => t.id === parseInt(e.target.value));
-                    setSelectedTeam(team || null);
-                  }}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select Team</option>
-                  {teams.map(team => (
-                    <option key={team.id} value={team.id}>{team.name}</option>
-                  ))}
-                </select>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Your Team</label>
+                <div className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-blue-50 border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span className="text-yellow-400 font-bold text-sm">TC</span>
+                      </div>
+                      <div>
+                        <div className="font-semibold text-blue-900">
+                          {selectedTeam?.name || 'Tuskers CC'}
+                        </div>
+                        <div className="text-sm text-blue-700">
+                          Official Team Account
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
+                      OFFICIAL
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -873,6 +900,116 @@ Generated: ${new Date().toLocaleString()}
           </div>
         </div>
       </div>
+
+      {/* Player Selection Modal */}
+      {showPlayerSelection && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-[#1e3a8a]">Select Team Players</h2>
+                <button
+                  onClick={() => setShowPlayerSelection(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Tuskers CC Players Selection */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-blue-900">
+                    {selectedTeam?.name || 'Tuskers CC'} Players (Select 11)
+                  </h3>
+                  <div className="text-sm text-gray-600 mb-3">
+                    Selected: {selectedTuskersPlayers.length}/11
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto border rounded-lg p-3">
+                    {players.map(player => (
+                      <label
+                        key={player.id}
+                        className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                          selectedTuskersPlayers.some(p => p.id === player.id)
+                            ? 'bg-blue-50 border-blue-200'
+                            : 'bg-gray-50 hover:bg-gray-100'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedTuskersPlayers.some(p => p.id === player.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              if (selectedTuskersPlayers.length < 11) {
+                                setSelectedTuskersPlayers([...selectedTuskersPlayers, player]);
+                              }
+                            } else {
+                              setSelectedTuskersPlayers(selectedTuskersPlayers.filter(p => p.id !== player.id));
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium">{player.name}</div>
+                          <div className="text-sm text-gray-500">
+                            #{player.jerseyNumber} • {player.position}
+                          </div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Opposition Players Entry */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-red-900">
+                    {oppositionName} Players (Enter 11)
+                  </h3>
+                  
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {oppositionPlayers.map((name, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <span className="text-sm font-medium text-gray-600 w-8">
+                          {index + 1}.
+                        </span>
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => {
+                            const newPlayers = [...oppositionPlayers];
+                            newPlayers[index] = e.target.value;
+                            setOppositionPlayers(newPlayers);
+                          }}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder={`Player ${index + 1} name`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-4 mt-8 pt-6 border-t">
+                <button
+                  onClick={() => setShowPlayerSelection(false)}
+                  className="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={startMatchWithPlayers}
+                  disabled={selectedTuskersPlayers.length !== 11 || oppositionPlayers.some(name => !name.trim())}
+                  className="px-6 py-3 bg-[#1e3a8a] text-white rounded-xl font-semibold hover:bg-blue-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  Start Official {selectedFormat} Match
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
