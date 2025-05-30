@@ -1,13 +1,13 @@
 import { 
   users, teams, venues, competitions, players, matches, lineups, playerStats, teamStats,
-  articles, socialPosts, polls, quizzes, gallery, announcements, triviaQuestions, triviaLeaderboard,
-  forumCategories, forumTopics, forumPosts, forumPostLikes, userProfiles, 
-  communityEvents, eventParticipants,
+  matchPerformances, articles, socialPosts, polls, quizzes, gallery, announcements, 
+  triviaQuestions, triviaLeaderboard, forumCategories, forumTopics, forumPosts, 
+  forumPostLikes, userProfiles, communityEvents, eventParticipants,
   type User, type InsertUser, type Team, type InsertTeam, type Venue, type InsertVenue,
   type Competition, type InsertCompetition, type Player, type InsertPlayer, 
   type Match, type InsertMatch, type Lineup, type InsertLineup,
-  type PlayerStats, type InsertPlayerStats, type Article, type InsertArticle,
-  type SocialPost, type InsertSocialPost, type Poll, type InsertPoll,
+  type PlayerStats, type InsertPlayerStats, type MatchPerformance, type InsertMatchPerformance,
+  type Article, type InsertArticle, type SocialPost, type InsertSocialPost, type Poll, type InsertPoll,
   type Quiz, type InsertQuiz, type GalleryItem, type InsertGalleryItem,
   type Announcement, type InsertAnnouncement,
   type TriviaQuestion, type InsertTriviaQuestion, type TriviaLeaderboard, type InsertTriviaLeaderboard,
@@ -84,6 +84,11 @@ export interface IStorage {
 
   // Player Stats
   updatePlayerStats(playerId: number, stats: Partial<PlayerStats>): Promise<void>;
+
+  // Match Performances
+  createMatchPerformance(performance: InsertMatchPerformance): Promise<MatchPerformance>;
+  getMatchPerformances(matchId: number): Promise<(MatchPerformance & { player: Player })[]>;
+  updatePlayerStatsFromMatch(matchId: number, playerPerformances: InsertMatchPerformance[]): Promise<void>;
 
   // Statistics
   getTeamStats(): Promise<{
@@ -603,6 +608,78 @@ export class DatabaseStorage implements IStorage {
     return {
       activeMembersCount: membersCount.count
     };
+  }
+
+  // Match Performance Methods
+  async createMatchPerformance(performance: InsertMatchPerformance): Promise<MatchPerformance> {
+    const [result] = await db.insert(matchPerformances).values(performance).returning();
+    return result;
+  }
+
+  async getMatchPerformances(matchId: number): Promise<(MatchPerformance & { player: Player })[]> {
+    return await db.select()
+      .from(matchPerformances)
+      .leftJoin(players, eq(matchPerformances.playerId, players.id))
+      .where(eq(matchPerformances.matchId, matchId))
+      .then(rows => rows.map(row => ({
+        ...row.match_performances,
+        player: row.players!
+      })));
+  }
+
+  async updatePlayerStatsFromMatch(matchId: number, playerPerformances: InsertMatchPerformance[]): Promise<void> {
+    // First, save the match performances
+    for (const performance of playerPerformances) {
+      await this.createMatchPerformance(performance);
+    }
+
+    // Then update each player's cumulative stats
+    for (const performance of playerPerformances) {
+      if (!performance.playerId) continue;
+
+      // Get current player stats
+      const currentStats = await db.select()
+        .from(playerStats)
+        .where(eq(playerStats.playerId, performance.playerId))
+        .limit(1);
+
+      const stats = currentStats[0];
+      
+      if (stats) {
+        // Update existing stats by adding the match performance
+        await db.update(playerStats)
+          .set({
+            matches: (stats.matches || 0) + 1,
+            runsScored: (stats.runsScored || 0) + (performance.runsScored || 0),
+            ballsFaced: (stats.ballsFaced || 0) + (performance.ballsFaced || 0),
+            fours: (stats.fours || 0) + (performance.fours || 0),
+            sixes: (stats.sixes || 0) + (performance.sixes || 0),
+            wicketsTaken: (stats.wicketsTaken || 0) + (performance.wicketsTaken || 0),
+            ballsBowled: (stats.ballsBowled || 0) + (performance.ballsBowled || 0),
+            runsConceded: (stats.runsConceded || 0) + (performance.runsConceded || 0),
+            catches: (stats.catches || 0) + (performance.catches || 0),
+            stumpings: (stats.stumpings || 0) + (performance.stumpings || 0),
+            runOuts: (stats.runOuts || 0) + (performance.runOuts || 0)
+          })
+          .where(eq(playerStats.playerId, performance.playerId));
+      } else {
+        // Create new stats record for the player
+        await db.insert(playerStats).values({
+          playerId: performance.playerId,
+          matches: 1,
+          runsScored: performance.runsScored || 0,
+          ballsFaced: performance.ballsFaced || 0,
+          fours: performance.fours || 0,
+          sixes: performance.sixes || 0,
+          wicketsTaken: performance.wicketsTaken || 0,
+          ballsBowled: performance.ballsBowled || 0,
+          runsConceded: performance.runsConceded || 0,
+          catches: performance.catches || 0,
+          stumpings: performance.stumpings || 0,
+          runOuts: performance.runOuts || 0
+        });
+      }
+    }
   }
 }
 

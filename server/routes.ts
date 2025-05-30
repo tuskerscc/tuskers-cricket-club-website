@@ -779,6 +779,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Match Performance endpoints
+  app.post("/api/matches/:matchId/performances", async (req, res) => {
+    try {
+      const matchId = parseInt(req.params.matchId);
+      if (isNaN(matchId)) {
+        return res.status(400).json({ error: "Invalid match ID" });
+      }
+
+      const { playerPerformances } = req.body;
+      if (!Array.isArray(playerPerformances)) {
+        return res.status(400).json({ error: "Player performances must be an array" });
+      }
+
+      // Add matchId to each performance
+      const performances = playerPerformances.map(perf => ({
+        ...perf,
+        matchId
+      }));
+
+      // Update player stats based on match performances
+      await storage.updatePlayerStatsFromMatch(matchId, performances);
+
+      res.json({ success: true, message: "Player stats updated successfully" });
+    } catch (error) {
+      console.error("Error updating player stats:", error);
+      res.status(500).json({ error: "Failed to update player stats" });
+    }
+  });
+
+  app.get("/api/matches/:matchId/performances", async (req, res) => {
+    try {
+      const matchId = parseInt(req.params.matchId);
+      if (isNaN(matchId)) {
+        return res.status(400).json({ error: "Invalid match ID" });
+      }
+
+      const performances = await storage.getMatchPerformances(matchId);
+      res.json(performances);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch match performances" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
