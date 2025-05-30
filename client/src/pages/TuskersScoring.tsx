@@ -180,24 +180,34 @@ export default function TuskersScoring() {
     return currentBowlerOvers < maxOvers;
   };
 
+  const getRequiredReserveCount = (totalPlayers: number) => {
+    if (totalPlayers === 15) return 4;
+    if (totalPlayers === 14) return 3;
+    if (totalPlayers === 13) return 2;
+    if (totalPlayers === 12) return 1;
+    return 0; // For 9-11 players, no reserves required
+  };
+
   const startMatchWithPlayers = () => {
-    if (selectedTuskersPlayers.length !== 15) {
-      toast({ title: "Error", description: "Please select exactly 15 Tuskers players (11 playing + 4 reserves)" });
+    if (selectedTuskersPlayers.length < 9 || selectedTuskersPlayers.length > 15) {
+      toast({ title: "Error", description: "Please select between 9-15 Tuskers players" });
       return;
     }
 
-    const emptyOppositionPlayers = oppositionPlayers.filter(name => name.trim() === '');
-    if (emptyOppositionPlayers.length > 0) {
-      toast({ title: "Error", description: "Please enter all 15 opposition player names" });
+    const oppositionPlayerCount = oppositionPlayers.filter(name => name.trim() !== '').length;
+    if (oppositionPlayerCount < 9 || oppositionPlayerCount > 15) {
+      toast({ title: "Error", description: "Please enter between 9-15 opposition player names" });
       return;
     }
 
-    // Validate role assignments
+    // Validate role assignments for Tuskers
     const tuskersRoleValues = Object.values(tuskersRoles);
     const captainCount = tuskersRoleValues.filter(role => role === 'captain').length;
     const wicketKeeperCount = tuskersRoleValues.filter(role => role === 'wicket_keeper').length;
     const reserveCount = tuskersRoleValues.filter(role => role === 'reserve').length;
     const playingCount = tuskersRoleValues.filter(role => role === 'playing').length;
+    const requiredReserves = getRequiredReserveCount(selectedTuskersPlayers.length);
+    const requiredPlaying = selectedTuskersPlayers.length - requiredReserves - 2; // -2 for captain and keeper
 
     if (captainCount !== 1) {
       toast({ title: "Error", description: "Please select exactly 1 captain" });
@@ -207,12 +217,12 @@ export default function TuskersScoring() {
       toast({ title: "Error", description: "Please select exactly 1 wicket keeper" });
       return;
     }
-    if (reserveCount !== 4) {
-      toast({ title: "Error", description: "Please select exactly 4 reserve players" });
+    if (reserveCount !== requiredReserves) {
+      toast({ title: "Error", description: `Please select exactly ${requiredReserves} reserve players for ${selectedTuskersPlayers.length} total players` });
       return;
     }
-    if (playingCount !== 9) {
-      toast({ title: "Error", description: "Please select exactly 9 playing members (excluding captain and wicket keeper)" });
+    if (playingCount !== requiredPlaying) {
+      toast({ title: "Error", description: `Please select exactly ${requiredPlaying} playing members (excluding captain and wicket keeper)` });
       return;
     }
 
@@ -607,8 +617,14 @@ export default function TuskersScoring() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Tuskers CC Players */}
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-3">Select Tuskers CC Players (15 required)</h4>
-                  <p className="text-sm text-gray-600 mb-3">11 playing + 1 captain + 1 wicket keeper + 4 reserves</p>
+                  <h4 className="font-semibold text-gray-800 mb-3">Select Tuskers CC Players (9-15 players)</h4>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {selectedTuskersPlayers.length > 0 ? (
+                      `${selectedTuskersPlayers.length - getRequiredReserveCount(selectedTuskersPlayers.length) - 2} playing + 1 captain + 1 keeper + ${getRequiredReserveCount(selectedTuskersPlayers.length)} reserves`
+                    ) : (
+                      "Select players to see role breakdown"
+                    )}
+                  </p>
                   
                   <div className="max-h-80 overflow-y-auto bg-gray-50 p-3 rounded-lg">
                     {players.map((player) => (
@@ -657,7 +673,7 @@ export default function TuskersScoring() {
                   </div>
                   
                   <div className="mt-2 text-sm text-gray-600">
-                    <p>Selected: {selectedTuskersPlayers.length}/15</p>
+                    <p>Selected: {selectedTuskersPlayers.length}/15 (min: 9)</p>
                     <div className="flex flex-wrap gap-2 mt-1">
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
                         Captain: {Object.values(tuskersRoles).filter(r => r === 'captain').length}
@@ -677,8 +693,14 @@ export default function TuskersScoring() {
 
                 {/* Opposition Players */}
                 <div>
-                  <h4 className="font-semibold text-gray-800 mb-3">Opposition Players (15 required)</h4>
-                  <p className="text-sm text-gray-600 mb-3">11 playing + 1 captain + 1 wicket keeper + 4 reserves</p>
+                  <h4 className="font-semibold text-gray-800 mb-3">Opposition Players (9-15 players)</h4>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {oppositionPlayers.filter(p => p.trim()).length > 0 ? (
+                      `${oppositionPlayers.filter(p => p.trim()).length - getRequiredReserveCount(oppositionPlayers.filter(p => p.trim()).length) - 2} playing + 1 captain + 1 keeper + ${getRequiredReserveCount(oppositionPlayers.filter(p => p.trim()).length)} reserves`
+                    ) : (
+                      "Enter player names to see role breakdown"
+                    )}
+                  </p>
                   
                   <div className="max-h-80 overflow-y-auto bg-gray-50 p-3 rounded-lg">
                     {oppositionPlayers.map((player, index) => (
@@ -715,7 +737,7 @@ export default function TuskersScoring() {
                   </div>
                   
                   <div className="mt-2 text-sm text-gray-600">
-                    <p>Entered: {oppositionPlayers.filter(p => p.trim()).length}/15</p>
+                    <p>Entered: {oppositionPlayers.filter(p => p.trim()).length}/15 (min: 9)</p>
                     <div className="flex flex-wrap gap-2 mt-1">
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
                         Captain: {Object.values(oppositionRoles).filter(r => r === 'captain').length}
@@ -737,7 +759,18 @@ export default function TuskersScoring() {
 
             <button
               onClick={startMatchWithPlayers}
-              disabled={!selectedTeam || !oppositionName || !venue || !matchDate || !tossWinner || !tossChoice || selectedTuskersPlayers.length !== 15}
+              disabled={
+                !selectedTeam || 
+                !oppositionName || 
+                !venue || 
+                !matchDate || 
+                !tossWinner || 
+                !tossChoice || 
+                selectedTuskersPlayers.length < 9 || 
+                selectedTuskersPlayers.length > 15 ||
+                oppositionPlayers.filter(p => p.trim()).length < 9 ||
+                oppositionPlayers.filter(p => p.trim()).length > 15
+              }
               className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               Start Match
