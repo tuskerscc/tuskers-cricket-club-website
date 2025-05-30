@@ -1,36 +1,41 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function LiveMatchWidget() {
-  useEffect(() => {
-    // Load the cricket widget script
-    const script1 = document.createElement('script');
-    script1.type = 'text/javascript';
-    script1.innerHTML = `
-      app="www.cricwaves.com"; 
-      mo="f1_zd"; 
-      nt="ban"; 
-      mats=""; 
-      tor=""; 
-      Width='302px'; 
-      Height='252px'; 
-      wi="w"; 
-      co="ban"; 
-      ad="1";
-    `;
-    document.head.appendChild(script1);
+  const widgetRef = useRef<HTMLDivElement>(null);
 
-    const script2 = document.createElement('script');
-    script2.type = 'text/javascript';
-    script2.src = '//www.cricwaves.com/cricket/widgets/script/scoreWidgets.js?v=0.111';
-    document.head.appendChild(script2);
+  useEffect(() => {
+    // Clear any existing content
+    if (widgetRef.current) {
+      widgetRef.current.innerHTML = '';
+    }
+
+    // Set global variables for cricket widget
+    (window as any).app = "www.cricwaves.com";
+    (window as any).mo = "f1_zd";
+    (window as any).nt = "ban";
+    (window as any).mats = "";
+    (window as any).tor = "";
+    (window as any).Width = '302px';
+    (window as any).Height = '252px';
+    (window as any).wi = "w";
+    (window as any).co = "ban";
+    (window as any).ad = "1";
+
+    // Load the cricket widget script
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://www.cricwaves.com/cricket/widgets/script/scoreWidgets.js?v=0.111';
+    script.async = true;
+    
+    // Add the script to the widget container
+    if (widgetRef.current) {
+      widgetRef.current.appendChild(script);
+    }
 
     return () => {
-      // Cleanup scripts on component unmount
-      try {
-        if (document.head.contains(script1)) document.head.removeChild(script1);
-        if (document.head.contains(script2)) document.head.removeChild(script2);
-      } catch (e) {
-        // Ignore cleanup errors
+      // Cleanup
+      if (widgetRef.current && script.parentNode) {
+        script.parentNode.removeChild(script);
       }
     };
   }, []);
@@ -44,8 +49,12 @@ export default function LiveMatchWidget() {
       
       {/* Cricket Widget Container */}
       <div className="flex justify-center">
-        <div id="cricwaves-widget" className="w-full max-w-sm">
-          {/* The widget will be loaded here by the external script */}
+        <div 
+          ref={widgetRef}
+          className="w-full max-w-sm min-h-[252px] flex items-center justify-center"
+          style={{ width: '302px', height: '252px' }}
+        >
+          <div className="text-gray-500 text-sm">Loading cricket scores...</div>
         </div>
       </div>
     </div>
