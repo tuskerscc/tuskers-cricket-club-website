@@ -646,20 +646,20 @@ export class DatabaseStorage implements IStorage {
       const stats = currentStats[0];
       
       if (stats) {
-        // Update existing stats by adding the match performance
+        // Update existing stats with latest match performance (replace, don't add)
         await db.update(playerStats)
           .set({
             matches: (stats.matches || 0) + 1,
-            runsScored: (stats.runsScored || 0) + (performance.runsScored || 0),
-            ballsFaced: (stats.ballsFaced || 0) + (performance.ballsFaced || 0),
-            fours: (stats.fours || 0) + (performance.fours || 0),
-            sixes: (stats.sixes || 0) + (performance.sixes || 0),
-            wicketsTaken: (stats.wicketsTaken || 0) + (performance.wicketsTaken || 0),
-            ballsBowled: (stats.ballsBowled || 0) + (performance.ballsBowled || 0),
-            runsConceded: (stats.runsConceded || 0) + (performance.runsConceded || 0),
-            catches: (stats.catches || 0) + (performance.catches || 0),
-            stumpings: (stats.stumpings || 0) + (performance.stumpings || 0),
-            runOuts: (stats.runOuts || 0) + (performance.runOuts || 0)
+            runsScored: performance.runsScored || 0,
+            ballsFaced: performance.ballsFaced || 0,
+            fours: performance.fours || 0,
+            sixes: performance.sixes || 0,
+            wicketsTaken: performance.wicketsTaken || 0,
+            ballsBowled: performance.ballsBowled || 0,
+            runsConceded: performance.runsConceded || 0,
+            catches: performance.catches || 0,
+            stumpings: performance.stumpings || 0,
+            runOuts: performance.runOuts || 0
           })
           .where(eq(playerStats.playerId, performance.playerId));
       } else {
