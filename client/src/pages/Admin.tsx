@@ -580,6 +580,121 @@ function AdminContent() {
           </div>
         )}
 
+        {/* Gallery Tab */}
+        {activeTab === 'gallery' && (
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Add Gallery Item Form */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-bold text-[#1e3a8a] mb-4">Add New Gallery Item</h2>
+              <form onSubmit={galleryForm.handleSubmit(onGallerySubmit)} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input
+                    {...galleryForm.register('title')}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    placeholder="Image Title"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    {...galleryForm.register('description')}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    placeholder="Brief description of the image"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <select
+                    {...galleryForm.register('category')}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                  >
+                    <option value="match">Match</option>
+                    <option value="training">Training</option>
+                    <option value="celebration">Celebration</option>
+                    <option value="team">Team</option>
+                    <option value="ground">Ground</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                  <input
+                    {...galleryForm.register('imageUrl')}
+                    type="file"
+                    accept="image/*"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">Upload an image file (JPG, PNG, etc.)</p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={addGalleryItemMutation.isPending}
+                  className="w-full bg-[#1e3a8a] text-white py-2 px-4 rounded-lg hover:bg-blue-800 transition-colors disabled:opacity-50"
+                >
+                  {addGalleryItemMutation.isPending ? 'Adding...' : 'Add Gallery Item'}
+                </button>
+              </form>
+            </div>
+
+            {/* Gallery Items List */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-bold text-[#1e3a8a] mb-4">Gallery Items ({galleryItems.length})</h2>
+              <div className="max-h-96 overflow-y-auto space-y-4">
+                {galleryItems.map((item) => (
+                  <div key={item.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-start space-x-4">
+                      {item.imageUrl && (
+                        <img 
+                          src={item.imageUrl} 
+                          alt={item.title}
+                          className="w-20 h-20 object-cover rounded-lg"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://via.placeholder.com/80x80?text=Image';
+                          }}
+                        />
+                      )}
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900">{item.title}</div>
+                        <div className="text-sm text-gray-600 mt-1">{item.description}</div>
+                        <div className="flex items-center space-x-2 mt-2">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {item.category}
+                          </span>
+                          {item.createdAt && (
+                            <span className="text-xs text-gray-500">
+                              {new Date(item.createdAt).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deleteGalleryItemMutation.mutate(item.id)}
+                        disabled={deleteGalleryItemMutation.isPending}
+                        className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {galleryItems.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <div className="text-4xl mb-2">📷</div>
+                    <p>No gallery items yet. Add your first image above!</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Analytics Tab */}
         {activeTab === 'analytics' && (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">

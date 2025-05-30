@@ -75,6 +75,7 @@ export interface IStorage {
   // Gallery
   getGalleryItems(): Promise<GalleryItem[]>;
   createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem>;
+  deleteGalleryItem(id: number): Promise<void>;
 
   // Statistics
   getTeamStats(): Promise<{

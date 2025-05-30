@@ -1,7 +1,7 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPlayerSchema, insertMatchSchema, insertArticleSchema, insertPollSchema } from "@shared/schema";
+import { insertPlayerSchema, insertMatchSchema, insertArticleSchema, insertPollSchema, insertGallerySchema } from "@shared/schema";
 import { generateCricketPoll, generateCricketQuiz } from "./cricket-api";
 
 // Extend Express Request type to include session
@@ -545,7 +545,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Gallery endpoints
+  app.get("/api/gallery", async (req, res) => {
+    try {
+      const galleryItems = await storage.getGalleryItems();
+      res.json(galleryItems);
+    } catch (error) {
+      console.error('Error fetching gallery items:', error);
+      res.status(500).json({ error: 'Failed to fetch gallery items' });
+    }
+  });
 
+  app.post("/api/gallery", async (req, res) => {
+    try {
+      const validatedData = insertGallerySchema.parse(req.body);
+      const galleryItem = await storage.createGalleryItem(validatedData);
+      res.status(201).json(galleryItem);
+    } catch (error) {
+      console.error('Error creating gallery item:', error);
+      res.status(400).json({ error: 'Invalid gallery item data' });
+    }
+  });
+
+  app.delete("/api/gallery/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid gallery item ID" });
+      }
+
+      await storage.deleteGalleryItem(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting gallery item:', error);
+      res.status(500).json({ error: 'Failed to delete gallery item' });
+    }
+  });
 
   // Cricket scoring endpoints
   app.post('/api/scoring/login', async (req, res) => {
