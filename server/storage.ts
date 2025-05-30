@@ -54,6 +54,7 @@ export interface IStorage {
   getArticleBySlug(slug: string): Promise<Article | undefined>;
   createArticle(article: InsertArticle): Promise<Article>;
   updateArticle(id: number, article: Partial<InsertArticle>): Promise<void>;
+  deleteArticle(id: number): Promise<void>;
   getFeaturedArticles(): Promise<Article[]>;
 
   // Social Posts
@@ -298,6 +299,10 @@ export class DatabaseStorage implements IStorage {
 
   async updateArticle(id: number, article: Partial<InsertArticle>): Promise<void> {
     await db.update(articles).set(article).where(eq(articles.id, id));
+  }
+
+  async deleteArticle(id: number): Promise<void> {
+    await db.delete(articles).where(eq(articles.id, id));
   }
 
   async getFeaturedArticles(): Promise<Article[]> {

@@ -345,6 +345,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/articles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid article ID" });
+      }
+
+      await storage.updateArticle(id, req.body);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Update article error:", error);
+      res.status(500).json({ error: "Failed to update article" });
+    }
+  });
+
+  app.delete("/api/articles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid article ID" });
+      }
+
+      await storage.deleteArticle(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete article error:", error);
+      res.status(500).json({ error: "Failed to delete article" });
+    }
+  });
+
   // Social posts endpoints
   app.get("/api/social-posts", async (req, res) => {
     try {
