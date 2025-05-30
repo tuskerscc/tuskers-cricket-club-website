@@ -1418,7 +1418,7 @@ export default function TuskersScoring() {
             </button>
           </div>
         </div>
-      </div>
-    )}
+      )}
+    </div>
   );
 }
