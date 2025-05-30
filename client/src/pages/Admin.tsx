@@ -103,6 +103,18 @@ function AdminContent() {
     }
   });
 
+  const deleteAllPlayersMutation = useMutation({
+    mutationFn: () => apiRequest('DELETE', '/api/players/all'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/players'] });
+      toast({ title: "Success", description: "All players deleted successfully" });
+    },
+    onError: (error) => {
+      console.error('Delete all players error:', error);
+      toast({ title: "Error", description: "Failed to delete all players", variant: "destructive" });
+    }
+  });
+
   const onPlayerSubmit = (data: any) => {
     addPlayerMutation.mutate(data);
   };
@@ -234,7 +246,22 @@ function AdminContent() {
 
             {/* Players List */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-[#1e3a8a] mb-4">Current Players ({players.length})</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-[#1e3a8a]">Current Players ({players.length})</h2>
+                {players.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (confirm('Are you sure you want to delete ALL players? This action cannot be undone.')) {
+                        deleteAllPlayersMutation.mutate();
+                      }
+                    }}
+                    disabled={deleteAllPlayersMutation.isPending}
+                    className="bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    {deleteAllPlayersMutation.isPending ? 'Deleting...' : 'Delete All Players'}
+                  </button>
+                )}
+              </div>
               <div className="max-h-96 overflow-y-auto space-y-3">
                 {players.map((player) => (
                   <div key={player.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
