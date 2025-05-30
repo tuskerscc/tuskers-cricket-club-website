@@ -380,6 +380,10 @@ export class DatabaseStorage implements IStorage {
     return newItem;
   }
 
+  async deleteGalleryItem(id: number): Promise<void> {
+    await db.delete(gallery).where(eq(gallery.id, id));
+  }
+
   async getTeamStats(): Promise<{
     matchesWon: number;
     totalRuns: number;
