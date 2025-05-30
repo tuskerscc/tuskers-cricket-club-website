@@ -274,6 +274,11 @@ export default function TuskersScoring() {
       bowlingTeamPlayers: shouldTuskersBatFirst ? oppositionPlayers.filter(name => name.trim() !== '') : players.filter(player => selectedTuskersPlayers.includes(player.id)).map(p => p.name)
     });
     setShowSetup(false);
+    
+    // Show initial player selection modal for openers and bowler
+    setTimeout(() => {
+      setMatchState(prev => prev ? { ...prev, showBatsmanModal: true } : null);
+    }, 100);
   };
 
   const handleDismissal = (type: string) => {
@@ -318,7 +323,44 @@ export default function TuskersScoring() {
 
     const newState = { ...matchState };
     
-    // Find the out batsman and add to dismissed list if not already added
+    // Check if this is initial setup (both batsmen are "Select Batsman")
+    const isInitialSetup = newState.batsmen.every(b => b.name === 'Select Batsman');
+    
+    if (isInitialSetup) {
+      // Set first opener
+      if (newState.batsmen[0].name === 'Select Batsman') {
+        newState.batsmen[0] = {
+          name: newBatsmanName,
+          runs: 0,
+          balls: 0,
+          fours: 0,
+          sixes: 0,
+          isOut: false
+        };
+        setMatchState(newState);
+        setNewBatsmanName('');
+        // Keep modal open for second opener
+        return;
+      }
+      // Set second opener
+      else if (newState.batsmen[1].name === 'Select Batsman') {
+        newState.batsmen[1] = {
+          name: newBatsmanName,
+          runs: 0,
+          balls: 0,
+          fours: 0,
+          sixes: 0,
+          isOut: false
+        };
+        newState.showBatsmanModal = false;
+        newState.showBowlerSelection = true; // Show bowler selection after openers
+        setMatchState(newState);
+        setNewBatsmanName('');
+        return;
+      }
+    }
+    
+    // Handle replacement during match (when someone gets out)
     const outBatsmanIndex = newState.batsmen.findIndex(b => b.isOut);
     if (outBatsmanIndex !== -1 && !newState.dismissedBatsmen.some(db => db.name === newState.batsmen[outBatsmanIndex].name)) {
       newState.dismissedBatsmen.push({ ...newState.batsmen[outBatsmanIndex] });
@@ -349,7 +391,12 @@ export default function TuskersScoring() {
   const confirmBowlerChange = () => {
     if (!matchState || !newBowlerName.trim()) return;
 
-    if (!canBowlerBowl(newBowlerName, matchState.format)) {
+    const newState = { ...matchState };
+    
+    // Check if this is initial bowler selection
+    const isInitialBowlerSetup = newState.currentBowler.name === 'Select Bowler';
+    
+    if (!isInitialBowlerSetup && !canBowlerBowl(newBowlerName, matchState.format)) {
       const maxOvers = getBowlerMaxOvers(matchState.format);
       toast({ 
         title: "Bowling Restriction", 
@@ -358,13 +405,14 @@ export default function TuskersScoring() {
       return;
     }
 
-    const newState = { ...matchState };
-    
-    if (!newState.bowlers.find(b => b.name === newState.currentBowler.name)) {
-      newState.bowlers.push({ ...newState.currentBowler });
-    } else {
-      const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
-      newState.bowlers[bowlerIndex] = { ...newState.currentBowler };
+    // Save current bowler to bowlers array if not initial setup
+    if (!isInitialBowlerSetup) {
+      if (!newState.bowlers.find(b => b.name === newState.currentBowler.name)) {
+        newState.bowlers.push({ ...newState.currentBowler });
+      } else {
+        const bowlerIndex = newState.bowlers.findIndex(b => b.name === newState.currentBowler.name);
+        newState.bowlers[bowlerIndex] = { ...newState.currentBowler };
+      }
     }
 
     const existingBowler = newState.bowlers.find(b => b.name === newBowlerName);
@@ -1112,7 +1160,14 @@ export default function TuskersScoring() {
         {matchState.showBatsmanModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Select New Batsman</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                {matchState.batsmen.every(b => b.name === 'Select Batsman') ? 
+                  'Select First Opener' : 
+                  matchState.batsmen[0].name !== 'Select Batsman' && matchState.batsmen[1].name === 'Select Batsman' ?
+                  'Select Second Opener' :
+                  'Select New Batsman'
+                }
+              </h3>
               
               <select
                 value={newBatsmanName}
@@ -1150,7 +1205,9 @@ export default function TuskersScoring() {
         {matchState.showBowlerSelection && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Select New Bowler</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                {matchState.currentBowler.name === 'Select Bowler' ? 'Select Opening Bowler' : 'Select New Bowler'}
+              </h3>
               
               <select
                 value={newBowlerName}
