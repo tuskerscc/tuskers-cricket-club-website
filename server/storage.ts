@@ -502,56 +502,45 @@ export class DatabaseStorage implements IStorage {
     oversAgainst: number;
   }): Promise<void> {
     try {
-      console.log('Storage received data:', data);
-      
-      // Ensure all values are valid numbers
-      const cleanData = {
-        matchesWon: Number(data.matchesWon) || 0,
-        totalMatches: Number(data.totalMatches) || 1,
-        totalRuns: Number(data.totalRuns) || 0,
-        wicketsTaken: Number(data.wicketsTaken) || 0,
-        totalOvers: Number(data.totalOvers) || 0,
-        runsAgainst: Number(data.runsAgainst) || 0,
-        oversAgainst: Number(data.oversAgainst) || 0
+      // Convert all inputs to safe integers/floats
+      const safeInt = (val: any) => {
+        const num = parseInt(String(val)) || 0;
+        return isNaN(num) ? 0 : Math.max(0, num);
       };
       
-      // Calculate NRR with proper validation
-      const runRate = cleanData.totalOvers > 0 ? cleanData.totalRuns / cleanData.totalOvers : 0;
-      const concededRate = cleanData.oversAgainst > 0 ? cleanData.runsAgainst / cleanData.oversAgainst : 0;
-      let nrr = runRate - concededRate;
-      
-      // Ensure NRR is a valid number
-      if (isNaN(nrr) || !isFinite(nrr)) {
-        nrr = 0;
-      }
-      
-      const insertData = {
-        matchesWon: cleanData.matchesWon,
-        totalMatches: cleanData.totalMatches,
-        totalRuns: cleanData.totalRuns,
-        wicketsTaken: cleanData.wicketsTaken,
-        totalOvers: cleanData.totalOvers,
-        runsAgainst: cleanData.runsAgainst,
-        oversAgainst: cleanData.oversAgainst,
-        nrr: parseFloat(nrr.toFixed(3))
+      const safeFloat = (val: any) => {
+        const num = parseFloat(String(val)) || 0;
+        return isNaN(num) ? 0 : Math.max(0, num);
       };
       
-      console.log('Inserting clean data:', insertData);
+      const matchesWon = safeInt(data.matchesWon);
+      const totalMatches = safeInt(data.totalMatches) || 1;
+      const totalRuns = safeInt(data.totalRuns);
+      const wicketsTaken = safeInt(data.wicketsTaken);
+      const totalOvers = safeFloat(data.totalOvers);
+      const runsAgainst = safeInt(data.runsAgainst);
+      const oversAgainst = safeFloat(data.oversAgainst);
       
-      // Final validation before database insert
-      const finalData = {};
-      for (const [key, value] of Object.entries(insertData)) {
-        if (typeof value === 'number') {
-          finalData[key] = isNaN(value) || !isFinite(value) ? 0 : value;
-        } else {
-          finalData[key] = value;
-        }
+      // Calculate NRR safely
+      let nrr = 0;
+      if (totalOvers > 0 && oversAgainst > 0) {
+        const runRate = totalRuns / totalOvers;
+        const concededRate = runsAgainst / oversAgainst;
+        nrr = runRate - concededRate;
+        nrr = Math.round(nrr * 1000) / 1000; // Round to 3 decimal places
       }
       
-      console.log('Final validated data for database:', finalData);
-      
-      // Always insert new record
-      await db.insert(teamStats).values(finalData);
+      // Insert with guaranteed valid values
+      await db.insert(teamStats).values({
+        matchesWon: matchesWon,
+        totalMatches: totalMatches,
+        totalRuns: totalRuns,
+        wicketsTaken: wicketsTaken,
+        totalOvers: totalOvers,
+        runsAgainst: runsAgainst,
+        oversAgainst: oversAgainst,
+        nrr: nrr
+      });
     } catch (error) {
       console.error('Error updating team stats:', error);
       throw error;
