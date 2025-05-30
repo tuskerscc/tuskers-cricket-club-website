@@ -567,8 +567,7 @@ function AdminContent() {
                 { id: 'articles', name: 'Articles', icon: '📰' },
                 { id: 'gallery', name: 'Gallery', icon: '🖼️' },
                 { id: 'announcements', name: 'Announcements', icon: '📢' },
-                { id: 'statistics', name: 'Team Stats', icon: '📈' },
-                { id: 'analytics', name: 'Analytics', icon: '📊' }
+                { id: 'statistics', name: 'Team Stats', icon: '📈' }
               ].map((tab) => (
                 <button
                   key={tab.id}
