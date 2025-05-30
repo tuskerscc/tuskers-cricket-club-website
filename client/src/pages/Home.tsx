@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
-import MatchCenter from '@/components/MatchCenter';
 import Squad from '@/components/Squad';
 import ARStadiumMap from '@/components/ARStadiumMap';
 
@@ -104,7 +103,7 @@ export default function Home() {
           </div>
         </section>
 
-        <MatchCenter />
+
         <Squad />
         <ARStadiumMap />
         <CricketTrivia />

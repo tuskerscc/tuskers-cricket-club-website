@@ -31,9 +31,7 @@ export default function Header() {
             <a href="#squad" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
               Squad
             </a>
-            <a href="#matches" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
-              Fixtures
-            </a>
+
 
             <a href="#trivia" className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors">
               Trivia
@@ -77,17 +75,7 @@ export default function Header() {
                 <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
               </a>
               
-              <a 
-                href="#matches" 
-                className="flex items-center px-4 py-3 text-gray-700 hover:text-[#1e3a8a] hover:bg-blue-50 rounded-xl transition-all duration-200 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                  <i className="fas fa-calendar text-green-600 text-sm"></i>
-                </div>
-                <span>Fixtures</span>
-                <i className="fas fa-chevron-right ml-auto text-gray-400 text-xs"></i>
-              </a>
+
 
 
 
