@@ -55,6 +55,11 @@ interface MatchState {
   venue: string;
   matchDate: string;
   selectedPlayers: Player[];
+  tossWinner: string;
+  tossChoice: 'bat' | 'bowl';
+  isComplete?: boolean;
+  dismissedBatsmen?: Batsman[];
+  showBatsmanModal?: boolean;
 }
 
 interface LoginForm {
@@ -71,6 +76,8 @@ export default function TuskersScoring() {
   const [oppositionName, setOppositionName] = useState('');
   const [venue, setVenue] = useState('');
   const [matchDate, setMatchDate] = useState('');
+  const [tossWinner, setTossWinner] = useState<'tuskers' | 'opposition' | ''>('');
+  const [tossChoice, setTossChoice] = useState<'bat' | 'bowl' | ''>('');
   const { toast } = useToast();
 
   // Fetch teams and players from database
@@ -131,16 +138,21 @@ export default function TuskersScoring() {
   };
 
   const initializeMatch = () => {
-    if (!selectedTeam || !oppositionName || !venue || !matchDate) {
-      toast({ title: "Error", description: "Please fill all match details" });
+    if (!selectedTeam || !oppositionName || !venue || !matchDate || !tossWinner || !tossChoice) {
+      toast({ title: "Error", description: "Please fill all match details including toss information" });
       return;
     }
 
     const maxOvers = getMaxOvers(selectedFormat);
     
+    // Determine which team bats first based on toss
+    const tuskersName = selectedTeam.name;
+    const shouldTuskersBatFirst = (tossWinner === 'tuskers' && tossChoice === 'bat') || 
+                                  (tossWinner === 'opposition' && tossChoice === 'bowl');
+    
     setMatchState({
-      team1: selectedTeam.name,
-      team2: oppositionName,
+      team1: shouldTuskersBatFirst ? tuskersName : oppositionName,
+      team2: shouldTuskersBatFirst ? oppositionName : tuskersName,
       battingTeam: 1,
       innings: 1,
       totalRuns: 0,
@@ -159,7 +171,12 @@ export default function TuskersScoring() {
       striker: 0,
       venue: venue,
       matchDate: matchDate,
-      selectedPlayers: players.filter(p => p.id <= 15) // First 15 players as squad
+      selectedPlayers: players.filter(p => p.id <= 15), // First 15 players as squad
+      tossWinner: tossWinner === 'tuskers' ? tuskersName : oppositionName,
+      tossChoice: tossChoice,
+      isComplete: false,
+      dismissedBatsmen: [],
+      showBatsmanModal: false
     });
     setShowSetup(false);
   };
@@ -500,27 +517,20 @@ Generated: ${new Date().toLocaleString()}
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Your Team</label>
-                <div className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-blue-50 border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <span className="text-yellow-400 font-bold text-sm">TC</span>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-blue-900">
-                          {selectedTeam?.name || 'Tuskers CC'}
-                        </div>
-                        <div className="text-sm text-blue-700">
-                          Official Team Account
-                        </div>
-                      </div>
-                    </div>
-                    <div className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
-                      OFFICIAL
-                    </div>
-                  </div>
-                </div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Select Your Team</label>
+                <select
+                  value={selectedTeam?.id || ''}
+                  onChange={(e) => {
+                    const team = teams.find(t => t.id === parseInt(e.target.value));
+                    setSelectedTeam(team || null);
+                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select Team</option>
+                  {teams.map(team => (
+                    <option key={team.id} value={team.id}>{team.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -555,6 +565,48 @@ Generated: ${new Date().toLocaleString()}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
+              </div>
+
+              {/* Toss Information */}
+              <div className="bg-yellow-50 p-4 rounded-xl border-l-4 border-yellow-400">
+                <h3 className="font-semibold text-yellow-800 mb-4">Toss Information</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Toss Winner</label>
+                    <select
+                      value={tossWinner}
+                      onChange={(e) => setTossWinner(e.target.value as 'tuskers' | 'opposition' | '')}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select Toss Winner</option>
+                      <option value="tuskers">{selectedTeam?.name || 'Your Team'}</option>
+                      <option value="opposition">{oppositionName || 'Opposition Team'}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Toss Choice</label>
+                    <select
+                      value={tossChoice}
+                      onChange={(e) => setTossChoice(e.target.value as 'bat' | 'bowl' | '')}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled={!tossWinner}
+                    >
+                      <option value="">Select Choice</option>
+                      <option value="bat">Choose to Bat First</option>
+                      <option value="bowl">Choose to Bowl First</option>
+                    </select>
+                  </div>
+                </div>
+
+                {tossWinner && tossChoice && (
+                  <div className="mt-3 p-3 bg-yellow-100 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                      <strong>{tossWinner === 'tuskers' ? selectedTeam?.name : oppositionName}</strong> won the toss and chose to <strong>{tossChoice === 'bat' ? 'bat first' : 'bowl first'}</strong>
+                    </p>
+                  </div>
+                )}
               </div>
 
               {selectedTeam && (
