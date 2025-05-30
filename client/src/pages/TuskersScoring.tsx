@@ -1326,7 +1326,6 @@ export default function TuskersScoring() {
           </div>
         )}
       </div>
-      </div>
 
       {/* Openers Selection Modal */}
       {showOpenersSelection && (
@@ -1420,6 +1419,7 @@ export default function TuskersScoring() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
