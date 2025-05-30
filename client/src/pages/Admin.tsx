@@ -60,7 +60,7 @@ function AdminContent() {
   });
 
   const addPlayerMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/players', { method: 'POST', body: data }),
+    mutationFn: (data: any) => apiRequest('POST', '/api/players', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/players'] });
       playerForm.reset();
@@ -72,7 +72,7 @@ function AdminContent() {
   });
 
   const addArticleMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/articles', { method: 'POST', body: data }),
+    mutationFn: (data: any) => apiRequest('POST', '/api/articles', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
       articleForm.reset();
@@ -84,15 +84,19 @@ function AdminContent() {
   });
 
   const deletePlayerMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/players/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/players/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/players'] });
       toast({ title: "Success", description: "Player deleted successfully" });
+    },
+    onError: (error) => {
+      console.error('Delete player error:', error);
+      toast({ title: "Error", description: "Failed to delete player", variant: "destructive" });
     }
   });
 
   const deleteArticleMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/articles/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/articles/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
       toast({ title: "Success", description: "Article deleted successfully" });
