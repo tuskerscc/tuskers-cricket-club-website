@@ -150,6 +150,8 @@ function AdminContent() {
         content: editingArticle.content,
         excerpt: editingArticle.excerpt || '',
         featuredImage: editingArticle.featuredImage || '',
+        author: editingArticle.author || 'Admin',
+        category: editingArticle.category || 'news',
         isFeatured: editingArticle.isFeatured || false,
         isPublished: editingArticle.isPublished || false
       });
@@ -160,8 +162,10 @@ function AdminContent() {
         content: '',
         excerpt: '',
         featuredImage: '',
+        author: 'Admin',
+        category: 'news',
         isFeatured: false,
-        published: true
+        isPublished: true
       });
     }
   }, [editingArticle, articleForm]);
