@@ -46,41 +46,30 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Fan Zone */}
           <div>
-            <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Contact Us</h4>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <i className="fas fa-map-marker-alt text-[#fcd34d]"></i>
-                <span className="text-[#bfdbfe]">Tuskers Cricket Ground, Stadium Road</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <i className="fas fa-phone text-[#fcd34d]"></i>
-                <span className="text-[#bfdbfe]">+1 (555) 123-4567</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <i className="fas fa-envelope text-[#fcd34d]"></i>
-                <span className="text-[#bfdbfe]">info@tuskerscc.com</span>
-              </div>
-            </div>
+            <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Fan Zone</h4>
+            <ul className="space-y-3">
+              <li><a href="#gallery" className="text-[#bfdbfe] hover:text-white transition-colors">Gallery</a></li>
+              <li><a href="#trivia" className="text-[#bfdbfe] hover:text-white transition-colors">Cricket Trivia</a></li>
+              <li><a href="#forum" className="text-[#bfdbfe] hover:text-white transition-colors">Community Forum</a></li>
+              <li><a href="#events" className="text-[#bfdbfe] hover:text-white transition-colors">Events</a></li>
+            </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Newsletter */}
           <div>
-            <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Contact Us</h4>
-            <div className="space-y-3 text-[#bfdbfe]">
-              <div className="flex items-center">
-                <i className="fas fa-envelope mr-3 text-[#fcd34d]"></i>
-                <span>tuskerscckandy@gmail.com</span>
-              </div>
-              <div className="flex items-center">
-                <i className="fas fa-phone mr-3 text-[#fcd34d]"></i>
-                <span>+94 XXX XXX XXX</span>
-              </div>
-              <div className="flex items-center">
-                <i className="fas fa-map-marker-alt mr-3 text-[#fcd34d]"></i>
-                <span>Kandy, Sri Lanka</span>
-              </div>
+            <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Stay Updated</h4>
+            <p className="text-[#bfdbfe] mb-4">Get the latest news and updates from TUSKERS CRICKET CLUB</p>
+            <div className="flex">
+              <input 
+                type="email" 
+                placeholder="Your email" 
+                className="flex-1 px-3 py-2 bg-[#1d4ed8] text-white placeholder-[#bfdbfe] rounded-l-lg border border-[#2563eb] focus:outline-none focus:border-[#fcd34d]"
+              />
+              <button className="px-4 py-2 bg-[#f59e0b] text-[#1e3a8a] font-semibold rounded-r-lg hover:bg-[#fcd34d] transition-colors">
+                Subscribe
+              </button>
             </div>
           </div>
         </div>
