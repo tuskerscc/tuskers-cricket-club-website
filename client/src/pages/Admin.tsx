@@ -48,7 +48,6 @@ function AdminContent() {
 
   // Article form
   const articleForm = useForm({
-    resolver: zodResolver(insertArticleSchema),
     defaultValues: {
       title: '',
       slug: '',
@@ -185,10 +184,30 @@ function AdminContent() {
   }, [editingArticle, articleForm]);
 
   const onArticleSubmit = (data: any) => {
-    if (editingArticle) {
-      updateArticleMutation.mutate({ id: editingArticle.id, data });
+    // Handle file upload
+    const formData = { ...data };
+    
+    // If a featured image file is selected, convert to base64
+    if (data.featuredImage && data.featuredImage[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        formData.featuredImage = e.target?.result as string;
+        if (editingArticle) {
+          updateArticleMutation.mutate({ id: editingArticle.id, data: formData });
+        } else {
+          addArticleMutation.mutate(formData);
+        }
+      };
+      reader.readAsDataURL(data.featuredImage[0]);
     } else {
-      addArticleMutation.mutate(data);
+      if (editingArticle) {
+        // Keep existing image if no new image is uploaded
+        formData.featuredImage = editingArticle.featuredImage || '';
+        updateArticleMutation.mutate({ id: editingArticle.id, data: formData });
+      } else {
+        formData.featuredImage = '';
+        addArticleMutation.mutate(formData);
+      }
     }
   };
 
@@ -421,6 +440,17 @@ function AdminContent() {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
                     placeholder="Brief description..."
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Featured Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    {...articleForm.register('featuredImage')}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload article featured image (JPG, PNG, WebP)</p>
                 </div>
 
                 <div>
