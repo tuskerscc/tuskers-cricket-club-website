@@ -1,0 +1,470 @@
+/*
+Theme Name: TUSKERS CRICKET CLUB
+Description: Official WordPress theme for TUSKERS CRICKET CLUB featuring Royal Blue and Gold branding with comprehensive cricket club functionality.
+Version: 1.0
+Author: TUSKERS CRICKET CLUB
+*/
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* CSS Variables for Royal Blue and Gold Theme */
+:root {
+    --royal-blue: #1e3a8a;
+    --gold: #f59e0b;
+    --light-gold: #fcd34d;
+    --light-blue: #bfdbfe;
+    --dark-blue: #1e40af;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: var(--gray-800);
+    background-color: var(--gray-50);
+}
+
+/* Header Styles */
+.site-header {
+    background-color: var(--royal-blue);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.site-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.logo-icon {
+    width: 3rem;
+    height: 3rem;
+    background-color: var(--gold);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--royal-blue);
+    font-weight: bold;
+    font-size: 1.125rem;
+}
+
+.site-title {
+    color: var(--light-gold);
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.site-tagline {
+    color: var(--light-blue);
+    font-size: 0.875rem;
+}
+
+/* Navigation */
+.main-navigation ul {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.main-navigation a {
+    color: var(--light-blue);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.main-navigation a:hover {
+    color: var(--light-gold);
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--royal-blue) 0%, var(--dark-blue) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.hero-text h1 {
+    font-size: 4rem;
+    font-weight: bold;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.hero-text .club-name {
+    color: var(--light-gold);
+}
+
+.hero-text .cricket-text {
+    color: white;
+}
+
+.hero-description {
+    font-size: 1.25rem;
+    color: var(--light-blue);
+    margin-bottom: 2rem;
+    max-width: 28rem;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    background-color: var(--gold);
+    color: var(--royal-blue);
+    padding: 1rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    font-size: 1.125rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    transform: scale(1);
+}
+
+.btn-primary:hover {
+    background-color: var(--light-gold);
+    transform: scale(1.05);
+}
+
+.btn-secondary {
+    border: 2px solid var(--light-gold);
+    color: var(--light-gold);
+    padding: 1rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    font-size: 1.125rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    background: transparent;
+}
+
+.btn-secondary:hover {
+    background-color: var(--light-gold);
+    color: var(--royal-blue);
+}
+
+/* Content Sections */
+.content-section {
+    padding: 5rem 0;
+}
+
+.section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--royal-blue);
+    margin-bottom: 1rem;
+}
+
+.section-description {
+    font-size: 1.125rem;
+    color: var(--gray-600);
+    max-width: 48rem;
+    margin: 0 auto;
+}
+
+/* Card Styles */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.card {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-0.5rem);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.card-image {
+    width: 100%;
+    height: 12rem;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--royal-blue);
+    margin-bottom: 0.75rem;
+}
+
+.card-text {
+    color: var(--gray-600);
+    margin-bottom: 1rem;
+}
+
+/* Statistics Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--royal-blue);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--gray-600);
+    font-weight: 600;
+}
+
+/* Footer */
+.site-footer {
+    background-color: var(--royal-blue);
+    color: white;
+    padding: 4rem 0;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.footer-section h4 {
+    color: var(--light-gold);
+    font-size: 1.125rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.75rem;
+}
+
+.footer-section a {
+    color: var(--light-blue);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--dark-blue);
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.copyright {
+    color: var(--light-blue);
+}
+
+.footer-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-navigation {
+        display: none;
+    }
+    
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .hero-text h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-buttons {
+        justify-content: center;
+    }
+    
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* WordPress Specific Styles */
+.wp-block-group {
+    margin: 0;
+}
+
+.alignwide {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.alignfull {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+}
+
+/* Post Content */
+.post-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.post-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--royal-blue);
+    margin-bottom: 1rem;
+}
+
+.post-meta {
+    color: var(--gray-600);
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.post-content p {
+    margin-bottom: 1.5rem;
+}
+
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1.5rem 0;
+}
+
+/* Cricket Widget Container */
+.cricket-widget {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(16px);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.widget-title {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.scale-on-hover {
+    transition: transform 0.3s ease;
+}
+
+.scale-on-hover:hover {
+    transform: scale(1.05);
+}
