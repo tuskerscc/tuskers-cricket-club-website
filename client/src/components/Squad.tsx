@@ -270,29 +270,9 @@ export default function Squad() {
                     <h3 className="font-bold text-gray-900 text-lg mb-1 line-clamp-1">
                       {player.name.toUpperCase()}
                     </h3>
-                    <p className="text-[#1e3a8a] font-semibold text-sm mb-3">
+                    <p className="text-[#1e3a8a] font-semibold text-sm">
                       {player.role.toUpperCase()}
                     </p>
-                    
-                    {/* Quick Stats */}
-                    {player.stats && (
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="bg-gray-50 rounded-lg p-2">
-                          <div className="font-semibold text-gray-900">
-                            {player.stats.runsScored || 0}
-                          </div>
-                          <div className="text-gray-600">Runs</div>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-2">
-                          <div className="font-semibold text-gray-900">
-                            {(player.stats.wicketsTaken ?? 0) || (player.stats.catches ?? 0)}
-                          </div>
-                          <div className="text-gray-600">
-                            {player.role.toLowerCase().includes('bowler') ? 'Wickets' : 'Catches'}
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
