@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { ChevronLeft, ChevronRight, Star, Users } from 'lucide-react';
 import type { PlayerWithStats } from '@/lib/types';
 
 export default function Squad() {
   const [category, setCategory] = useState<'all' | 'batsmen' | 'bowlers' | 'allrounders' | 'wicketkeeper'>('all');
-  const [selectedPlayer, setSelectedPlayer] = useState<PlayerWithStats | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const sliderRef = useRef<HTMLDivElement>(null);
+  const [itemsPerView, setItemsPerView] = useState(4);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   const { data: players = [], isLoading } = useQuery<PlayerWithStats[]>({
     queryKey: ['/api/players']
@@ -20,57 +21,78 @@ export default function Squad() {
     if (category === 'allrounders') return player.role.toLowerCase().includes('all-rounder');
     if (category === 'wicketkeeper') return player.role.toLowerCase().includes('wicket-keeper');
     return false;
-  }).slice(0, 25); // Limit to 25 players
+  });
+
+  // Responsive items per view
+  useEffect(() => {
+    const updateItemsPerView = () => {
+      const width = window.innerWidth;
+      if (width < 640) setItemsPerView(1);
+      else if (width < 768) setItemsPerView(2);
+      else if (width < 1024) setItemsPerView(3);
+      else setItemsPerView(4);
+    };
+
+    updateItemsPerView();
+    window.addEventListener('resize', updateItemsPerView);
+    return () => window.removeEventListener('resize', updateItemsPerView);
+  }, []);
 
   // Auto-scroll functionality
   useEffect(() => {
-    if (!isAutoScrolling || filteredPlayers.length === 0) return;
+    if (!isAutoScrolling || filteredPlayers.length <= itemsPerView) return;
     
     const interval = setInterval(() => {
-      setCurrentIndex(prevIndex => 
-        prevIndex >= filteredPlayers.length - 3 ? 0 : prevIndex + 1
-      );
-    }, 3000);
+      setCurrentIndex(prevIndex => {
+        const maxIndex = Math.max(0, filteredPlayers.length - itemsPerView);
+        return prevIndex >= maxIndex ? 0 : prevIndex + 1;
+      });
+    }, 4000);
 
     return () => clearInterval(interval);
-  }, [filteredPlayers.length, isAutoScrolling]);
+  }, [filteredPlayers.length, isAutoScrolling, itemsPerView]);
 
   // Navigation functions
   const goToSlide = (index: number) => {
-    setCurrentIndex(index);
+    const maxIndex = Math.max(0, filteredPlayers.length - itemsPerView);
+    setCurrentIndex(Math.min(Math.max(0, index), maxIndex));
     setIsAutoScrolling(false);
-    setTimeout(() => setIsAutoScrolling(true), 5000);
+    setTimeout(() => setIsAutoScrolling(true), 6000);
   };
 
   const nextSlide = () => {
-    const newIndex = currentIndex >= filteredPlayers.length - 3 ? 0 : currentIndex + 1;
+    const maxIndex = Math.max(0, filteredPlayers.length - itemsPerView);
+    const newIndex = currentIndex >= maxIndex ? 0 : currentIndex + 1;
     goToSlide(newIndex);
   };
 
   const prevSlide = () => {
-    const newIndex = currentIndex <= 0 ? filteredPlayers.length - 3 : currentIndex - 1;
+    const maxIndex = Math.max(0, filteredPlayers.length - itemsPerView);
+    const newIndex = currentIndex <= 0 ? maxIndex : currentIndex - 1;
     goToSlide(newIndex);
   };
 
   if (isLoading) {
     return (
-      <section id="squad" className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-[#1e3a8a] mb-4">Our Squad</h2>
-            <p className="text-xl text-gray-600">Meet the talented players who make Tuskers CC a champion team</p>
+      <section id="squad" className="py-8 md:py-16 bg-gray-50">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl md:text-4xl font-bold text-[#1e3a8a] mb-2">SQUAD</h2>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Users className="w-4 h-4" />
+                <span>Men's Team</span>
+              </div>
+            </div>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-gray-50 rounded-2xl overflow-hidden shadow-lg animate-pulse">
-                <div className="w-full h-64 bg-gray-200"></div>
-                <div className="p-6">
-                  <div className="h-6 bg-gray-200 rounded mb-3"></div>
-                  <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-gray-200 rounded"></div>
-                    <div className="h-3 bg-gray-200 rounded"></div>
-                  </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 animate-pulse">
+                <div className="w-full h-48 bg-gray-200"></div>
+                <div className="p-4 text-center">
+                  <div className="h-5 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-20 mx-auto"></div>
                 </div>
               </div>
             ))}
@@ -80,399 +102,227 @@ export default function Squad() {
     );
   }
 
+  const maxIndex = Math.max(0, filteredPlayers.length - itemsPerView);
+  const canGoPrev = currentIndex > 0;
+  const canGoNext = currentIndex < maxIndex;
+
   return (
-    <section id="squad" className="py-16 bg-white">
+    <section id="squad" className="py-8 md:py-16 bg-gray-50">
       <div className="container mx-auto px-4 max-w-7xl">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#1e3a8a] mb-4">Our Squad</h2>
-          <p className="text-xl text-gray-600">Meet the talented players who make Tuskers CC a champion team</p>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl md:text-4xl font-bold text-[#1e3a8a] mb-2">SQUAD</h2>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Users className="w-4 h-4" />
+              <span>Men's Team</span>
+            </div>
+          </div>
+          
+          {/* Navigation Controls */}
+          <div className="flex items-center gap-4">
+            {filteredPlayers.length > itemsPerView && (
+              <div className="flex gap-2">
+                <button
+                  onClick={prevSlide}
+                  disabled={!canGoPrev}
+                  className={`p-2 rounded-full border transition-all duration-200 ${
+                    canGoPrev 
+                      ? 'border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white' 
+                      : 'border-gray-300 text-gray-300 cursor-not-allowed'
+                  }`}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  disabled={!canGoNext}
+                  className={`p-2 rounded-full border transition-all duration-200 ${
+                    canGoNext 
+                      ? 'border-[#1e3a8a] text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white' 
+                      : 'border-gray-300 text-gray-300 cursor-not-allowed'
+                  }`}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Squad Categories */}
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
+        {/* Category Filter */}
+        <div className="flex flex-wrap justify-center gap-3 mb-8">
           <button 
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
               category === 'all' 
-                ? 'bg-[#1e3a8a] text-white' 
-                : 'bg-white text-[#1e3a8a] border border-[#1e3a8a] hover:bg-[#eff6ff]'
+                ? 'bg-[#1e3a8a] text-white shadow-md' 
+                : 'bg-white text-[#1e3a8a] border border-gray-200 hover:bg-gray-50'
             }`}
-            onClick={() => setCategory('all')}
+            onClick={() => {
+              setCategory('all');
+              setCurrentIndex(0);
+            }}
           >
             All Players
           </button>
           <button 
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
               category === 'batsmen' 
-                ? 'bg-[#1e3a8a] text-white' 
-                : 'bg-white text-[#1e3a8a] border border-[#1e3a8a] hover:bg-[#eff6ff]'
+                ? 'bg-[#1e3a8a] text-white shadow-md' 
+                : 'bg-white text-[#1e3a8a] border border-gray-200 hover:bg-gray-50'
             }`}
-            onClick={() => setCategory('batsmen')}
+            onClick={() => {
+              setCategory('batsmen');
+              setCurrentIndex(0);
+            }}
           >
             Batsmen
           </button>
           <button 
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
               category === 'bowlers' 
-                ? 'bg-[#1e3a8a] text-white' 
-                : 'bg-white text-[#1e3a8a] border border-[#1e3a8a] hover:bg-[#eff6ff]'
+                ? 'bg-[#1e3a8a] text-white shadow-md' 
+                : 'bg-white text-[#1e3a8a] border border-gray-200 hover:bg-gray-50'
             }`}
-            onClick={() => setCategory('bowlers')}
+            onClick={() => {
+              setCategory('bowlers');
+              setCurrentIndex(0);
+            }}
           >
             Bowlers
           </button>
           <button 
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
               category === 'allrounders' 
-                ? 'bg-[#1e3a8a] text-white' 
-                : 'bg-white text-[#1e3a8a] border border-[#1e3a8a] hover:bg-[#eff6ff]'
+                ? 'bg-[#1e3a8a] text-white shadow-md' 
+                : 'bg-white text-[#1e3a8a] border border-gray-200 hover:bg-gray-50'
             }`}
-            onClick={() => setCategory('allrounders')}
+            onClick={() => {
+              setCategory('allrounders');
+              setCurrentIndex(0);
+            }}
           >
-            All-rounders
+            All-Rounders
           </button>
           <button 
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
               category === 'wicketkeeper' 
-                ? 'bg-[#1e3a8a] text-white' 
-                : 'bg-white text-[#1e3a8a] border border-[#1e3a8a] hover:bg-[#eff6ff]'
+                ? 'bg-[#1e3a8a] text-white shadow-md' 
+                : 'bg-white text-[#1e3a8a] border border-gray-200 hover:bg-gray-50'
             }`}
-            onClick={() => setCategory('wicketkeeper')}
+            onClick={() => {
+              setCategory('wicketkeeper');
+              setCurrentIndex(0);
+            }}
           >
-            Wicket-keepers
+            Wicket-Keepers
           </button>
         </div>
 
-        {/* Bay Window Style Image Slider */}
+        {/* Players Grid/Slider */}
         <div className="relative overflow-hidden">
-          {filteredPlayers.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No players found in this category.</p>
-            </div>
-          ) : (
-            <>
-              {/* Navigation Arrows */}
-              <button 
-                onClick={prevSlide}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-[#1e3a8a] rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110"
-                onMouseEnter={() => setIsAutoScrolling(false)}
-                onMouseLeave={() => setIsAutoScrolling(true)}
+          <div 
+            ref={sliderRef}
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{
+              transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+            }}
+          >
+            {filteredPlayers.map((player) => (
+              <div
+                key={player.id}
+                className="flex-shrink-0 px-3"
+                style={{ width: `${100 / itemsPerView}%` }}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button 
-                onClick={nextSlide}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-[#1e3a8a] rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110"
-                onMouseEnter={() => setIsAutoScrolling(false)}
-                onMouseLeave={() => setIsAutoScrolling(true)}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-
-              {/* Bay Window Slider Container */}
-              <div 
-                ref={sliderRef}
-                className="flex transition-transform duration-700 ease-in-out"
-                style={{ transform: `translateX(-${currentIndex * 33.333}%)` }}
-                onMouseEnter={() => setIsAutoScrolling(false)}
-                onMouseLeave={() => setIsAutoScrolling(true)}
-              >
-                {filteredPlayers.map((player, index) => {
-                  const isCenter = index === currentIndex + 1;
-                  const isAdjacent = index === currentIndex || index === currentIndex + 2;
-                  
-                  return (
-                    <div
-                      key={player.id}
-                      className={`flex-shrink-0 w-1/3 px-2 transition-all duration-700 ${
-                        isCenter 
-                          ? 'transform scale-110 z-20' 
-                          : isAdjacent 
-                          ? 'transform scale-95 z-10' 
-                          : 'transform scale-85 z-0'
-                      }`}
-                    >
-                      <div 
-                        className={`bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden shadow-lg cursor-pointer transition-all duration-500 hover:shadow-2xl ${
-                          isCenter ? 'ring-4 ring-[#1e3a8a]/20' : ''
-                        }`}
-                        onClick={() => setSelectedPlayer(player)}
-                      >
-                        <div className="relative">
-                          <img 
-                            src={player.photo || 'https://via.placeholder.com/300x400/1e3a8a/white?text=Player'}
-                            alt={player.name}
-                            className="w-full h-80 object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                          <div className="absolute bottom-4 left-4 text-white">
-                            <h3 className="text-xl font-bold mb-1">{player.name}</h3>
-                            <p className="text-[#ffd700] font-semibold">{player.role}</p>
-                          </div>
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
+                  {/* Player Image */}
+                  <div className="relative">
+                    <div className="w-full h-48 bg-gradient-to-br from-[#1e3a8a] to-[#3b82f6] flex items-center justify-center">
+                      {player.photo ? (
+                        <img 
+                          src={player.photo} 
+                          alt={player.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-white text-6xl font-bold">
+                          {player.name.charAt(0).toUpperCase()}
                         </div>
-                        
-                        <div className="p-6">
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div className="text-center bg-[#eff6ff] rounded-lg p-3">
-                              <div className="text-2xl font-bold text-[#1e3a8a]">
-                                {player.stats?.matches || 0}
-                              </div>
-                              <div className="text-gray-600">Matches</div>
-                            </div>
-                            <div className="text-center bg-[#fef3c7] rounded-lg p-3">
-                              <div className="text-2xl font-bold text-[#d97706]">
-                                {player.stats?.runsScored || 0}
-                              </div>
-                              <div className="text-gray-600">Runs</div>
-                            </div>
+                      )}
+                    </div>
+                    
+                    {/* Captain Badge */}
+                    {player.name.toLowerCase().includes('captain') && (
+                      <div className="absolute top-3 right-3 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                        <Star className="w-3 h-3" />
+                        CAPTAIN
+                      </div>
+                    )}
+                    
+                    {/* Jersey Number */}
+                    <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-[#1e3a8a] px-2 py-1 rounded-full text-sm font-bold">
+                      #{player.jerseyNumber || player.id}
+                    </div>
+                  </div>
+
+                  {/* Player Info */}
+                  <div className="p-4 text-center">
+                    <h3 className="font-bold text-gray-900 text-lg mb-1 line-clamp-1">
+                      {player.name.toUpperCase()}
+                    </h3>
+                    <p className="text-[#1e3a8a] font-semibold text-sm mb-3">
+                      {player.role.toUpperCase()}
+                    </p>
+                    
+                    {/* Quick Stats */}
+                    {player.stats && (
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-gray-50 rounded-lg p-2">
+                          <div className="font-semibold text-gray-900">
+                            {player.stats.runsScored || 0}
                           </div>
-                          
-                          {player.role.toLowerCase().includes('bowler') && (
-                            <div className="mt-4 text-center bg-[#f0fdf4] rounded-lg p-3">
-                              <div className="text-2xl font-bold text-[#16a34a]">
-                                {player.stats?.wicketsTaken || 0}
-                              </div>
-                              <div className="text-gray-600">Wickets</div>
-                            </div>
-                          )}
-                          
-                          {(player.role.toLowerCase().includes('keeper') || player.role.toLowerCase().includes('wicket')) && (
-                            <div className="mt-4 text-center bg-[#fdf2f8] rounded-lg p-3">
-                              <div className="text-2xl font-bold text-[#e11d48]">
-                                {player.stats?.catches || 0}
-                              </div>
-                              <div className="text-gray-600">Catches</div>
-                            </div>
-                          )}
+                          <div className="text-gray-600">Runs</div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-2">
+                          <div className="font-semibold text-gray-900">
+                            {(player.stats.wicketsTaken ?? 0) || (player.stats.catches ?? 0)}
+                          </div>
+                          <div className="text-gray-600">
+                            {player.role.toLowerCase().includes('bowler') ? 'Wickets' : 'Catches'}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Dot Indicators */}
-              <div className="flex justify-center mt-8 space-x-2">
-                {Array.from({ length: Math.max(0, filteredPlayers.length - 2) }).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      index === currentIndex 
-                        ? 'bg-[#1e3a8a] scale-125' 
-                        : 'bg-gray-300 hover:bg-gray-400'
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Keep the existing player modal unchanged */}
-        <div className="hidden">
-          {filteredPlayers.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">No players found in this category.</p>
-            </div>
-          ) : (
-            filteredPlayers.map((player) => (
-              <div 
-                key={player.id} 
-                className="group bg-gradient-to-br from-[#eff6ff] to-blue-50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative"
-              >
-                {player.isCaptain && (
-                  <div className="absolute top-4 right-4 bg-[#f59e0b] text-[#1e3a8a] px-3 py-1 rounded-full text-xs font-bold z-10">
-                    <i className="fas fa-crown mr-1"></i>
-                    CAPTAIN
-                  </div>
-                )}
-                {player.isViceCaptain && (
-                  <div className="absolute top-4 right-4 bg-[#1e40af] text-white px-3 py-1 rounded-full text-xs font-bold z-10">
-                    VICE-CAPTAIN
-                  </div>
-                )}
-                
-                <img 
-                  src={player.photo || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=500'} 
-                  alt={player.name} 
-                  className="w-full h-64 object-cover object-top"
-                />
-                
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-bold text-[#1e3a8a]">{player.name}</h3>
-                    {player.jerseyNumber && (
-                      <span className="bg-[#1e3a8a] text-white px-3 py-1 rounded-full text-sm font-bold">
-                        #{player.jerseyNumber}
-                      </span>
                     )}
                   </div>
-                  <p className="text-[#d97706] font-semibold mb-4">
-                    {player.role} • {player.battingStyle || player.bowlingStyle || 'Right-handed'}
-                  </p>
-                  
-                  {player.stats && (
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Matches:</span>
-                        <span className="font-semibold text-[#1e3a8a]">{player.stats.matches}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Runs:</span>
-                        <span className="font-semibold text-[#1e3a8a]">{player.stats.runsScored}</span>
-                      </div>
-                      {player.stats.wicketsTaken > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Wickets:</span>
-                          <span className="font-semibold text-[#1e3a8a]">{player.stats.wicketsTaken}</span>
-                        </div>
-                      )}
-                      {player.stats.catches > 0 && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Catches:</span>
-                          <span className="font-semibold text-[#1e3a8a]">{player.stats.catches}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  <button 
-                    onClick={() => setSelectedPlayer(player)}
-                    className="w-full mt-4 bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors group-hover:bg-[#f59e0b] group-hover:text-[#1e3a8a]"
-                  >
-                    View Full Profile
-                  </button>
                 </div>
               </div>
-            ))
-          )}
+            ))}
+          </div>
         </div>
 
-
-
-        {/* Player Detail Modal */}
-        {selectedPlayer && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="relative">
-                {/* Close Button */}
-                <button
-                  onClick={() => setSelectedPlayer(null)}
-                  className="absolute top-4 right-4 bg-gray-200 hover:bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center z-10"
-                >
-                  ✕
-                </button>
-
-                {/* Player Header */}
-                <div className="bg-gradient-to-br from-[#1e3a8a] to-blue-800 text-white p-6 rounded-t-2xl">
-                  <div className="flex items-center space-x-4">
-                    <img 
-                      src={selectedPlayer.photo || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200'} 
-                      alt={selectedPlayer.name} 
-                      className="w-20 h-20 rounded-full object-cover border-4 border-white"
-                    />
-                    <div>
-                      <h2 className="text-2xl font-bold">{selectedPlayer.name}</h2>
-                      <p className="text-blue-200">{selectedPlayer.role}</p>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <span className="bg-[#fcd34d] text-[#1e3a8a] px-3 py-1 rounded-full text-sm font-bold">
-                          #{selectedPlayer.jerseyNumber}
-                        </span>
-                        {selectedPlayer.isCaptain && (
-                          <span className="bg-[#f59e0b] text-[#1e3a8a] px-3 py-1 rounded-full text-sm font-bold">
-                            CAPTAIN
-                          </span>
-                        )}
-                        {selectedPlayer.isViceCaptain && (
-                          <span className="bg-[#1e40af] text-white px-3 py-1 rounded-full text-sm font-bold">
-                            VICE-CAPTAIN
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Player Details */}
-                <div className="p-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Basic Info */}
-                    <div>
-                      <h3 className="text-lg font-bold text-[#1e3a8a] mb-4">Player Information</h3>
-                      <div className="space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Batting Style:</span>
-                          <span className="font-semibold">{selectedPlayer.battingStyle || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Bowling Style:</span>
-                          <span className="font-semibold">{selectedPlayer.bowlingStyle || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Jersey Number:</span>
-                          <span className="font-semibold">#{selectedPlayer.jerseyNumber}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Role:</span>
-                          <span className="font-semibold">{selectedPlayer.role}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Performance Stats */}
-                    <div>
-                      <h3 className="text-lg font-bold text-[#1e3a8a] mb-4">Performance Stats</h3>
-                      {selectedPlayer.stats ? (
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Matches:</span>
-                            <span className="font-semibold">{selectedPlayer.stats.matchesPlayed || 0}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Runs Scored:</span>
-                            <span className="font-semibold">{selectedPlayer.stats.runsScored || 0}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Wickets Taken:</span>
-                            <span className="font-semibold">{selectedPlayer.stats.wicketsTaken || 0}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Catches:</span>
-                            <span className="font-semibold">{selectedPlayer.stats.catches || 0}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Average:</span>
-                            <span className="font-semibold">{selectedPlayer.stats.average || 'N/A'}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Strike Rate:</span>
-                            <span className="font-semibold">{selectedPlayer.stats.strikeRate || 'N/A'}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-gray-500">No performance data available</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-4 mt-8">
-                    <button 
-                      onClick={() => setSelectedPlayer(null)}
-                      className="flex-1 bg-[#1e3a8a] text-white py-3 rounded-lg font-semibold hover:bg-[#1e40af] transition-colors"
-                    >
-                      Close Profile
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Pagination Dots */}
+        {filteredPlayers.length > itemsPerView && (
+          <div className="flex justify-center mt-8 gap-2">
+            {Array.from({ length: maxIndex + 1 }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                  index === currentIndex 
+                    ? 'bg-[#1e3a8a] scale-110' 
+                    : 'bg-gray-300 hover:bg-gray-400'
+                }`}
+              />
+            ))}
           </div>
         )}
+
+        {/* Player Count */}
+        <div className="text-center mt-6">
+          <p className="text-gray-600">
+            Showing {Math.min(itemsPerView, filteredPlayers.length)} of {filteredPlayers.length} players
+          </p>
+        </div>
       </div>
     </section>
   );
