@@ -88,7 +88,7 @@ export default function TuskersScoring() {
   const [oppositionName, setOppositionName] = useState('');
   const [venue, setVenue] = useState('');
   const [matchDate, setMatchDate] = useState(new Date().toISOString().split('T')[0]);
-  const [tossWinner, setTossWinner] = useState<'tuskers' | 'opposition' | ''>('');
+  const [tossWinner, setTossWinner] = useState<'TUSKERS' | 'opposition' | ''>('');
   const [tossChoice, setTossChoice] = useState<'bat' | 'bowl' | ''>('');
   const [selectedTuskersPlayers, setSelectedTuskersPlayers] = useState<number[]>([]);
   const [oppositionPlayers, setOppositionPlayers] = useState<string[]>(['', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
@@ -198,7 +198,7 @@ export default function TuskersScoring() {
 
   const startMatchWithPlayers = () => {
     if (selectedTuskersPlayers.length < 9 || selectedTuskersPlayers.length > 15) {
-      toast({ title: "Error", description: "Please select between 9-15 Tuskers players" });
+      toast({ title: "Error", description: "Please select between 9-15 TUSKERS players" });
       return;
     }
 
@@ -208,7 +208,7 @@ export default function TuskersScoring() {
       return;
     }
 
-    // Validate role assignments for Tuskers
+    // Validate role assignments for TUSKERS
     const tuskersRoleValues = Object.values(tuskersRoles);
     const captainCount = tuskersRoleValues.filter(role => role === 'captain').length;
     const wicketKeeperCount = tuskersRoleValues.filter(role => role === 'wicket_keeper').length;
@@ -253,7 +253,7 @@ export default function TuskersScoring() {
     const maxOvers = getMaxOvers(selectedFormat);
     
     const tuskersName = selectedTeam!.name;
-    const shouldTuskersBatFirst = (tossWinner === 'tuskers' && tossChoice === 'bat') || 
+    const shouldTuskersBatFirst = (tossWinner === 'TUSKERS' && tossChoice === 'bat') || 
                                   (tossWinner === 'opposition' && tossChoice === 'bowl');
     
     setMatchState({
