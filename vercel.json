@@ -4,13 +4,6 @@
     {
       "src": "server/index.ts",
       "use": "@vercel/node"
-    },
-    {
-      "src": "client/**/*",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
     }
   ],
   "routes": [
@@ -20,9 +13,11 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/client/$1"
+      "dest": "/dist/$1"
     }
   ],
+  "outputDirectory": "dist",
+  "buildCommand": "npm run build",
   "env": {
     "NODE_ENV": "production"
   }

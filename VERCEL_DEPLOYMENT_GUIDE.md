@@ -41,18 +41,15 @@ git push -u origin main
 
 ## Step 3: Set Up Database
 
-### Option A: Vercel PostgreSQL (Recommended)
-1. Go to https://vercel.com/dashboard
-2. Click "Storage" → "Create Database"
-3. Select "PostgreSQL"
-4. Choose region closest to your users
-5. Note down the connection details
-
-### Option B: Neon Database (Free)
+### Neon Database Setup (Recommended - Free)
 1. Go to https://neon.tech
-2. Sign up and create new project
-3. Copy the connection string
-4. Save it for environment variables
+2. Sign up using email or GitHub account
+3. Create new project:
+   - Project name: "tuskers-cricket-club"
+   - Region: Choose closest to your location
+   - PostgreSQL version: Keep default
+4. Copy the connection string from dashboard
+5. It will look like: `postgresql://username:password@hostname/database?sslmode=require`
 
 ## Step 4: Deploy to Vercel
 
