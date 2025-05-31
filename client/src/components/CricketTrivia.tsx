@@ -223,11 +223,11 @@ export default function CricketTrivia() {
 
   if (gameMode === 'menu') {
     return (
-      <section id="trivia" className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <section id="trivia" className="py-16 bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-[#1e3a8a] mb-4">🏏 Cricket Trivia Challenge</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <h2 className="text-4xl font-bold text-[#fcd34d] mb-4">🏏 Cricket Trivia Challenge</h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto">
               Test your cricket knowledge and compete with fans worldwide!
             </p>
           </div>

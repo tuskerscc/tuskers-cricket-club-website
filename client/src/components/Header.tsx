@@ -10,7 +10,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-lg sticky top-0 z-50">
+    <header className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] shadow-lg sticky top-0 z-50">
       {/* Main Navigation */}
       <nav className="container-responsive py-3 sm:py-4">
         <div className="flex items-center justify-between">
@@ -22,7 +22,7 @@ export default function Header() {
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-contain"
             />
             <div>
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[#1e3a8a] leading-tight">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[#fcd34d] leading-tight">
                 <span className="block sm:hidden">TUSKERS CC</span>
                 <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
               </h1>
@@ -33,32 +33,32 @@ export default function Header() {
           <div className="hidden lg:flex items-center space-x-8">
             <a
               href="#squad"
-              className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors"
+              className="text-[#fcd34d] hover:text-white font-medium transition-colors"
             >
               Squad
             </a>
 
             <a
               href="#trivia"
-              className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors"
+              className="text-[#fcd34d] hover:text-white font-medium transition-colors"
             >
               Trivia
             </a>
             <Link
               href="/news"
-              className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors"
+              className="text-[#fcd34d] hover:text-white font-medium transition-colors"
             >
               News
             </Link>
             <Link
               href="/contact"
-              className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors"
+              className="text-[#fcd34d] hover:text-white font-medium transition-colors"
             >
               Contact
             </Link>
             <a
               href="#fanzone"
-              className="text-gray-700 hover:text-[#1e3a8a] font-medium transition-colors"
+              className="text-[#fcd34d] hover:text-white font-medium transition-colors"
             >
               Fan Zone
             </a>

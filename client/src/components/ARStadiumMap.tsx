@@ -104,11 +104,11 @@ export default function ARStadiumMap() {
 
 
   return (
-    <section className="py-16 bg-gradient-to-br from-[#eff6ff] to-white">
+    <section className="py-16 bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#1e3a8a] mb-4">Interactive Field Map</h2>
-          <p className="text-xl text-gray-600">Cricket field with interactive player positions</p>
+          <h2 className="text-4xl font-bold text-[#fcd34d] mb-4">Interactive Field Map</h2>
+          <p className="text-xl text-white/80">Cricket field with interactive player positions</p>
         </div>
 
         {/* Controls */}
@@ -116,8 +116,8 @@ export default function ARStadiumMap() {
           <button
             className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
               showPlayerStats
-                ? 'bg-[#f59e0b] text-white shadow-lg'
-                : 'bg-white text-[#f59e0b] border-2 border-[#f59e0b] hover:bg-[#f59e0b] hover:text-white'
+                ? 'bg-[#fcd34d] text-[#1e3a8a] shadow-lg'
+                : 'bg-white text-[#fcd34d] border-2 border-[#fcd34d] hover:bg-[#fcd34d] hover:text-[#1e3a8a]'
             }`}
             onClick={() => setShowPlayerStats(!showPlayerStats)}
           >
