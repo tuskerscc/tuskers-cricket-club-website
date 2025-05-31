@@ -46,7 +46,7 @@ export default function Gallery() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-[#fcd34d] mb-4">Match Gallery</h1>
-          <p className="text-xl text-white/80">Capturing memorable moments from Tuskers CC</p>
+          <p className="text-xl text-white/80">Capturing memorable moments from TUSKERS CRICKET CLUB</p>
         </div>
 
         {/* Category Filter */}

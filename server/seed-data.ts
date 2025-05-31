@@ -193,7 +193,7 @@ export async function seedDatabase() {
         awayTeamScore: '201/4',
         homeTeamOvers: '50.0',
         awayTeamOvers: '48.3',
-        result: 'Tuskers CC won by 6 wickets',
+        result: 'TUSKERS CRICKET CLUB won by 6 wickets',
         playerOfMatch: insertedPlayers[1].id,
         isLive: false,
         liveData: null

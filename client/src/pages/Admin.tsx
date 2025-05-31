@@ -620,7 +620,7 @@ function AdminContent() {
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-sm p-6 mb-8 border border-white/20">
-          <h1 className="text-3xl font-bold text-[#fcd34d] mb-2">Tuskers CC Admin Panel</h1>
+          <h1 className="text-3xl font-bold text-[#fcd34d] mb-2">TUSKERS CRICKET CLUB Admin Panel</h1>
           <p className="text-white/80">Manage your cricket club's data and content</p>
         </div>
 

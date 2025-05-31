@@ -47,7 +47,7 @@ export default function News() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-[#fcd34d] mb-4">Latest News</h1>
-          <p className="text-xl text-white/80">Stay updated with TUSKERS Cricket Club news and updates</p>
+          <p className="text-xl text-white/80">Stay updated with TUSKERS CRICKET CLUB news and updates</p>
         </div>
 
         {/* Category Filter */}
