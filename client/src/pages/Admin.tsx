@@ -616,17 +616,17 @@ function AdminContent() {
   };
 
   return (
-    <div className="py-8">
+    <div className="py-8 min-h-screen bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <h1 className="text-3xl font-bold text-[#1e3a8a] mb-2">Tuskers CC Admin Panel</h1>
-          <p className="text-gray-600">Manage your cricket club's data and content</p>
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-sm p-6 mb-8 border border-white/20">
+          <h1 className="text-3xl font-bold text-[#fcd34d] mb-2">Tuskers CC Admin Panel</h1>
+          <p className="text-white/80">Manage your cricket club's data and content</p>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="bg-white rounded-lg shadow-sm mb-8">
-          <div className="border-b border-gray-200">
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-sm mb-8 border border-white/20">
+          <div className="border-b border-white/20">
             <nav className="flex space-x-8 px-6" aria-label="Tabs">
               {[
                 { id: 'players', name: 'Players', icon: '👤' },
@@ -641,8 +641,8 @@ function AdminContent() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
-                      ? 'border-[#1e3a8a] text-[#1e3a8a]'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-[#fcd34d] text-[#fcd34d]'
+                      : 'border-transparent text-white/70 hover:text-white hover:border-white/30'
                   }`}
                 >
                   <span className="mr-2">{tab.icon}</span>

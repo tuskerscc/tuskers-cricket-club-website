@@ -19,11 +19,11 @@ export default function Gallery() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-16">
+      <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a] to-[#1e40af] py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-[#1e3a8a] mb-4">Match Gallery</h1>
-            <p className="text-xl text-gray-600">Capturing memorable moments from Tuskers CC</p>
+            <h1 className="text-4xl font-bold text-[#fcd34d] mb-4">Match Gallery</h1>
+            <p className="text-xl text-white/80">Capturing memorable moments from Tuskers CC</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
@@ -42,11 +42,11 @@ export default function Gallery() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
+    <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a] to-[#1e40af] py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-[#1e3a8a] mb-4">Match Gallery</h1>
-          <p className="text-xl text-gray-600">Capturing memorable moments from Tuskers CC</p>
+          <h1 className="text-4xl font-bold text-[#fcd34d] mb-4">Match Gallery</h1>
+          <p className="text-xl text-white/80">Capturing memorable moments from Tuskers CC</p>
         </div>
 
         {/* Category Filter */}
