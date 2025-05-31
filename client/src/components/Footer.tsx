@@ -61,13 +61,13 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Stay Updated</h4>
             <p className="text-[#bfdbfe] mb-4">Get the latest news and updates from TUSKERS CRICKET CLUB</p>
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
               <input 
                 type="email" 
                 placeholder="Your email" 
-                className="flex-1 px-3 py-2 bg-[#1d4ed8] text-white placeholder-[#bfdbfe] rounded-l-lg border border-[#2563eb] focus:outline-none focus:border-[#fcd34d]"
+                className="flex-1 px-3 py-2 bg-[#1d4ed8] text-white placeholder-[#bfdbfe] rounded-lg sm:rounded-l-lg sm:rounded-r-none border border-[#2563eb] focus:outline-none focus:border-[#fcd34d] min-w-0"
               />
-              <button className="px-4 py-2 bg-[#f59e0b] text-[#1e3a8a] font-semibold rounded-r-lg hover:bg-[#fcd34d] transition-colors">
+              <button className="px-4 py-2 bg-[#f59e0b] text-[#1e3a8a] font-semibold rounded-lg sm:rounded-l-none sm:rounded-r-lg hover:bg-[#fcd34d] transition-colors whitespace-nowrap">
                 Subscribe
               </button>
             </div>
