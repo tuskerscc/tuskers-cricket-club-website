@@ -11,8 +11,8 @@ export default function LatestUpdates() {
     queryKey: ['/api/articles/featured']
   });
 
-  const featuredArticle = featuredArticles[0];
-  const regularArticles = articles.slice(0, 6);
+  const featuredArticle = featuredArticles && featuredArticles.length > 0 ? featuredArticles[0] : null;
+  const regularArticles = articles ? articles.slice(0, 6) : [];
 
   if (isLoading) {
     return (
@@ -59,7 +59,7 @@ export default function LatestUpdates() {
                 <div className="p-8 lg:p-12 flex flex-col justify-center">
                   <div className="flex items-center space-x-4 mb-6">
                     <span className="bg-[#fef3c7] text-[#d97706] px-4 py-2 rounded-full text-sm font-semibold">
-                      {featuredArticle.category.toUpperCase()}
+                      {featuredArticle.category?.toUpperCase() || 'NEWS'}
                     </span>
                     <span className="text-gray-500 text-sm">
                       {featuredArticle.publishedAt ? new Date(featuredArticle.publishedAt).toLocaleDateString() : 'Recently'}

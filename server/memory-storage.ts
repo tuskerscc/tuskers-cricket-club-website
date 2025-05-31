@@ -186,10 +186,13 @@ const articles: Article[] = [
     slug: "tata-ipl-2025-qualifier-2-preview",
     content: "An exciting qualifier match between Tuskers Cricket Club and Royal Challengers is set to take place. Both teams have shown exceptional form this season and are ready for an intense battle.",
     excerpt: "Preview of the upcoming qualifier match between Tuskers CC and Royal Challengers",
-    imageUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+    featuredImage: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
     publishedAt: new Date('2024-03-10T10:00:00'),
     isFeatured: true,
-    categoryId: 1
+    author: "Sports Desk",
+    category: "Match Preview",
+    isPublished: true,
+    createdAt: new Date('2024-03-10T10:00:00')
   }
 ];
 
