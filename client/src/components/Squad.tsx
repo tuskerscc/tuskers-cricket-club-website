@@ -74,12 +74,12 @@ export default function Squad() {
 
   if (isLoading) {
     return (
-      <section id="squad" className="py-8 md:py-16 bg-gray-50">
+      <section id="squad" className="py-8 md:py-16 bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-4xl font-bold text-[#1e3a8a] mb-2">SQUAD</h2>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <h2 className="text-2xl md:text-4xl font-bold text-[#fcd34d] mb-2">SQUAD</h2>
+              <div className="flex items-center gap-2 text-sm text-white/80">
                 <Users className="w-4 h-4" />
                 <span>Men's Team</span>
               </div>
@@ -107,13 +107,13 @@ export default function Squad() {
   const canGoNext = currentIndex < maxIndex;
 
   return (
-    <section id="squad" className="py-8 md:py-16 bg-gray-50">
+    <section id="squad" className="py-8 md:py-16 bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]">
       <div className="container-responsive">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <div>
-            <h2 className="text-responsive-2xl font-bold text-[#1e3a8a] mb-2">SQUAD</h2>
-            <div className="flex items-center gap-2 text-responsive-xs text-gray-600">
+            <h2 className="text-responsive-2xl font-bold text-[#fcd34d] mb-2">SQUAD</h2>
+            <div className="flex items-center gap-2 text-responsive-xs text-white/80">
               <Users className="w-4 h-4" />
               <span>Men's Team</span>
             </div>
