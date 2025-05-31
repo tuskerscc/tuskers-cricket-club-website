@@ -15,6 +15,12 @@ declare module 'express-serve-static-core' {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve ads.txt for Google AdSense
+  app.get('/ads.txt', (req, res) => {
+    res.setHeader('Content-Type', 'text/plain');
+    res.sendFile('ads.txt', { root: './client' });
+  });
+
   // Admin authentication routes
   app.post('/api/admin/login', async (req, res) => {
     try {
