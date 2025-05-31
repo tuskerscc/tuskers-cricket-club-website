@@ -36,7 +36,7 @@ export default function Home() {
                   <i className="fas fa-trophy text-[#fcd34d] text-2xl"></i>
                 </div>
                 <h3 className="text-3xl font-bold text-[#1e3a8a] mb-2">
-                  {stats?.matchesWon || 23}
+                  {stats?.matchesWon || 0}
                 </h3>
                 <p className="text-gray-600 font-medium">Matches Won</p>
               </div>
@@ -47,7 +47,7 @@ export default function Home() {
                   <i className="fas fa-bullseye text-white text-2xl"></i>
                 </div>
                 <h3 className="text-3xl font-bold text-[#1e3a8a] mb-2">
-                  {stats?.totalRuns || 3247}
+                  {stats?.totalRuns || 0}
                 </h3>
                 <p className="text-gray-600 font-medium">Total Runs</p>
               </div>
@@ -58,7 +58,7 @@ export default function Home() {
                   <i className="fas fa-crosshairs text-white text-2xl"></i>
                 </div>
                 <h3 className="text-3xl font-bold text-[#1e3a8a] mb-2">
-                  {stats?.wicketsTaken || 156}
+                  {stats?.wicketsTaken || 0}
                 </h3>
                 <p className="text-gray-600 font-medium">Wickets Taken</p>
               </div>
