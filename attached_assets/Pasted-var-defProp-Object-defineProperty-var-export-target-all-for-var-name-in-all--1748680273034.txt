@@ -1,0 +1,2176 @@
+var __defProp = Object.defineProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
+// server/index.ts
+import express2 from "express";
+import session from "express-session";
+
+// server/routes.ts
+import { createServer } from "http";
+
+// shared/schema.ts
+var schema_exports = {};
+__export(schema_exports, {
+  announcements: () => announcements,
+  articles: () => articles,
+  communityEvents: () => communityEvents,
+  communityEventsRelations: () => communityEventsRelations,
+  competitions: () => competitions,
+  competitionsRelations: () => competitionsRelations,
+  eventParticipants: () => eventParticipants,
+  eventParticipantsRelations: () => eventParticipantsRelations,
+  forumCategories: () => forumCategories,
+  forumCategoriesRelations: () => forumCategoriesRelations,
+  forumPostLikes: () => forumPostLikes,
+  forumPostLikesRelations: () => forumPostLikesRelations,
+  forumPosts: () => forumPosts,
+  forumPostsRelations: () => forumPostsRelations,
+  forumTopics: () => forumTopics,
+  forumTopicsRelations: () => forumTopicsRelations,
+  gallery: () => gallery,
+  galleryRelations: () => galleryRelations,
+  insertAnnouncementSchema: () => insertAnnouncementSchema,
+  insertArticleSchema: () => insertArticleSchema,
+  insertCommunityEventSchema: () => insertCommunityEventSchema,
+  insertCompetitionSchema: () => insertCompetitionSchema,
+  insertEventParticipantSchema: () => insertEventParticipantSchema,
+  insertForumCategorySchema: () => insertForumCategorySchema,
+  insertForumPostLikeSchema: () => insertForumPostLikeSchema,
+  insertForumPostSchema: () => insertForumPostSchema,
+  insertForumTopicSchema: () => insertForumTopicSchema,
+  insertGallerySchema: () => insertGallerySchema,
+  insertLineupSchema: () => insertLineupSchema,
+  insertMatchPerformanceSchema: () => insertMatchPerformanceSchema,
+  insertMatchSchema: () => insertMatchSchema,
+  insertPlayerSchema: () => insertPlayerSchema,
+  insertPlayerStatsSchema: () => insertPlayerStatsSchema,
+  insertPollSchema: () => insertPollSchema,
+  insertQuizSchema: () => insertQuizSchema,
+  insertScoringBallSchema: () => insertScoringBallSchema,
+  insertScoringInningsSchema: () => insertScoringInningsSchema,
+  insertScoringMatchSchema: () => insertScoringMatchSchema,
+  insertScoringUserSchema: () => insertScoringUserSchema,
+  insertSocialPostSchema: () => insertSocialPostSchema,
+  insertTeamSchema: () => insertTeamSchema,
+  insertTriviaLeaderboardSchema: () => insertTriviaLeaderboardSchema,
+  insertTriviaQuestionSchema: () => insertTriviaQuestionSchema,
+  insertUserProfileSchema: () => insertUserProfileSchema,
+  insertUserSchema: () => insertUserSchema,
+  insertVenueSchema: () => insertVenueSchema,
+  lineups: () => lineups,
+  lineupsRelations: () => lineupsRelations,
+  matchPerformances: () => matchPerformances,
+  matchPerformancesRelations: () => matchPerformancesRelations,
+  matches: () => matches,
+  matchesRelations: () => matchesRelations,
+  playerStats: () => playerStats,
+  playerStatsRelations: () => playerStatsRelations,
+  players: () => players,
+  playersRelations: () => playersRelations,
+  polls: () => polls,
+  quizzes: () => quizzes,
+  scoringBalls: () => scoringBalls,
+  scoringInnings: () => scoringInnings,
+  scoringMatches: () => scoringMatches,
+  scoringUsers: () => scoringUsers,
+  socialPosts: () => socialPosts,
+  teamStats: () => teamStats,
+  teams: () => teams,
+  teamsRelations: () => teamsRelations,
+  triviaLeaderboard: () => triviaLeaderboard,
+  triviaQuestions: () => triviaQuestions,
+  userProfiles: () => userProfiles,
+  userProfilesRelations: () => userProfilesRelations,
+  users: () => users,
+  venues: () => venues,
+  venuesRelations: () => venuesRelations
+});
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, real } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { createInsertSchema } from "drizzle-zod";
+var users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  role: text("role").notNull().default("admin"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var teams = pgTable("teams", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  shortName: text("short_name").notNull(),
+  logo: text("logo"),
+  isOurTeam: boolean("is_our_team").default(false)
+});
+var venues = pgTable("venues", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  location: text("location"),
+  capacity: integer("capacity")
+});
+var competitions = pgTable("competitions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  shortName: text("short_name"),
+  type: text("type").notNull()
+  // league, tournament, etc.
+});
+var players = pgTable("players", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  jerseyNumber: integer("jersey_number"),
+  role: text("role").notNull(),
+  // batsman, bowler, all-rounder, wicket-keeper
+  battingStyle: text("batting_style"),
+  // right-handed, left-handed
+  bowlingStyle: text("bowling_style"),
+  // right-arm fast, left-arm spin, etc.
+  bio: text("bio"),
+  photo: text("photo"),
+  isCaptain: boolean("is_captain").default(false),
+  isViceCaptain: boolean("is_vice_captain").default(false),
+  isActive: boolean("is_active").default(true)
+});
+var matches = pgTable("matches", {
+  id: serial("id").primaryKey(),
+  homeTeamId: integer("home_team_id").references(() => teams.id),
+  awayTeamId: integer("away_team_id").references(() => teams.id),
+  venueId: integer("venue_id").references(() => venues.id),
+  competitionId: integer("competition_id").references(() => competitions.id),
+  matchDate: timestamp("match_date").notNull(),
+  status: text("status").notNull().default("upcoming"),
+  // upcoming, live, completed
+  homeTeamScore: text("home_team_score"),
+  // e.g., "245/6"
+  awayTeamScore: text("away_team_score"),
+  homeTeamOvers: text("home_team_overs"),
+  // e.g., "50.0"
+  awayTeamOvers: text("away_team_overs"),
+  result: text("result"),
+  // e.g., "Tuskers CC won by 58 runs"
+  playerOfMatch: integer("player_of_match").references(() => players.id),
+  isLive: boolean("is_live").default(false),
+  liveData: jsonb("live_data")
+  // current batsmen, bowlers, etc.
+});
+var lineups = pgTable("lineups", {
+  id: serial("id").primaryKey(),
+  matchId: integer("match_id").references(() => matches.id),
+  playerId: integer("player_id").references(() => players.id),
+  teamId: integer("team_id").references(() => teams.id),
+  isSubstitute: boolean("is_substitute").default(false),
+  battingOrder: integer("batting_order")
+});
+var playerStats = pgTable("player_stats", {
+  id: serial("id").primaryKey(),
+  playerId: integer("player_id").references(() => players.id),
+  matches: integer("matches").default(0),
+  runsScored: integer("runs_scored").default(0),
+  ballsFaced: integer("balls_faced").default(0),
+  fours: integer("fours").default(0),
+  sixes: integer("sixes").default(0),
+  wicketsTaken: integer("wickets_taken").default(0),
+  ballsBowled: integer("balls_bowled").default(0),
+  runsConceded: integer("runs_conceded").default(0),
+  catches: integer("catches").default(0),
+  stumpings: integer("stumpings").default(0),
+  runOuts: integer("run_outs").default(0)
+});
+var matchPerformances = pgTable("match_performances", {
+  id: serial("id").primaryKey(),
+  matchId: integer("match_id").references(() => matches.id),
+  playerId: integer("player_id").references(() => players.id),
+  runsScored: integer("runs_scored").default(0),
+  ballsFaced: integer("balls_faced").default(0),
+  fours: integer("fours").default(0),
+  sixes: integer("sixes").default(0),
+  wicketsTaken: integer("wickets_taken").default(0),
+  ballsBowled: integer("balls_bowled").default(0),
+  runsConceded: integer("runs_conceded").default(0),
+  catches: integer("catches").default(0),
+  stumpings: integer("stumpings").default(0),
+  runOuts: integer("run_outs").default(0),
+  isOut: boolean("is_out").default(false),
+  dismissalType: text("dismissal_type"),
+  // bowled, caught, lbw, run out, etc.
+  createdAt: timestamp("created_at").defaultNow()
+});
+var articles = pgTable("articles", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  excerpt: text("excerpt"),
+  content: text("content").notNull(),
+  featuredImage: text("featured_image"),
+  author: text("author").notNull(),
+  category: text("category").notNull(),
+  // news, match-report, training, etc.
+  isPublished: boolean("is_published").default(false),
+  isFeatured: boolean("is_featured").default(false),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var socialPosts = pgTable("social_posts", {
+  id: serial("id").primaryKey(),
+  platform: text("platform").notNull(),
+  // twitter, instagram, facebook
+  postId: text("post_id").notNull(),
+  content: text("content").notNull(),
+  author: text("author").notNull(),
+  authorAvatar: text("author_avatar"),
+  likes: integer("likes").default(0),
+  comments: integer("comments").default(0),
+  shares: integer("shares").default(0),
+  postedAt: timestamp("posted_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var polls = pgTable("polls", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(),
+  options: jsonb("options").notNull(),
+  // array of options
+  votes: jsonb("votes").notNull().default("{}"),
+  // option votes count
+  isActive: boolean("is_active").default(true),
+  endsAt: timestamp("ends_at"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var quizzes = pgTable("quizzes", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(),
+  options: jsonb("options").notNull(),
+  // array of options
+  correctAnswer: text("correct_answer").notNull(),
+  explanation: text("explanation"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var gallery = pgTable("gallery", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url").notNull(),
+  category: text("category").notNull(),
+  // match, training, celebration, etc.
+  matchId: integer("match_id").references(() => matches.id),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var announcements = pgTable("announcements", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  type: text("type").notNull(),
+  // general, match, achievement, training
+  priority: text("priority").notNull(),
+  // low, medium, high
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var teamStats = pgTable("team_stats", {
+  id: serial("id").primaryKey(),
+  matchesWon: integer("matches_won").default(0),
+  totalMatches: integer("total_matches").default(0),
+  totalRuns: integer("total_runs").default(0),
+  wicketsTaken: integer("wickets_taken").default(0),
+  totalOvers: real("total_overs").default(0),
+  runsAgainst: integer("runs_against").default(0),
+  oversAgainst: real("overs_against").default(0),
+  nrr: real("nrr").default(0),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+var triviaQuestions = pgTable("trivia_questions", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(),
+  options: text("options").array().notNull(),
+  correct: text("correct").notNull(),
+  difficulty: text("difficulty").notNull(),
+  // easy, medium, hard
+  category: text("category").notNull(),
+  points: integer("points").default(10),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var triviaLeaderboard = pgTable("trivia_leaderboard", {
+  id: serial("id").primaryKey(),
+  playerName: text("player_name").notNull(),
+  score: integer("score").notNull(),
+  questionsAnswered: integer("questions_answered").notNull(),
+  accuracy: real("accuracy").notNull(),
+  playDate: timestamp("play_date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var scoringUsers = pgTable("scoring_users", {
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 50 }).notNull().unique(),
+  email: varchar("email", { length: 100 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(),
+  userType: varchar("user_type", { length: 20 }).notNull().default("fan"),
+  // 'fan' or 'tuskers'
+  createdAt: timestamp("created_at").defaultNow()
+});
+var scoringMatches = pgTable("scoring_matches", {
+  id: serial("id").primaryKey(),
+  matchName: varchar("match_name", { length: 200 }).notNull(),
+  team1: varchar("team1", { length: 100 }).notNull(),
+  team2: varchar("team2", { length: 100 }).notNull(),
+  venue: varchar("venue", { length: 150 }),
+  matchDate: timestamp("match_date").notNull(),
+  createdBy: integer("created_by").references(() => scoringUsers.id),
+  status: varchar("status", { length: 20 }).notNull().default("upcoming"),
+  // 'upcoming', 'live', 'completed'
+  isLive: boolean("is_live").default(false),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var scoringInnings = pgTable("scoring_innings", {
+  id: serial("id").primaryKey(),
+  matchId: integer("match_id").references(() => scoringMatches.id).notNull(),
+  battingTeam: varchar("batting_team", { length: 100 }).notNull(),
+  bowlingTeam: varchar("bowling_team", { length: 100 }).notNull(),
+  inningsNumber: integer("innings_number").notNull(),
+  // 1 or 2
+  totalRuns: integer("total_runs").default(0),
+  totalWickets: integer("total_wickets").default(0),
+  totalOvers: real("total_overs").default(0),
+  extras: integer("extras").default(0),
+  isCompleted: boolean("is_completed").default(false)
+});
+var scoringBalls = pgTable("scoring_balls", {
+  id: serial("id").primaryKey(),
+  inningsId: integer("innings_id").references(() => scoringInnings.id).notNull(),
+  ballNumber: integer("ball_number").notNull(),
+  overNumber: integer("over_number").notNull(),
+  batsman: varchar("batsman", { length: 100 }),
+  bowler: varchar("bowler", { length: 100 }),
+  runs: integer("runs").default(0),
+  isWicket: boolean("is_wicket").default(false),
+  wicketType: varchar("wicket_type", { length: 50 }),
+  // 'bowled', 'caught', 'lbw', etc.
+  isExtra: boolean("is_extra").default(false),
+  extraType: varchar("extra_type", { length: 20 }),
+  // 'wide', 'no-ball', 'bye', 'leg-bye'
+  commentary: text("commentary"),
+  timestamp: timestamp("timestamp").defaultNow()
+});
+var forumCategories = pgTable("forum_categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  icon: varchar("icon", { length: 50 }),
+  color: varchar("color", { length: 20 }),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var forumTopics = pgTable("forum_topics", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").references(() => forumCategories.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  slug: varchar("slug", { length: 250 }).unique().notNull(),
+  content: text("content").notNull(),
+  isSticky: boolean("is_sticky").default(false),
+  isLocked: boolean("is_locked").default(false),
+  viewCount: integer("view_count").default(0),
+  replyCount: integer("reply_count").default(0),
+  lastReplyAt: timestamp("last_reply_at"),
+  lastReplyUserId: integer("last_reply_user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+var forumPosts = pgTable("forum_posts", {
+  id: serial("id").primaryKey(),
+  topicId: integer("topic_id").references(() => forumTopics.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  isFirstPost: boolean("is_first_post").default(false),
+  likeCount: integer("like_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+var forumPostLikes = pgTable("forum_post_likes", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").references(() => forumPosts.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var userProfiles = pgTable("user_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  displayName: varchar("display_name", { length: 50 }),
+  bio: text("bio"),
+  location: varchar("location", { length: 100 }),
+  favoritePlayer: varchar("favorite_player", { length: 100 }),
+  joinDate: timestamp("join_date").defaultNow(),
+  postCount: integer("post_count").default(0),
+  reputation: integer("reputation").default(0),
+  avatar: varchar("avatar", { length: 255 }),
+  isOnline: boolean("is_online").default(false),
+  lastSeen: timestamp("last_seen").defaultNow(),
+  badges: text("badges").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+var communityEvents = pgTable("community_events", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  eventDate: timestamp("event_date").notNull(),
+  location: varchar("location", { length: 200 }),
+  organizer: varchar("organizer", { length: 100 }),
+  maxParticipants: integer("max_participants"),
+  currentParticipants: integer("current_participants").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var eventParticipants = pgTable("event_participants", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").references(() => communityEvents.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  status: varchar("status", { length: 20 }).default("registered"),
+  // 'registered', 'attended', 'cancelled'
+  registeredAt: timestamp("registered_at").defaultNow()
+});
+var teamsRelations = relations(teams, ({ many }) => ({
+  homeMatches: many(matches, { relationName: "homeTeam" }),
+  awayMatches: many(matches, { relationName: "awayTeam" }),
+  lineups: many(lineups)
+}));
+var venuesRelations = relations(venues, ({ many }) => ({
+  matches: many(matches)
+}));
+var competitionsRelations = relations(competitions, ({ many }) => ({
+  matches: many(matches)
+}));
+var playersRelations = relations(players, ({ many, one }) => ({
+  stats: one(playerStats),
+  lineups: many(lineups),
+  matchesWon: many(matches, { relationName: "playerOfMatch" }),
+  matchPerformances: many(matchPerformances)
+}));
+var matchesRelations = relations(matches, ({ one, many }) => ({
+  homeTeam: one(teams, {
+    fields: [matches.homeTeamId],
+    references: [teams.id],
+    relationName: "homeTeam"
+  }),
+  awayTeam: one(teams, {
+    fields: [matches.awayTeamId],
+    references: [teams.id],
+    relationName: "awayTeam"
+  }),
+  venue: one(venues, {
+    fields: [matches.venueId],
+    references: [venues.id]
+  }),
+  competition: one(competitions, {
+    fields: [matches.competitionId],
+    references: [competitions.id]
+  }),
+  playerOfMatch: one(players, {
+    fields: [matches.playerOfMatch],
+    references: [players.id],
+    relationName: "playerOfMatch"
+  }),
+  lineups: many(lineups),
+  galleryItems: many(gallery),
+  performances: many(matchPerformances)
+}));
+var matchPerformancesRelations = relations(matchPerformances, ({ one }) => ({
+  match: one(matches, {
+    fields: [matchPerformances.matchId],
+    references: [matches.id]
+  }),
+  player: one(players, {
+    fields: [matchPerformances.playerId],
+    references: [players.id]
+  })
+}));
+var lineupsRelations = relations(lineups, ({ one }) => ({
+  match: one(matches, {
+    fields: [lineups.matchId],
+    references: [matches.id]
+  }),
+  player: one(players, {
+    fields: [lineups.playerId],
+    references: [players.id]
+  }),
+  team: one(teams, {
+    fields: [lineups.teamId],
+    references: [teams.id]
+  })
+}));
+var playerStatsRelations = relations(playerStats, ({ one }) => ({
+  player: one(players, {
+    fields: [playerStats.playerId],
+    references: [players.id]
+  })
+}));
+var galleryRelations = relations(gallery, ({ one }) => ({
+  match: one(matches, {
+    fields: [gallery.matchId],
+    references: [matches.id]
+  })
+}));
+var forumCategoriesRelations = relations(forumCategories, ({ many }) => ({
+  topics: many(forumTopics)
+}));
+var forumTopicsRelations = relations(forumTopics, ({ one, many }) => ({
+  category: one(forumCategories, {
+    fields: [forumTopics.categoryId],
+    references: [forumCategories.id]
+  }),
+  user: one(users, {
+    fields: [forumTopics.userId],
+    references: [users.id]
+  }),
+  lastReplyUser: one(users, {
+    fields: [forumTopics.lastReplyUserId],
+    references: [users.id],
+    relationName: "lastReplyUser"
+  }),
+  posts: many(forumPosts)
+}));
+var forumPostsRelations = relations(forumPosts, ({ one, many }) => ({
+  topic: one(forumTopics, {
+    fields: [forumPosts.topicId],
+    references: [forumTopics.id]
+  }),
+  user: one(users, {
+    fields: [forumPosts.userId],
+    references: [users.id]
+  }),
+  likes: many(forumPostLikes)
+}));
+var forumPostLikesRelations = relations(forumPostLikes, ({ one }) => ({
+  post: one(forumPosts, {
+    fields: [forumPostLikes.postId],
+    references: [forumPosts.id]
+  }),
+  user: one(users, {
+    fields: [forumPostLikes.userId],
+    references: [users.id]
+  })
+}));
+var userProfilesRelations = relations(userProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [userProfiles.userId],
+    references: [users.id]
+  })
+}));
+var communityEventsRelations = relations(communityEvents, ({ many }) => ({
+  participants: many(eventParticipants)
+}));
+var eventParticipantsRelations = relations(eventParticipants, ({ one }) => ({
+  event: one(communityEvents, {
+    fields: [eventParticipants.eventId],
+    references: [communityEvents.id]
+  }),
+  user: one(users, {
+    fields: [eventParticipants.userId],
+    references: [users.id]
+  })
+}));
+var insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true
+});
+var insertTeamSchema = createInsertSchema(teams).omit({
+  id: true
+});
+var insertVenueSchema = createInsertSchema(venues).omit({
+  id: true
+});
+var insertCompetitionSchema = createInsertSchema(competitions).omit({
+  id: true
+});
+var insertPlayerSchema = createInsertSchema(players).omit({
+  id: true
+});
+var insertMatchSchema = createInsertSchema(matches).omit({
+  id: true
+});
+var insertLineupSchema = createInsertSchema(lineups).omit({
+  id: true
+});
+var insertPlayerStatsSchema = createInsertSchema(playerStats).omit({
+  id: true
+});
+var insertMatchPerformanceSchema = createInsertSchema(matchPerformances).omit({
+  id: true,
+  createdAt: true
+});
+var insertArticleSchema = createInsertSchema(articles).omit({
+  id: true,
+  createdAt: true
+});
+var insertSocialPostSchema = createInsertSchema(socialPosts).omit({
+  id: true,
+  createdAt: true
+});
+var insertPollSchema = createInsertSchema(polls).omit({
+  id: true,
+  createdAt: true
+});
+var insertQuizSchema = createInsertSchema(quizzes).omit({
+  id: true,
+  createdAt: true
+});
+var insertGallerySchema = createInsertSchema(gallery).omit({
+  id: true,
+  createdAt: true
+});
+var insertAnnouncementSchema = createInsertSchema(announcements).omit({
+  id: true,
+  createdAt: true
+});
+var insertTriviaQuestionSchema = createInsertSchema(triviaQuestions).omit({
+  id: true,
+  createdAt: true
+});
+var insertTriviaLeaderboardSchema = createInsertSchema(triviaLeaderboard).omit({
+  id: true,
+  playDate: true,
+  createdAt: true
+});
+var insertScoringUserSchema = createInsertSchema(scoringUsers).omit({
+  id: true,
+  createdAt: true
+});
+var insertScoringMatchSchema = createInsertSchema(scoringMatches).omit({
+  id: true,
+  createdAt: true
+});
+var insertScoringInningsSchema = createInsertSchema(scoringInnings).omit({
+  id: true
+});
+var insertScoringBallSchema = createInsertSchema(scoringBalls).omit({
+  id: true,
+  timestamp: true
+});
+var insertForumCategorySchema = createInsertSchema(forumCategories).omit({
+  id: true,
+  createdAt: true
+});
+var insertForumTopicSchema = createInsertSchema(forumTopics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+var insertForumPostSchema = createInsertSchema(forumPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+var insertForumPostLikeSchema = createInsertSchema(forumPostLikes).omit({
+  id: true,
+  createdAt: true
+});
+var insertUserProfileSchema = createInsertSchema(userProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+var insertCommunityEventSchema = createInsertSchema(communityEvents).omit({
+  id: true,
+  createdAt: true
+});
+var insertEventParticipantSchema = createInsertSchema(eventParticipants).omit({
+  id: true,
+  registeredAt: true
+});
+
+// server/db.ts
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import ws from "ws";
+neonConfig.webSocketConstructor = ws;
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL must be set. Did you forget to provision a database?"
+  );
+}
+var pool = new Pool({ connectionString: process.env.DATABASE_URL });
+var db = drizzle({ client: pool, schema: schema_exports });
+
+// server/storage.ts
+import { eq, desc, and, sql, count } from "drizzle-orm";
+var DatabaseStorage = class {
+  async getUser(id) {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || void 0;
+  }
+  async getUserByUsername(username) {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || void 0;
+  }
+  async createUser(insertUser) {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+  async getTeams() {
+    return await db.select().from(teams);
+  }
+  async getTeam(id) {
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
+    return team || void 0;
+  }
+  async createTeam(team) {
+    const [newTeam] = await db.insert(teams).values(team).returning();
+    return newTeam;
+  }
+  async getTuskersTeam() {
+    const [team] = await db.select().from(teams).where(eq(teams.isOurTeam, true));
+    return team || void 0;
+  }
+  async getPlayers() {
+    const playersWithStats = await db.select().from(players).leftJoin(playerStats, eq(players.id, playerStats.playerId)).where(eq(players.isActive, true)).orderBy(players.name);
+    return playersWithStats.map((row) => ({
+      ...row.players,
+      stats: row.player_stats || void 0
+    }));
+  }
+  async getPlayer(id) {
+    const [result] = await db.select().from(players).leftJoin(playerStats, eq(players.id, playerStats.playerId)).where(eq(players.id, id));
+    if (!result) return void 0;
+    return {
+      ...result.players,
+      stats: result.player_stats || void 0
+    };
+  }
+  async createPlayer(player) {
+    const [newPlayer] = await db.insert(players).values(player).returning();
+    return newPlayer;
+  }
+  async updatePlayer(id, player) {
+    await db.update(players).set(player).where(eq(players.id, id));
+  }
+  async deletePlayer(id) {
+    await db.delete(playerStats).where(eq(playerStats.playerId, id));
+    await db.delete(players).where(eq(players.id, id));
+  }
+  async deleteAllPlayers() {
+    await db.update(matches).set({ playerOfMatch: null });
+    await db.delete(lineups);
+    await db.delete(playerStats);
+    await db.delete(players);
+  }
+  async getStartingLineup(matchId) {
+    const lineup = await db.select().from(lineups).innerJoin(players, eq(lineups.playerId, players.id)).where(eq(lineups.matchId, matchId)).orderBy(lineups.battingOrder);
+    return lineup.map((row) => ({
+      ...row.lineups,
+      player: row.players
+    }));
+  }
+  async getMatches() {
+    const matchesData = await db.select({
+      match: matches,
+      homeTeam: { id: teams.id, name: teams.name, shortName: teams.shortName, logo: teams.logo, isOurTeam: teams.isOurTeam },
+      venue: venues,
+      competition: competitions
+    }).from(matches).innerJoin(teams, eq(matches.homeTeamId, teams.id)).innerJoin(venues, eq(matches.venueId, venues.id)).innerJoin(competitions, eq(matches.competitionId, competitions.id)).orderBy(desc(matches.matchDate));
+    const results = [];
+    for (const row of matchesData) {
+      const [awayTeam] = await db.select().from(teams).where(eq(teams.id, row.match.awayTeamId));
+      if (awayTeam) {
+        results.push({
+          ...row.match,
+          homeTeam: row.homeTeam,
+          awayTeam,
+          venue: row.venue,
+          competition: row.competition
+        });
+      }
+    }
+    return results;
+  }
+  async getMatch(id) {
+    return void 0;
+  }
+  async createMatch(match) {
+    const [newMatch] = await db.insert(matches).values(match).returning();
+    return newMatch;
+  }
+  async updateMatch(id, match) {
+    await db.update(matches).set(match).where(eq(matches.id, id));
+  }
+  async getLiveMatches() {
+    return [];
+  }
+  async getUpcomingMatches() {
+    return [];
+  }
+  async getRecentMatches() {
+    return [];
+  }
+  async getArticles() {
+    return await db.select().from(articles).where(eq(articles.isPublished, true)).orderBy(desc(articles.publishedAt));
+  }
+  async getArticle(id) {
+    const [article] = await db.select().from(articles).where(eq(articles.id, id));
+    return article || void 0;
+  }
+  async getArticleBySlug(slug) {
+    const [article] = await db.select().from(articles).where(eq(articles.slug, slug));
+    return article || void 0;
+  }
+  async createArticle(article) {
+    const [newArticle] = await db.insert(articles).values(article).returning();
+    return newArticle;
+  }
+  async updateArticle(id, article) {
+    await db.update(articles).set(article).where(eq(articles.id, id));
+  }
+  async deleteArticle(id) {
+    await db.delete(articles).where(eq(articles.id, id));
+  }
+  async getFeaturedArticles() {
+    return await db.select().from(articles).where(and(eq(articles.isPublished, true), eq(articles.isFeatured, true))).orderBy(desc(articles.publishedAt)).limit(3);
+  }
+  async getSocialPosts() {
+    return await db.select().from(socialPosts).orderBy(desc(socialPosts.postedAt)).limit(10);
+  }
+  async createSocialPost(post) {
+    const [newPost] = await db.insert(socialPosts).values(post).returning();
+    return newPost;
+  }
+  async getActivePolls() {
+    return await db.select().from(polls).where(eq(polls.isActive, true)).orderBy(desc(polls.createdAt));
+  }
+  async getPoll(id) {
+    const [poll] = await db.select().from(polls).where(eq(polls.id, id));
+    return poll || void 0;
+  }
+  async createPoll(poll) {
+    const [newPoll] = await db.insert(polls).values(poll).returning();
+    return newPoll;
+  }
+  async updatePoll(id, poll) {
+    await db.update(polls).set(poll).where(eq(polls.id, id));
+  }
+  async getActiveQuizzes() {
+    return await db.select().from(quizzes).where(eq(quizzes.isActive, true)).orderBy(desc(quizzes.createdAt));
+  }
+  async getQuiz(id) {
+    const [quiz] = await db.select().from(quizzes).where(eq(quizzes.id, id));
+    return quiz || void 0;
+  }
+  async createQuiz(quiz) {
+    const [newQuiz] = await db.insert(quizzes).values(quiz).returning();
+    return newQuiz;
+  }
+  async getGalleryItems() {
+    return await db.select().from(gallery).orderBy(desc(gallery.createdAt));
+  }
+  async createGalleryItem(item) {
+    const [newItem] = await db.insert(gallery).values(item).returning();
+    return newItem;
+  }
+  async deleteGalleryItem(id) {
+    await db.delete(gallery).where(eq(gallery.id, id));
+  }
+  async getAnnouncements() {
+    return await db.select().from(announcements).where(eq(announcements.isActive, true)).orderBy(desc(announcements.createdAt));
+  }
+  async createAnnouncement(announcement) {
+    const [newAnnouncement] = await db.insert(announcements).values(announcement).returning();
+    return newAnnouncement;
+  }
+  async updatePlayerStats(playerId, stats) {
+    await db.update(playerStats).set(stats).where(eq(playerStats.playerId, playerId));
+  }
+  async getTeamStats() {
+    try {
+      const allStats = await db.select().from(teamStats);
+      if (allStats.length === 0) {
+        return {
+          matchesWon: 0,
+          totalMatches: 0,
+          totalRuns: 0,
+          wicketsTaken: 0,
+          totalOvers: 0,
+          runsAgainst: 0,
+          oversAgainst: 0,
+          nrr: 0
+        };
+      }
+      const totalMatchesPlayed = allStats.length;
+      const totalMatchesWon = allStats.reduce((sum2, stat) => sum2 + (stat.matchesWon || 0), 0);
+      const sumTotalRuns = allStats.reduce((sum2, stat) => sum2 + (stat.totalRuns || 0), 0);
+      const sumWicketsTaken = allStats.reduce((sum2, stat) => sum2 + (stat.wicketsTaken || 0), 0);
+      const sumTotalOvers = allStats.reduce((sum2, stat) => sum2 + (stat.totalOvers || 0), 0);
+      const sumRunsAgainst = allStats.reduce((sum2, stat) => sum2 + (stat.runsAgainst || 0), 0);
+      const sumOversAgainst = allStats.reduce((sum2, stat) => sum2 + (stat.oversAgainst || 0), 0);
+      const runRate = sumTotalOvers > 0 ? sumTotalRuns / sumTotalOvers : 0;
+      const concededRate = sumOversAgainst > 0 ? sumRunsAgainst / sumOversAgainst : 0;
+      const nrr = runRate - concededRate;
+      return {
+        matchesWon: totalMatchesWon,
+        totalMatches: totalMatchesPlayed,
+        totalRuns: sumTotalRuns,
+        wicketsTaken: sumWicketsTaken,
+        totalOvers: sumTotalOvers,
+        runsAgainst: sumRunsAgainst,
+        oversAgainst: sumOversAgainst,
+        nrr: parseFloat(nrr.toFixed(3))
+      };
+    } catch (error) {
+      console.error("Error fetching team stats:", error);
+      return {
+        matchesWon: 0,
+        totalMatches: 0,
+        totalRuns: 0,
+        wicketsTaken: 0,
+        totalOvers: 0,
+        runsAgainst: 0,
+        oversAgainst: 0,
+        nrr: 0
+      };
+    }
+  }
+  async updateTeamStats(data) {
+    try {
+      const safeInt = (val) => {
+        const num = parseInt(String(val)) || 0;
+        return isNaN(num) ? 0 : Math.max(0, num);
+      };
+      const safeFloat = (val) => {
+        const num = parseFloat(String(val)) || 0;
+        return isNaN(num) ? 0 : Math.max(0, num);
+      };
+      const matchesWon = safeInt(data.matchesWon);
+      const totalMatches = safeInt(data.totalMatches) || 1;
+      const totalRuns = safeInt(data.totalRuns);
+      const wicketsTaken = safeInt(data.wicketsTaken);
+      const totalOvers = safeFloat(data.totalOvers);
+      const runsAgainst = safeInt(data.runsAgainst);
+      const oversAgainst = safeFloat(data.oversAgainst);
+      let nrr = 0;
+      if (totalOvers > 0 && oversAgainst > 0) {
+        const runRate = totalRuns / totalOvers;
+        const concededRate = runsAgainst / oversAgainst;
+        nrr = runRate - concededRate;
+        nrr = Math.round(nrr * 1e3) / 1e3;
+      }
+      await db.insert(teamStats).values({
+        matchesWon,
+        totalMatches,
+        totalRuns,
+        wicketsTaken,
+        totalOvers,
+        runsAgainst,
+        oversAgainst,
+        nrr
+      });
+    } catch (error) {
+      console.error("Error updating team stats:", error);
+      throw error;
+    }
+  }
+  async getTriviaQuestions() {
+    return await db.select().from(triviaQuestions).where(eq(triviaQuestions.isActive, true));
+  }
+  async getTriviaLeaderboard() {
+    const today = /* @__PURE__ */ new Date();
+    today.setHours(0, 0, 0, 0);
+    return await db.select().from(triviaLeaderboard).where(sql`date(${triviaLeaderboard.playDate}) = date(${today.toISOString()})`).orderBy(desc(triviaLeaderboard.score), desc(triviaLeaderboard.accuracy)).limit(50);
+  }
+  async submitTriviaScore(entry) {
+    const [result] = await db.insert(triviaLeaderboard).values(entry).returning();
+    return result;
+  }
+  // Forum Methods
+  async getForumCategories() {
+    return await db.select().from(forumCategories).orderBy(forumCategories.id);
+  }
+  async getForumTopics(categoryId) {
+    const query = db.select().from(forumTopics).orderBy(desc(forumTopics.isSticky), desc(forumTopics.updatedAt));
+    if (categoryId) {
+      return await query.where(eq(forumTopics.categoryId, categoryId));
+    }
+    return await query;
+  }
+  async getForumTopic(slug) {
+    const [topic] = await db.select().from(forumTopics).where(eq(forumTopics.slug, slug));
+    return topic || void 0;
+  }
+  async createForumTopic(topic) {
+    const [newTopic] = await db.insert(forumTopics).values(topic).returning();
+    return newTopic;
+  }
+  async getForumPosts(topicId) {
+    return await db.select().from(forumPosts).where(eq(forumPosts.topicId, topicId)).orderBy(forumPosts.createdAt);
+  }
+  async createForumPost(post) {
+    const [newPost] = await db.insert(forumPosts).values(post).returning();
+    return newPost;
+  }
+  async getForumStats() {
+    const [topicsCount] = await db.select({ count: count() }).from(forumTopics);
+    const [postsCount] = await db.select({ count: count() }).from(forumPosts);
+    const [membersCount] = await db.select({ count: count() }).from(users);
+    return {
+      totalTopics: topicsCount.count,
+      totalPosts: postsCount.count,
+      totalMembers: membersCount.count
+    };
+  }
+  // Community Events Methods
+  async getCommunityEvents() {
+    return await db.select().from(communityEvents).orderBy(communityEvents.eventDate);
+  }
+  async createCommunityEvent(event) {
+    const [newEvent] = await db.insert(communityEvents).values(event).returning();
+    return newEvent;
+  }
+  async joinCommunityEvent(eventId, userId) {
+    const [participant] = await db.insert(eventParticipants).values({ eventId, userId }).returning();
+    return participant;
+  }
+  async leaveCommunityEvent(eventId, userId) {
+    await db.delete(eventParticipants).where(and(eq(eventParticipants.eventId, eventId), eq(eventParticipants.userId, userId)));
+  }
+  async getCommunityStats() {
+    const [membersCount] = await db.select({ count: count() }).from(users);
+    return {
+      activeMembersCount: membersCount.count
+    };
+  }
+  // Match Performance Methods
+  async createMatchPerformance(performance) {
+    const [result] = await db.insert(matchPerformances).values(performance).returning();
+    return result;
+  }
+  async getMatchPerformances(matchId) {
+    return await db.select().from(matchPerformances).leftJoin(players, eq(matchPerformances.playerId, players.id)).where(eq(matchPerformances.matchId, matchId)).then((rows) => rows.map((row) => ({
+      ...row.match_performances,
+      player: row.players
+    })));
+  }
+  async updatePlayerStatsFromMatch(matchId, playerPerformances) {
+    for (const performance of playerPerformances) {
+      await this.createMatchPerformance(performance);
+    }
+    for (const performance of playerPerformances) {
+      if (!performance.playerId) continue;
+      const currentStats = await db.select().from(playerStats).where(eq(playerStats.playerId, performance.playerId)).limit(1);
+      const stats = currentStats[0];
+      if (stats) {
+        await db.update(playerStats).set({
+          matches: (stats.matches || 0) + 1,
+          runsScored: performance.runsScored || 0,
+          ballsFaced: performance.ballsFaced || 0,
+          fours: performance.fours || 0,
+          sixes: performance.sixes || 0,
+          wicketsTaken: performance.wicketsTaken || 0,
+          ballsBowled: performance.ballsBowled || 0,
+          runsConceded: performance.runsConceded || 0,
+          catches: performance.catches || 0,
+          stumpings: performance.stumpings || 0,
+          runOuts: performance.runOuts || 0
+        }).where(eq(playerStats.playerId, performance.playerId));
+      } else {
+        await db.insert(playerStats).values({
+          playerId: performance.playerId,
+          matches: 1,
+          runsScored: performance.runsScored || 0,
+          ballsFaced: performance.ballsFaced || 0,
+          fours: performance.fours || 0,
+          sixes: performance.sixes || 0,
+          wicketsTaken: performance.wicketsTaken || 0,
+          ballsBowled: performance.ballsBowled || 0,
+          runsConceded: performance.runsConceded || 0,
+          catches: performance.catches || 0,
+          stumpings: performance.stumpings || 0,
+          runOuts: performance.runOuts || 0
+        });
+      }
+    }
+  }
+};
+var storage = new DatabaseStorage();
+
+// server/cricket-api.ts
+var RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || "0958181a25mshdd91bd784761359p1fbc29jsnbeae1a0d580f";
+var RAPIDAPI_HOST = process.env.CRICKET_API_HOST || "free-cricbuzz-cricket-api.p.rapidapi.com";
+function generateCricketPoll() {
+  const historicalPolls = [
+    {
+      question: "Which team has won the most Cricket World Cup titles?",
+      options: ["Australia", "West Indies", "India", "England"],
+      context: "Cricket World Cup History",
+      isLive: false
+    },
+    {
+      question: "Who holds the record for the highest individual score in Test cricket?",
+      options: ["Brian Lara (400*)", "Matthew Hayden (380)", "Mahela Jayawardene (374)", "Don Bradman (334)"],
+      context: "Test Cricket Records",
+      isLive: false
+    },
+    {
+      question: "Which venue is known as the 'Home of Cricket'?",
+      options: ["Lord's Cricket Ground", "Melbourne Cricket Ground", "Eden Gardens", "The Oval"],
+      context: "Cricket Venues",
+      isLive: false
+    },
+    {
+      question: "Who was the first cricketer to score 10,000 runs in ODI cricket?",
+      options: ["Sachin Tendulkar", "Sunil Gavaskar", "Allan Border", "Javed Miandad"],
+      context: "ODI Cricket Milestones",
+      isLive: false
+    },
+    {
+      question: "Which team won the inaugural T20 World Cup in 2007?",
+      options: ["India", "Pakistan", "Australia", "South Africa"],
+      context: "T20 Cricket History",
+      isLive: false
+    }
+  ];
+  return historicalPolls[Math.floor(Math.random() * historicalPolls.length)];
+}
+function generateCricketQuiz() {
+  const historicalQuizzes = [
+    {
+      question: "Who holds the record for the highest individual score in Test cricket?",
+      options: ["Brian Lara (400*)", "Matthew Hayden (380)", "Don Bradman (334)", "Virat Kohli (254*)"],
+      correct: "Brian Lara (400*)",
+      context: "Test Cricket Records - Trinidad 2004"
+    },
+    {
+      question: "Which country won the first Cricket World Cup in 1975?",
+      options: ["West Indies", "Australia", "England", "India"],
+      correct: "West Indies",
+      context: "Cricket World Cup History - Lord's 1975"
+    },
+    {
+      question: "Who has taken the most wickets in international cricket (all formats)?",
+      options: ["Muttiah Muralitharan (1347)", "Shane Warne (1001)", "Anil Kumble (956)", "James Anderson (900+)"],
+      correct: "Muttiah Muralitharan (1347)",
+      context: "International Cricket Records"
+    },
+    {
+      question: "Which batsman scored the first double century in ODI cricket?",
+      options: ["Sachin Tendulkar", "Rohit Sharma", "Virender Sehwag", "Chris Gayle"],
+      correct: "Sachin Tendulkar",
+      context: "ODI Cricket Milestones - Gwalior 2010"
+    },
+    {
+      question: "What is the fastest recorded delivery in cricket history?",
+      options: ["161.3 km/h (Shoaib Akhtar)", "158.8 km/h (Brett Lee)", "157.7 km/h (Jeff Thomson)", "156.2 km/h (Mitchell Starc)"],
+      correct: "161.3 km/h (Shoaib Akhtar)",
+      context: "Bowling Records - 2003 World Cup"
+    },
+    {
+      question: "Which team has won the most Ashes series?",
+      options: ["Australia (34)", "England (32)", "Australia (35)", "England (33)"],
+      correct: "Australia (34)",
+      context: "The Ashes History - 1882-2023"
+    }
+  ];
+  return historicalQuizzes[Math.floor(Math.random() * historicalQuizzes.length)];
+}
+
+// server/routes.ts
+async function registerRoutes(app2) {
+  app2.post("/api/admin/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "tuskers2024";
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        req.session.adminLoggedIn = true;
+        res.json({ success: true, message: "Login successful" });
+      } else {
+        res.status(401).json({ success: false, message: "Invalid credentials" });
+      }
+    } catch (error) {
+      console.error("Admin login error:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  });
+  app2.get("/api/admin/verify", async (req, res) => {
+    try {
+      if (req.session && req.session.adminLoggedIn) {
+        res.json({ success: true, message: "Authenticated" });
+      } else {
+        res.status(401).json({ success: false, message: "Not authenticated" });
+      }
+    } catch (error) {
+      console.error("Admin verify error:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  });
+  app2.post("/api/admin/logout", async (req, res) => {
+    try {
+      if (req.session) {
+        req.session.adminLoggedIn = false;
+      }
+      res.json({ success: true, message: "Logged out" });
+    } catch (error) {
+      console.error("Admin logout error:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  });
+  app2.get("/api/admin/verify", async (req, res) => {
+    try {
+      const isLoggedIn = req.session?.adminLoggedIn;
+      const loginTime = req.session?.adminLoginTime;
+      if (!isLoggedIn || !loginTime) {
+        return res.status(401).json({ success: false, message: "Not authenticated" });
+      }
+      const sessionAge = (/* @__PURE__ */ new Date()).getTime() - new Date(loginTime).getTime();
+      const maxAge = 8 * 60 * 60 * 1e3;
+      if (sessionAge > maxAge) {
+        delete req.session.adminLoggedIn;
+        delete req.session.adminLoginTime;
+        return res.status(401).json({ success: false, message: "Session expired" });
+      }
+      res.json({ success: true, message: "Authenticated" });
+    } catch (error) {
+      console.error("Admin verify error:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  });
+  app2.post("/api/admin/logout", async (req, res) => {
+    try {
+      delete req.session.adminLoggedIn;
+      delete req.session.adminLoginTime;
+      res.json({ success: true, message: "Logged out successfully" });
+    } catch (error) {
+      console.error("Admin logout error:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  });
+  const adminAuth = (req, res, next) => {
+    const isLoggedIn = req.session?.adminLoggedIn;
+    const loginTime = req.session?.adminLoginTime;
+    if (!isLoggedIn || !loginTime) {
+      return res.status(401).json({ success: false, message: "Admin authentication required" });
+    }
+    const sessionAge = (/* @__PURE__ */ new Date()).getTime() - new Date(loginTime).getTime();
+    const maxAge = 8 * 60 * 60 * 1e3;
+    if (sessionAge > maxAge) {
+      delete req.session.adminLoggedIn;
+      delete req.session.adminLoginTime;
+      return res.status(401).json({ success: false, message: "Admin session expired" });
+    }
+    next();
+  };
+  app2.get("/api/teams", async (req, res) => {
+    try {
+      const teams2 = await storage.getTeams();
+      res.json(teams2);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch teams" });
+    }
+  });
+  app2.get("/api/teams/tuskers", async (req, res) => {
+    try {
+      const team = await storage.getTuskersTeam();
+      if (!team) {
+        return res.status(404).json({ error: "Tuskers team not found" });
+      }
+      res.json(team);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch Tuskers team" });
+    }
+  });
+  app2.get("/api/players", async (req, res) => {
+    try {
+      const players2 = await storage.getPlayers();
+      res.json(players2);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch players" });
+    }
+  });
+  app2.get("/api/players/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid player ID" });
+      }
+      const player = await storage.getPlayer(id);
+      if (!player) {
+        return res.status(404).json({ error: "Player not found" });
+      }
+      res.json(player);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch player" });
+    }
+  });
+  app2.post("/api/players", async (req, res) => {
+    try {
+      const validatedData = insertPlayerSchema.parse(req.body);
+      const player = await storage.createPlayer(validatedData);
+      res.status(201).json(player);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid player data" });
+    }
+  });
+  app2.delete("/api/players/all", async (req, res) => {
+    try {
+      await storage.deleteAllPlayers();
+      res.json({ success: true, message: "All players deleted successfully" });
+    } catch (error) {
+      console.error("Delete all players error:", error);
+      res.status(500).json({ error: "Failed to delete all players" });
+    }
+  });
+  app2.delete("/api/players/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid player ID" });
+      }
+      await storage.deletePlayer(id);
+      res.json({ success: true, message: "Player deleted successfully" });
+    } catch (error) {
+      console.error("Delete player error:", error);
+      res.status(500).json({ error: "Failed to delete player" });
+    }
+  });
+  app2.get("/api/matches", async (req, res) => {
+    try {
+      const matches2 = await storage.getMatches();
+      res.json(matches2);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch matches" });
+    }
+  });
+  app2.get("/api/matches/live", async (req, res) => {
+    try {
+      const liveMatches = await storage.getLiveMatches();
+      res.json(liveMatches);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch live matches" });
+    }
+  });
+  app2.get("/api/matches/upcoming", async (req, res) => {
+    try {
+      const upcomingMatches = await storage.getUpcomingMatches();
+      res.json(upcomingMatches);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch upcoming matches" });
+    }
+  });
+  app2.get("/api/matches/recent", async (req, res) => {
+    try {
+      const recentMatches = await storage.getRecentMatches();
+      res.json(recentMatches);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch recent matches" });
+    }
+  });
+  app2.get("/api/matches/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid match ID" });
+      }
+      const match = await storage.getMatch(id);
+      if (!match) {
+        return res.status(404).json({ error: "Match not found" });
+      }
+      res.json(match);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch match" });
+    }
+  });
+  app2.get("/api/matches/:id/lineup", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid match ID" });
+      }
+      const lineup = await storage.getStartingLineup(id);
+      res.json(lineup);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch starting lineup" });
+    }
+  });
+  app2.post("/api/matches", async (req, res) => {
+    try {
+      const validatedData = insertMatchSchema.parse(req.body);
+      const match = await storage.createMatch(validatedData);
+      res.status(201).json(match);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid match data" });
+    }
+  });
+  app2.get("/api/articles", async (req, res) => {
+    try {
+      const articles2 = await storage.getArticles();
+      res.json(articles2);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch articles" });
+    }
+  });
+  app2.get("/api/articles/featured", async (req, res) => {
+    try {
+      const featuredArticles = await storage.getFeaturedArticles();
+      res.json(featuredArticles);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch featured articles" });
+    }
+  });
+  app2.get("/api/articles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid article ID" });
+      }
+      const article = await storage.getArticle(id);
+      if (!article) {
+        return res.status(404).json({ error: "Article not found" });
+      }
+      res.json(article);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch article" });
+    }
+  });
+  app2.get("/api/articles/slug/:slug", async (req, res) => {
+    try {
+      const slug = req.params.slug;
+      const article = await storage.getArticleBySlug(slug);
+      if (!article) {
+        return res.status(404).json({ error: "Article not found" });
+      }
+      res.json(article);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch article" });
+    }
+  });
+  app2.post("/api/articles", async (req, res) => {
+    try {
+      const validatedData = insertArticleSchema.parse(req.body);
+      const articleData = {
+        ...validatedData,
+        publishedAt: validatedData.isPublished ? /* @__PURE__ */ new Date() : null
+      };
+      const article = await storage.createArticle(articleData);
+      res.status(201).json(article);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid article data" });
+    }
+  });
+  app2.patch("/api/articles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid article ID" });
+      }
+      await storage.updateArticle(id, req.body);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Update article error:", error);
+      res.status(500).json({ error: "Failed to update article" });
+    }
+  });
+  app2.delete("/api/articles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid article ID" });
+      }
+      await storage.deleteArticle(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete article error:", error);
+      res.status(500).json({ error: "Failed to delete article" });
+    }
+  });
+  app2.get("/api/social-posts", async (req, res) => {
+    try {
+      const posts = await storage.getSocialPosts();
+      res.json(posts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch social posts" });
+    }
+  });
+  app2.get("/api/polls", async (req, res) => {
+    try {
+      const polls2 = await storage.getActivePolls();
+      res.json(polls2);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch polls" });
+    }
+  });
+  app2.get("/api/polls/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid poll ID" });
+      }
+      const poll = await storage.getPoll(id);
+      if (!poll) {
+        return res.status(404).json({ error: "Poll not found" });
+      }
+      res.json(poll);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch poll" });
+    }
+  });
+  app2.post("/api/polls", async (req, res) => {
+    try {
+      const validatedData = insertPollSchema.parse(req.body);
+      const poll = await storage.createPoll(validatedData);
+      res.status(201).json(poll);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid poll data" });
+    }
+  });
+  app2.post("/api/polls/:id/vote", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { option } = req.body;
+      if (isNaN(id) || !option) {
+        return res.status(400).json({ error: "Invalid poll ID or option" });
+      }
+      const poll = await storage.getPoll(id);
+      if (!poll) {
+        return res.status(404).json({ error: "Poll not found" });
+      }
+      const votes = poll.votes;
+      votes[option] = (votes[option] || 0) + 1;
+      await storage.updatePoll(id, { votes });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to vote on poll" });
+    }
+  });
+  app2.get("/api/quizzes", async (req, res) => {
+    try {
+      const quizzes2 = await storage.getActiveQuizzes();
+      res.json(quizzes2);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch quizzes" });
+    }
+  });
+  app2.get("/api/gallery", async (req, res) => {
+    try {
+      const galleryItems = await storage.getGalleryItems();
+      res.json(galleryItems);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch gallery items" });
+    }
+  });
+  app2.get("/api/stats/team", async (req, res) => {
+    try {
+      const stats = await storage.getTeamStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch team statistics" });
+    }
+  });
+  app2.put("/api/stats/team", async (req, res) => {
+    try {
+      const { matchResult, totalRuns, wicketsTaken, totalOvers, runsAgainst, oversAgainst } = req.body;
+      console.log("Raw input values:", { matchResult, totalRuns, wicketsTaken, totalOvers, runsAgainst, oversAgainst });
+      const parsedTotalRuns = Number(totalRuns) || 0;
+      const parsedWicketsTaken = Number(wicketsTaken) || 0;
+      const parsedTotalOvers = Number(totalOvers) || 0;
+      const parsedRunsAgainst = Number(runsAgainst) || 0;
+      const parsedOversAgainst = Number(oversAgainst) || 0;
+      const matchWon = matchResult === "won" ? 1 : 0;
+      const statsData = {
+        matchesWon: matchWon,
+        totalMatches: 1,
+        totalRuns: parsedTotalRuns,
+        wicketsTaken: parsedWicketsTaken,
+        totalOvers: parsedTotalOvers,
+        runsAgainst: parsedRunsAgainst,
+        oversAgainst: parsedOversAgainst
+      };
+      console.log("Processed stats data:", statsData);
+      for (const [key, value] of Object.entries(statsData)) {
+        if (isNaN(value)) {
+          console.error(`NaN detected in ${key}:`, value);
+          return res.status(400).json({ error: `Invalid value for ${key}` });
+        }
+      }
+      await storage.updateTeamStats(statsData);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating team stats:", error);
+      res.status(500).json({ error: "Failed to update team statistics" });
+    }
+  });
+  app2.post("/api/record-match", async (req, res) => {
+    try {
+      const { opponent, venue, date, result, teamRuns, wicketsTaken, oversFaced, runsConceded } = req.body;
+      const currentStats = await storage.getTeamStats();
+      const newMatchesWon = currentStats.matchesWon + (result === "Won" ? 1 : 0);
+      const newTotalMatches = currentStats.totalMatches + 1;
+      const newTotalRuns = currentStats.totalRuns + (teamRuns || 0);
+      const newWicketsTaken = currentStats.wicketsTaken + (wicketsTaken || 0);
+      const newTotalOvers = currentStats.totalMatches * 20 + (oversFaced || 20);
+      const newRunsAgainst = currentStats.totalRuns + (runsConceded || 0);
+      const newOversAgainst = newTotalOvers;
+      await storage.updateTeamStats({
+        matchesWon: newMatchesWon,
+        totalMatches: newTotalMatches,
+        totalRuns: newTotalRuns,
+        wicketsTaken: newWicketsTaken,
+        totalOvers: newTotalOvers,
+        runsAgainst: newRunsAgainst,
+        oversAgainst: newOversAgainst
+      });
+      console.log(`Match recorded: ${result} vs ${opponent} at ${venue} on ${date}`);
+      res.json({
+        success: true,
+        message: "Match recorded and team statistics updated successfully"
+      });
+    } catch (error) {
+      console.error("Error recording match:", error);
+      res.status(500).json({ error: "Failed to record match" });
+    }
+  });
+  app2.post("/api/record-match-performance", async (req, res) => {
+    try {
+      const { opponent, venue, date, result, selectedPlayers, playerPerformances } = req.body;
+      if (!selectedPlayers || selectedPlayers.length !== 11) {
+        return res.status(400).json({ error: "Exactly 11 players must be selected" });
+      }
+      if (!playerPerformances || !Array.isArray(playerPerformances)) {
+        return res.status(400).json({ error: "Player performances data is required" });
+      }
+      const teamRuns = playerPerformances.reduce((total, perf) => total + (perf.runsScored || 0), 0);
+      const teamWickets = playerPerformances.reduce((total, perf) => total + (perf.wicketsTaken || 0), 0);
+      const totalRunsConceded = playerPerformances.reduce((total, perf) => total + (perf.runsConceded || 0), 0);
+      const totalBallsBowled = playerPerformances.reduce((total, perf) => total + (perf.ballsBowled || 0), 0);
+      const oversBowled = totalBallsBowled / 6;
+      const currentStats = await storage.getTeamStats();
+      const newMatchesWon = currentStats.matchesWon + (result === "Won" ? 1 : 0);
+      const newTotalMatches = currentStats.totalMatches + 1;
+      const newTotalRuns = currentStats.totalRuns + teamRuns;
+      const newWicketsTaken = currentStats.wicketsTaken + teamWickets;
+      const oversFaced = 20;
+      const newTotalOvers = currentStats.totalOvers + oversFaced;
+      const newRunsAgainst = currentStats.runsAgainst + totalRunsConceded;
+      const newOversAgainst = currentStats.oversAgainst + oversBowled;
+      await storage.updateTeamStats({
+        matchesWon: newMatchesWon,
+        totalMatches: newTotalMatches,
+        totalRuns: newTotalRuns,
+        wicketsTaken: newWicketsTaken,
+        totalOvers: newTotalOvers,
+        runsAgainst: newRunsAgainst,
+        oversAgainst: newOversAgainst
+      });
+      for (const performance of playerPerformances) {
+        await storage.updatePlayerStats(performance.playerId, {
+          runsScored: performance.runsScored || 0,
+          ballsFaced: performance.ballsFaced || 0,
+          fours: performance.fours || 0,
+          sixes: performance.sixes || 0,
+          wicketsTaken: performance.wicketsTaken || 0,
+          runsConceded: performance.runsConceded || 0,
+          ballsBowled: performance.ballsBowled || 0,
+          catches: performance.catches || 0,
+          stumpings: performance.stumpings || 0,
+          runOuts: performance.runOuts || 0
+        });
+      }
+      console.log(`Match performance recorded: ${result} vs ${opponent} at ${venue} on ${date}`);
+      console.log(`Team totals: ${teamRuns} runs, ${teamWickets} wickets taken`);
+      res.json({
+        success: true,
+        message: "Match and player performances recorded successfully",
+        teamTotals: {
+          runs: teamRuns,
+          wickets: teamWickets,
+          result
+        }
+      });
+    } catch (error) {
+      console.error("Error recording match performance:", error);
+      res.status(500).json({ error: "Failed to record match performance" });
+    }
+  });
+  app2.get("/api/cricket/live-poll", async (req, res) => {
+    try {
+      const poll = generateCricketPoll();
+      res.json(poll);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate cricket poll" });
+    }
+  });
+  app2.get("/api/cricket/live-quiz", async (req, res) => {
+    try {
+      const quiz = generateCricketQuiz();
+      res.json(quiz);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate cricket quiz" });
+    }
+  });
+  app2.get("/api/trivia/questions", async (req, res) => {
+    try {
+      const questions = await storage.getTriviaQuestions();
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching trivia questions:", error);
+      res.status(500).json({ error: "Failed to fetch trivia questions" });
+    }
+  });
+  app2.get("/api/trivia/leaderboard", async (req, res) => {
+    try {
+      const leaderboard = await storage.getTriviaLeaderboard();
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching trivia leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch trivia leaderboard" });
+    }
+  });
+  app2.post("/api/trivia/submit-score", async (req, res) => {
+    try {
+      const { playerName, score, questionsAnswered, accuracy } = req.body;
+      if (!playerName || score === void 0 || questionsAnswered === void 0 || accuracy === void 0) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      const entry = await storage.submitTriviaScore({
+        playerName,
+        score,
+        questionsAnswered,
+        accuracy
+      });
+      res.json(entry);
+    } catch (error) {
+      console.error("Error submitting trivia score:", error);
+      res.status(500).json({ error: "Failed to submit trivia score" });
+    }
+  });
+  app2.get("/api/gallery", async (req, res) => {
+    try {
+      const galleryItems = await storage.getGalleryItems();
+      res.json(galleryItems);
+    } catch (error) {
+      console.error("Error fetching gallery items:", error);
+      res.status(500).json({ error: "Failed to fetch gallery items" });
+    }
+  });
+  app2.post("/api/gallery", async (req, res) => {
+    try {
+      const validatedData = insertGallerySchema.parse(req.body);
+      const galleryItem = await storage.createGalleryItem(validatedData);
+      res.status(201).json(galleryItem);
+    } catch (error) {
+      console.error("Error creating gallery item:", error);
+      res.status(400).json({ error: "Invalid gallery item data" });
+    }
+  });
+  app2.delete("/api/gallery/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid gallery item ID" });
+      }
+      await storage.deleteGalleryItem(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting gallery item:", error);
+      res.status(500).json({ error: "Failed to delete gallery item" });
+    }
+  });
+  app2.get("/api/announcements", async (req, res) => {
+    try {
+      const announcements2 = await storage.getAnnouncements();
+      res.json(announcements2);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+      res.status(500).json({ error: "Failed to fetch announcements" });
+    }
+  });
+  app2.post("/api/announcements", async (req, res) => {
+    try {
+      const validatedData = insertAnnouncementSchema.parse(req.body);
+      const announcement = await storage.createAnnouncement(validatedData);
+      res.status(201).json(announcement);
+    } catch (error) {
+      console.error("Error creating announcement:", error);
+      res.status(400).json({ error: "Invalid announcement data" });
+    }
+  });
+  app2.put("/api/players/:id/stats", async (req, res) => {
+    try {
+      const playerId = parseInt(req.params.id);
+      if (isNaN(playerId)) {
+        return res.status(400).json({ error: "Invalid player ID" });
+      }
+      await storage.updatePlayerStats(playerId, req.body);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating player stats:", error);
+      res.status(500).json({ error: "Failed to update player stats" });
+    }
+  });
+  app2.post("/api/scoring/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (username === "tuskers" && password === "tuskers2024") {
+        res.json({ success: true, message: "Login successful", userType: "tuskers" });
+      } else {
+        res.status(401).json({ success: false, message: "Invalid credentials" });
+      }
+    } catch (error) {
+      console.error("Scoring login error:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  });
+  app2.get("/api/scoring/live", async (req, res) => {
+    try {
+      const liveData = {
+        isLive: true,
+        matchName: "Tuskers CC vs Lightning Bolts",
+        venue: "Premier Cricket Ground",
+        status: "LIVE",
+        tuskersScore: "156/3 (28.4 overs)",
+        oppositionScore: "Lightning Bolts: Yet to bat",
+        currentBatsmen: [
+          { name: "R. Sharma", runs: 45, balls: 32 },
+          { name: "V. Kohli", runs: 28, balls: 25 }
+        ],
+        recentOvers: ["4", "1", "0", "6", "2", "1"]
+      };
+      res.json(liveData);
+    } catch (error) {
+      console.error("Live scoring error:", error);
+      res.status(500).json({ error: "Failed to fetch live data" });
+    }
+  });
+  app2.get("/api/forum/categories", async (req, res) => {
+    try {
+      const categories = await storage.getForumCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch forum categories" });
+    }
+  });
+  app2.get("/api/forum/topics/recent", async (req, res) => {
+    try {
+      const topics = await storage.getForumTopics();
+      res.json(topics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch forum topics" });
+    }
+  });
+  app2.get("/api/forum/topics/popular", async (req, res) => {
+    try {
+      const topics = await storage.getForumTopics();
+      res.json(topics.slice(0, 5));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch popular topics" });
+    }
+  });
+  app2.get("/api/forum/users/online", async (req, res) => {
+    try {
+      res.json([]);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch online users" });
+    }
+  });
+  app2.get("/api/forum/stats", async (req, res) => {
+    try {
+      const stats = await storage.getForumStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch forum stats" });
+    }
+  });
+  app2.get("/api/community/events", async (req, res) => {
+    try {
+      const events = await storage.getCommunityEvents();
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch community events" });
+    }
+  });
+  app2.post("/api/community/events", async (req, res) => {
+    try {
+      const event = await storage.createCommunityEvent(req.body);
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create community event" });
+    }
+  });
+  app2.post("/api/community/events/:id/join", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = 1;
+      const participant = await storage.joinCommunityEvent(eventId, userId);
+      res.json(participant);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to join event" });
+    }
+  });
+  app2.post("/api/community/events/:id/leave", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = 1;
+      await storage.leaveCommunityEvent(eventId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to leave event" });
+    }
+  });
+  app2.get("/api/community/stats", async (req, res) => {
+    try {
+      const stats = await storage.getCommunityStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch community stats" });
+    }
+  });
+  app2.post("/api/matches/:matchId/performances", async (req, res) => {
+    try {
+      const matchId = parseInt(req.params.matchId);
+      if (isNaN(matchId)) {
+        return res.status(400).json({ error: "Invalid match ID" });
+      }
+      const { playerPerformances } = req.body;
+      if (!Array.isArray(playerPerformances)) {
+        return res.status(400).json({ error: "Player performances must be an array" });
+      }
+      const performances = playerPerformances.map((perf) => ({
+        ...perf,
+        matchId
+      }));
+      await storage.updatePlayerStatsFromMatch(matchId, performances);
+      res.json({ success: true, message: "Player stats updated successfully" });
+    } catch (error) {
+      console.error("Error updating player stats:", error);
+      res.status(500).json({ error: "Failed to update player stats" });
+    }
+  });
+  app2.post("/api/match-performance/manual", adminAuth, async (req, res) => {
+    try {
+      const { matchData, playerPerformances } = req.body;
+      if (!matchData || !Array.isArray(playerPerformances)) {
+        return res.status(400).json({ message: "Match data and player performances are required" });
+      }
+      for (const performance of playerPerformances) {
+        if (performance.playerId && Object.keys(performance).some(
+          (key) => key !== "playerId" && performance[key] > 0
+        )) {
+          const statsUpdate = {};
+          if (performance.runsScored > 0) statsUpdate.runsScored = performance.runsScored;
+          if (performance.ballsFaced > 0) statsUpdate.ballsFaced = performance.ballsFaced;
+          if (performance.fours > 0) statsUpdate.fours = performance.fours;
+          if (performance.sixes > 0) statsUpdate.sixes = performance.sixes;
+          if (performance.wicketsTaken > 0) statsUpdate.wicketsTaken = performance.wicketsTaken;
+          if (performance.ballsBowled > 0) statsUpdate.ballsBowled = performance.ballsBowled;
+          if (performance.runsConceded > 0) statsUpdate.runsConceded = performance.runsConceded;
+          if (performance.catches > 0) statsUpdate.catches = performance.catches;
+          if (performance.stumpings > 0) statsUpdate.stumpings = performance.stumpings;
+          if (performance.runOuts > 0) statsUpdate.runOuts = performance.runOuts;
+          if (Object.keys(statsUpdate).length > 0) {
+            await storage.updatePlayerStats(performance.playerId, statsUpdate);
+          }
+        }
+      }
+      if (matchData.result && (matchData.result === "Won" || matchData.result === "Lost" || matchData.result === "Draw")) {
+        const currentStats = await storage.getTeamStats();
+        const newTotalMatches = currentStats.totalMatches + 1;
+        const newMatchesWon = matchData.result === "Won" ? currentStats.matchesWon + 1 : currentStats.matchesWon;
+        const totalRunsThisMatch = playerPerformances.reduce((sum2, perf) => sum2 + (perf.runsScored || 0), 0);
+        const totalWicketsThisMatch = playerPerformances.reduce((sum2, perf) => sum2 + (perf.wicketsTaken || 0), 0);
+        await storage.updateTeamStats({
+          matchesWon: newMatchesWon,
+          totalMatches: newTotalMatches,
+          totalRuns: currentStats.totalRuns + totalRunsThisMatch,
+          wicketsTaken: currentStats.wicketsTaken + totalWicketsThisMatch,
+          totalOvers: 20,
+          // Default overs for manual entry
+          runsAgainst: 150,
+          // Default opposition runs
+          oversAgainst: 20
+          // Default opposition overs
+        });
+      }
+      res.json({ message: "Match performance recorded successfully" });
+    } catch (error) {
+      console.error("Error recording manual match performance:", error);
+      res.status(500).json({ message: "Failed to record match performance" });
+    }
+  });
+  app2.get("/api/matches/:matchId/performances", async (req, res) => {
+    try {
+      const matchId = parseInt(req.params.matchId);
+      if (isNaN(matchId)) {
+        return res.status(400).json({ error: "Invalid match ID" });
+      }
+      const performances = await storage.getMatchPerformances(matchId);
+      res.json(performances);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch match performances" });
+    }
+  });
+  const httpServer = createServer(app2);
+  return httpServer;
+}
+
+// server/vite.ts
+import express from "express";
+import fs from "fs";
+import path2 from "path";
+import { createServer as createViteServer, createLogger } from "vite";
+
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+var vite_config_default = defineConfig({
+  plugins: [
+    react(),
+    runtimeErrorOverlay(),
+    ...process.env.NODE_ENV !== "production" && process.env.REPL_ID !== void 0 ? [
+      await import("@replit/vite-plugin-cartographer").then(
+        (m) => m.cartographer()
+      )
+    ] : []
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path.resolve(import.meta.dirname, "shared"),
+      "@assets": path.resolve(import.meta.dirname, "attached_assets")
+    }
+  },
+  root: path.resolve(import.meta.dirname, "client"),
+  build: {
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    emptyOutDir: true
+  }
+});
+
+// server/vite.ts
+import { nanoid } from "nanoid";
+var viteLogger = createLogger();
+function log(message, source = "express") {
+  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
+async function setupVite(app2, server) {
+  const serverOptions = {
+    middlewareMode: true,
+    hmr: { server },
+    allowedHosts: true
+  };
+  const vite = await createViteServer({
+    ...vite_config_default,
+    configFile: false,
+    customLogger: {
+      ...viteLogger,
+      error: (msg, options) => {
+        viteLogger.error(msg, options);
+        process.exit(1);
+      }
+    },
+    server: serverOptions,
+    appType: "custom"
+  });
+  app2.use(vite.middlewares);
+  app2.use("*", async (req, res, next) => {
+    const url = req.originalUrl;
+    try {
+      const clientTemplate = path2.resolve(
+        import.meta.dirname,
+        "..",
+        "client",
+        "index.html"
+      );
+      let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      template = template.replace(
+        `src="/src/main.tsx"`,
+        `src="/src/main.tsx?v=${nanoid()}"`
+      );
+      const page = await vite.transformIndexHtml(url, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+    } catch (e) {
+      vite.ssrFixStacktrace(e);
+      next(e);
+    }
+  });
+}
+function serveStatic(app2) {
+  const distPath = path2.resolve(import.meta.dirname, "public");
+  if (!fs.existsSync(distPath)) {
+    throw new Error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`
+    );
+  }
+  app2.use(express.static(distPath));
+  app2.use("*", (_req, res) => {
+    res.sendFile(path2.resolve(distPath, "index.html"));
+  });
+}
+
+// server/index.ts
+var app = express2();
+app.use(express2.json());
+app.use(express2.urlencoded({ extended: false }));
+app.use(session({
+  secret: process.env.SESSION_SECRET || "tuskers-cricket-club-2024",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false,
+    // Set to true in production with HTTPS
+    maxAge: 24 * 60 * 60 * 1e3
+    // 24 hours
+  }
+}));
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path3 = req.path;
+  let capturedJsonResponse = void 0;
+  const originalResJson = res.json;
+  res.json = function(bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path3.startsWith("/api")) {
+      let logLine = `${req.method} ${path3} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "\u2026";
+      }
+      log(logLine);
+    }
+  });
+  next();
+});
+(async () => {
+  log("Database seeding disabled - ready for manual data entry");
+  const server = await registerRoutes(app);
+  app.use((err, _req, res, _next) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    res.status(status).json({ message });
+    throw err;
+  });
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+  const port = 5e3;
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true
+  }, () => {
+    log(`serving on port ${port}`);
+  });
+})();
