@@ -7,14 +7,14 @@ import { MapPin, Phone, Mail, Clock, Users, Trophy } from "lucide-react";
 
 export default function Contact() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-4">
+          <h1 className="text-4xl font-bold text-[#fcd34d] mb-4">
             Contact Tuskers CC
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 max-w-2xl mx-auto">
             Get in touch with Kandy's premier cricket club. Whether you're interested in joining, 
             attending matches, or have questions about our facilities.
           </p>
