@@ -29,7 +29,7 @@ export default function Home() {
         {/* Quick Stats Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8">
               {/* Stat Card 1 */}
               <div className="text-center p-8 bg-gradient-to-br from-[#eff6ff] to-blue-50 rounded-2xl">
                 <div className="w-16 h-16 bg-[#1e3a8a] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -63,7 +63,18 @@ export default function Home() {
                 <p className="text-gray-600 font-medium">Wickets Taken</p>
               </div>
 
-              {/* Stat Card 4 */}
+              {/* Stat Card 4 - Winning Rate */}
+              <div className="text-center p-8 bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl">
+                <div className="w-16 h-16 bg-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="fas fa-percentage text-white text-2xl"></i>
+                </div>
+                <h3 className="text-3xl font-bold text-[#1e3a8a] mb-2">
+                  {stats?.winningRate?.toFixed(1) || '0.0'}%
+                </h3>
+                <p className="text-gray-600 font-medium">Win Rate</p>
+              </div>
+
+              {/* Stat Card 5 - NRR */}
               <div className="text-center p-8 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl">
                 <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <i className="fas fa-chart-line text-white text-2xl"></i>
