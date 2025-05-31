@@ -66,8 +66,6 @@ In Vercel dashboard, go to your project → Settings → Environment Variables:
 Add these variables:
 ```
 DATABASE_URL=your_postgresql_connection_string
-RAPIDAPI_KEY=your_cricket_api_key
-CRICKET_API_HOST=cricket-live-data.p.rapidapi.com
 NODE_ENV=production
 SESSION_SECRET=your_session_secret_key
 ```
