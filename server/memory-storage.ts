@@ -11,212 +11,19 @@ import {
 
 import { IStorage } from "./storage";
 
-// In-memory data stores
+// In-memory data stores - cleared for fresh start
 const users: User[] = [];
 const teams: Team[] = [
-  { id: 1, name: "Tuskers Cricket Club", shortName: "TCC", logo: null, isOurTeam: true },
-  { id: 2, name: "Royal Challengers", shortName: "RCB", logo: null, isOurTeam: false },
-  { id: 3, name: "Chennai Super Kings", shortName: "CSK", logo: null, isOurTeam: false }
+  { id: 1, name: "Tuskers Cricket Club", shortName: "TCC", logo: null, isOurTeam: true }
 ];
 
-const venues: Venue[] = [
-  { id: 1, name: "Tuskers Cricket Ground", location: "Stadium Road", capacity: 15000 },
-  { id: 2, name: "City Sports Complex", location: "Downtown", capacity: 8000 }
-];
-
-const competitions: Competition[] = [
-  { id: 1, name: "Local Premier League", shortName: "LPL", type: "league" },
-  { id: 2, name: "City Championship", shortName: "CC", type: "tournament" }
-];
-
-const players: (Player & { stats?: PlayerStats })[] = [
-  {
-    id: 543,
-    name: "Abilashan",
-    jerseyNumber: 1,
-    role: "Batsman",
-    battingStyle: "Right-handed",
-    bowlingStyle: null,
-    bio: "Aggressive opening batsman with excellent timing",
-    photo: null,
-    isCaptain: false,
-    isViceCaptain: false,
-    dateOfBirth: new Date('1995-03-15'),
-    stats: {
-      id: 1,
-      playerId: 543,
-      matches: 25,
-      runsScored: 1247,
-      ballsFaced: 980,
-      fours: 142,
-      sixes: 28,
-      wicketsTaken: 0,
-      ballsBowled: 0,
-      runsGiven: 0,
-      catches: 15,
-      stumpings: 0,
-      runOuts: 3
-    }
-  },
-  {
-    id: 544,
-    name: "Rajesh Sharma",
-    jerseyNumber: 7,
-    role: "Batsman",
-    battingStyle: "Right-handed",
-    bowlingStyle: null,
-    bio: "Reliable middle-order batsman",
-    photo: null,
-    isCaptain: false,
-    isViceCaptain: false,
-    dateOfBirth: new Date('1992-08-22'),
-    stats: {
-      id: 2,
-      playerId: 544,
-      matches: 22,
-      runsScored: 890,
-      ballsFaced: 720,
-      fours: 98,
-      sixes: 15,
-      wicketsTaken: 0,
-      ballsBowled: 0,
-      runsGiven: 0,
-      catches: 12,
-      stumpings: 0,
-      runOuts: 2
-    }
-  },
-  {
-    id: 545,
-    name: "Mohammed Ali",
-    jerseyNumber: 11,
-    role: "Bowler",
-    battingStyle: "Right-handed",
-    bowlingStyle: "Right-arm fast",
-    bio: "Fast bowler with excellent pace and accuracy",
-    photo: null,
-    isCaptain: false,
-    isViceCaptain: false,
-    dateOfBirth: new Date('1994-12-10'),
-    stats: {
-      id: 3,
-      playerId: 545,
-      matches: 20,
-      runsScored: 125,
-      ballsFaced: 98,
-      fours: 8,
-      sixes: 2,
-      wicketsTaken: 42,
-      ballsBowled: 1200,
-      runsGiven: 890,
-      catches: 8,
-      stumpings: 0,
-      runOuts: 1
-    }
-  },
-  {
-    id: 546,
-    name: "Vikram Singh",
-    jerseyNumber: 10,
-    role: "All-rounder",
-    battingStyle: "Left-handed",
-    bowlingStyle: "Left-arm spin",
-    bio: "Dynamic all-rounder with good batting and bowling skills",
-    photo: null,
-    isCaptain: true,
-    isViceCaptain: false,
-    dateOfBirth: new Date('1990-05-18'),
-    stats: {
-      id: 4,
-      playerId: 546,
-      matches: 28,
-      runsScored: 945,
-      ballsFaced: 780,
-      fours: 89,
-      sixes: 22,
-      wicketsTaken: 35,
-      ballsBowled: 840,
-      runsGiven: 670,
-      catches: 18,
-      stumpings: 0,
-      runOuts: 4
-    }
-  }
-];
-
-const matches: (Match & { homeTeam: Team; awayTeam: Team; venue: Venue; competition: Competition })[] = [
-  {
-    id: 1,
-    homeTeamId: 1,
-    awayTeamId: 2,
-    venueId: 1,
-    competitionId: 1,
-    dateTime: new Date('2024-03-15T14:00:00'),
-    status: 'completed',
-    result: 'Tuskers won by 6 wickets',
-    homeTeamScore: '178/4 (18.2 overs)',
-    awayTeamScore: '175/8 (20 overs)',
-    homeTeam: teams[0],
-    awayTeam: teams[1],
-    venue: venues[0],
-    competition: competitions[0]
-  },
-  {
-    id: 2,
-    homeTeamId: 2,
-    awayTeamId: 1,
-    venueId: 2,
-    competitionId: 1,
-    dateTime: new Date('2024-04-10T19:00:00'),
-    status: 'upcoming',
-    result: null,
-    homeTeamScore: null,
-    awayTeamScore: null,
-    homeTeam: teams[1],
-    awayTeam: teams[0],
-    venue: venues[1],
-    competition: competitions[0]
-  }
-];
-
-const articles: Article[] = [
-  {
-    id: 108,
-    title: "TATA IPL 2025, Qualifier 2: Tuskers vs Royal Challengers Preview",
-    slug: "tata-ipl-2025-qualifier-2-preview",
-    content: "An exciting qualifier match between Tuskers Cricket Club and Royal Challengers is set to take place. Both teams have shown exceptional form this season and are ready for an intense battle.",
-    excerpt: "Preview of the upcoming qualifier match between Tuskers CC and Royal Challengers",
-    featuredImage: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-    publishedAt: new Date('2024-03-10T10:00:00'),
-    isFeatured: true,
-    author: "Sports Desk",
-    category: "Match Preview",
-    isPublished: true,
-    createdAt: new Date('2024-03-10T10:00:00')
-  }
-];
-
-const galleryItems: GalleryItem[] = [
-  {
-    id: 4,
-    title: "Training Session",
-    description: "Players during an intense training session",
-    imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-    category: "training",
-    uploadedAt: new Date('2024-03-01T10:00:00')
-  }
-];
-
-const triviaQuestions: TriviaQuestion[] = [
-  {
-    id: 16,
-    question: "Who holds the record for the highest individual score in Test cricket?",
-    options: ["Brian Lara", "Don Bradman", "Virat Kohli", "Sachin Tendulkar"],
-    correctAnswer: "Brian Lara",
-    difficulty: "medium",
-    category: "records"
-  }
-];
+const venues: Venue[] = [];
+const competitions: Competition[] = [];
+const players: (Player & { stats?: PlayerStats })[] = [];
+const matches: (Match & { homeTeam: Team; awayTeam: Team; venue: Venue; competition: Competition })[] = [];
+const articles: Article[] = [];
+const galleryItems: GalleryItem[] = [];
+const triviaQuestions: TriviaQuestion[] = [];
 
 const announcements: Announcement[] = [];
 const socialPosts: SocialPost[] = [];
@@ -549,12 +356,12 @@ export class MemoryStorage implements IStorage {
     return {
       matchesWon,
       totalMatches: completedMatches.length,
-      totalRuns: 2840,
-      wicketsTaken: 45,
-      totalOvers: 120,
-      runsAgainst: 2650,
-      oversAgainst: 120,
-      nrr: 1.58
+      totalRuns: 0,
+      wicketsTaken: 0,
+      totalOvers: 0,
+      runsAgainst: 0,
+      oversAgainst: 0,
+      nrr: 0.00
     };
   }
 
