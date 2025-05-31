@@ -22,7 +22,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Simple credentials for demo (in production, use environment variables and hashed passwords)
       const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'tuskers2024';
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MAt@51BlaX';
       
       if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
         // Set session
