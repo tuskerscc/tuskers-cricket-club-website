@@ -51,11 +51,11 @@ export default function FanZone() {
   };
 
   return (
-    <section id="fanzone" className="py-16 bg-white">
+    <section id="fanzone" className="py-16 bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#1e3a8a] mb-4">Fan Zone</h2>
-          <p className="text-xl text-gray-600">Join the TUSKERS CRICKET CLUB community and engage with fellow cricket enthusiasts</p>
+          <h2 className="text-4xl font-bold text-[#fcd34d] mb-4">Fan Zone</h2>
+          <p className="text-xl text-white/80">Join the TUSKERS CRICKET CLUB community and engage with fellow cricket enthusiasts</p>
         </div>
 
         {/* Poll and Quiz Side by Side */}

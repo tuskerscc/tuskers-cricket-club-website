@@ -16,11 +16,11 @@ export default function LatestUpdates() {
 
   if (isLoading) {
     return (
-      <section id="news" className="py-16 bg-gray-50">
+      <section id="news" className="py-16 bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-[#1e3a8a] mb-4">Latest Updates</h2>
-            <p className="text-xl text-gray-600">Stay informed with the latest news, match reports, and team updates</p>
+            <h2 className="text-4xl font-bold text-[#fcd34d] mb-4">Latest Updates</h2>
+            <p className="text-xl text-white/80">Stay informed with the latest news, match reports, and team updates</p>
           </div>
           <div className="animate-pulse">
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-12 grid lg:grid-cols-2 gap-0">
@@ -39,11 +39,11 @@ export default function LatestUpdates() {
   }
 
   return (
-    <section id="news" className="py-16 bg-gray-50">
+    <section id="news" className="py-16 bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#1e3a8a] mb-4">Latest Updates</h2>
-          <p className="text-xl text-gray-600">Stay informed with the latest news, match reports, and team updates</p>
+          <h2 className="text-4xl font-bold text-[#fcd34d] mb-4">Latest Updates</h2>
+          <p className="text-xl text-white/80">Stay informed with the latest news, match reports, and team updates</p>
         </div>
 
         {/* Featured Article */}
