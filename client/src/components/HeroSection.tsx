@@ -17,25 +17,25 @@ export default function HeroSection() {
         }}
       ></div>
       
-      <div className="relative container mx-auto px-4 py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="relative container-responsive py-12 sm:py-16 md:py-20 lg:py-24">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Hero Content */}
-          <div className="text-white">
-            <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+          <div className="text-white text-center lg:text-left">
+            <h1 className="text-responsive-3xl font-bold mb-4 sm:mb-6 leading-tight">
               Welcome to<br />
               <span className="text-[#fcd34d]">Tuskers CC</span>
             </h1>
-            <p className="text-xl mb-8 text-gray-200 leading-relaxed">
+            <p className="text-responsive-base mb-6 sm:mb-8 text-gray-200 leading-relaxed max-w-lg mx-auto lg:mx-0">
               Passionate cricket, extraordinary talent, and unwavering dedication. 
               Join us as we continue our journey to excellence on and off the field.
             </p>
           </div>
 
           {/* Latest Announcements Widget */}
-          <div className="bg-white bg-opacity-95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
+          <div className="bg-white bg-opacity-95 backdrop-blur-sm rounded-2xl padding-responsive shadow-2xl">
             <div className="text-center mb-4">
-              <h3 className="text-2xl font-bold text-[#1e3a8a]">📢 Latest Announcements</h3>
-              <p className="text-gray-600 text-sm">Stay updated with our latest club news</p>
+              <h3 className="text-responsive-lg font-bold text-[#1e3a8a]">📢 Latest Announcements</h3>
+              <p className="text-gray-600 text-responsive-xs">Stay updated with our latest club news</p>
             </div>
             
             <div className="max-h-64 overflow-y-auto">

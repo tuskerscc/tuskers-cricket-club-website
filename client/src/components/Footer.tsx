@@ -1,9 +1,9 @@
 export default function Footer() {
 
   return (
-    <footer className="bg-[#1e3a8a] text-white py-16">
-      <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+    <footer className="bg-[#1e3a8a] text-white py-8 sm:py-12 lg:py-16">
+      <div className="container-responsive">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* Club Info */}
           <div>
             <div className="flex items-center space-x-3 mb-6">

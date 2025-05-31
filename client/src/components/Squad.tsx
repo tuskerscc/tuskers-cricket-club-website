@@ -108,12 +108,12 @@ export default function Squad() {
 
   return (
     <section id="squad" className="py-8 md:py-16 bg-gray-50">
-      <div className="container mx-auto px-4 max-w-7xl">
+      <div className="container-responsive">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
           <div>
-            <h2 className="text-2xl md:text-4xl font-bold text-[#1e3a8a] mb-2">SQUAD</h2>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <h2 className="text-responsive-2xl font-bold text-[#1e3a8a] mb-2">SQUAD</h2>
+            <div className="flex items-center gap-2 text-responsive-xs text-gray-600">
               <Users className="w-4 h-4" />
               <span>Men's Team</span>
             </div>

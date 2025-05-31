@@ -12,18 +12,19 @@ export default function Header() {
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
       {/* Main Navigation */}
-      <nav className="container mx-auto px-4 py-4">
+      <nav className="container-responsive py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3">
+          <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
             <img
               src={logoPath}
               alt="TUSKERS CRICKET CLUB"
-              className="w-12 h-12 rounded-lg object-contain"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-contain"
             />
             <div>
-              <h1 className="text-2xl font-bold text-[#1e3a8a]">
-                TUSKERS CRICKET CLUB
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[#1e3a8a] leading-tight">
+                <span className="block sm:hidden">TUSKERS CC</span>
+                <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
               </h1>
             </div>
           </Link>
