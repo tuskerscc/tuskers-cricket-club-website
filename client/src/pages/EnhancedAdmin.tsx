@@ -127,7 +127,7 @@ function EnhancedAdminContent() {
   });
 
   const deleteAnnouncementMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/announcements/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => apiRequest(`/api/announcements/${id}`, 'DELETE'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/announcements'] });
       toast({ title: "Success", description: "Announcement deleted successfully" });
@@ -138,7 +138,7 @@ function EnhancedAdminContent() {
   });
 
   const deleteArticleMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/articles/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => apiRequest(`/api/articles/${id}`, 'DELETE'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
       toast({ title: "Success", description: "Article deleted successfully" });
@@ -149,7 +149,7 @@ function EnhancedAdminContent() {
   });
 
   const deleteGalleryMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/gallery/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => apiRequest(`/api/gallery/${id}`, 'DELETE'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gallery'] });
       toast({ title: "Success", description: "Gallery item deleted successfully" });
@@ -161,7 +161,7 @@ function EnhancedAdminContent() {
 
   const updateAnnouncementMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest(`/api/announcements/${id}`, { method: 'PUT', body: data }),
+      apiRequest(`/api/announcements/${id}`, 'PUT', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/announcements'] });
       setEditingItem(null);
@@ -173,7 +173,7 @@ function EnhancedAdminContent() {
   });
 
   const createPlayerMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/players', { method: 'POST', body: data }),
+    mutationFn: (data: any) => apiRequest('/api/players', 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/players'] });
       playerForm.reset();
@@ -185,7 +185,7 @@ function EnhancedAdminContent() {
   });
 
   const createAnnouncementMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/announcements', { method: 'POST', body: data }),
+    mutationFn: (data: any) => apiRequest('/api/announcements', 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/announcements'] });
       announcementForm.reset();
@@ -197,7 +197,7 @@ function EnhancedAdminContent() {
   });
 
   const createArticleMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/articles', { method: 'POST', body: data }),
+    mutationFn: (data: any) => apiRequest('/api/articles', 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
       articleForm.reset();
@@ -209,7 +209,7 @@ function EnhancedAdminContent() {
   });
 
   const createGalleryMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/gallery', { method: 'POST', body: data }),
+    mutationFn: (data: any) => apiRequest('/api/gallery', 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gallery'] });
       galleryForm.reset();
@@ -221,7 +221,7 @@ function EnhancedAdminContent() {
   });
 
   const updateStatsMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/stats/team', { method: 'PUT', body: data }),
+    mutationFn: (data: any) => apiRequest('/api/stats/team', 'PUT', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/stats/team'] });
       toast({ title: "Success", description: "Team statistics updated successfully" });
