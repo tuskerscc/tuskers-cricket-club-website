@@ -62,11 +62,11 @@ export default function Article() {
         <article className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Featured Image */}
           {article.featuredImage && (
-            <div className="w-full h-64 md:h-96">
+            <div className="w-full h-64 md:h-96 bg-gray-100 flex items-center justify-center">
               <img
                 src={article.featuredImage}
                 alt={article.title}
-                className="w-full h-full object-cover"
+                className="max-w-full max-h-full object-contain"
               />
             </div>
           )}
