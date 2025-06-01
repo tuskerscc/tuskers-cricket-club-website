@@ -181,11 +181,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/players", async (req, res) => {
     try {
+      console.log('Player creation request body:', req.body);
       const validatedData = insertPlayerSchema.parse(req.body);
       const player = await storage.createPlayer(validatedData);
       res.status(201).json(player);
     } catch (error) {
-      res.status(400).json({ error: "Invalid player data" });
+      console.error('Player validation error:', error);
+      if (error instanceof Error) {
+        res.status(400).json({ error: "Invalid player data", details: error.message });
+      } else {
+        res.status(400).json({ error: "Invalid player data" });
+      }
     }
   });
 
@@ -343,6 +349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/articles", async (req, res) => {
     try {
+      console.log('Article creation request body:', req.body);
       const validatedData = insertArticleSchema.parse(req.body);
       // Set publishedAt to current date if the article is published
       const articleData = {
@@ -352,7 +359,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const article = await storage.createArticle(articleData);
       res.status(201).json(article);
     } catch (error) {
-      res.status(400).json({ error: "Invalid article data" });
+      console.error('Article validation error:', error);
+      if (error instanceof Error) {
+        res.status(400).json({ error: "Invalid article data", details: error.message });
+      } else {
+        res.status(400).json({ error: "Invalid article data" });
+      }
     }
   });
 
