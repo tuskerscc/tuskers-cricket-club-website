@@ -1,4 +1,4 @@
-import logoPath from "@assets/image_1748758628764.png";
+import logoPath from "@assets/Tuskers CC Logo.png";
 
 export default function Footer() {
 

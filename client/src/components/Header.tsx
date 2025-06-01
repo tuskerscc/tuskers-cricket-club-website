@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { useState } from "react";
-import logoPath from "@assets/image_1748758628764.png";
+import logoPath from "@assets/Tuskers CC Logo.png";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
