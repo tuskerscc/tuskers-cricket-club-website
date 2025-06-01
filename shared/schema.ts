@@ -457,6 +457,13 @@ export const galleryRelations = relations(gallery, ({ one, many }) => ({
   likes: many(galleryLikes),
 }));
 
+export const galleryLikesRelations = relations(galleryLikes, ({ one }) => ({
+  galleryItem: one(gallery, {
+    fields: [galleryLikes.galleryItemId],
+    references: [gallery.id],
+  }),
+}));
+
 // Forum Relations
 export const forumCategoriesRelations = relations(forumCategories, ({ many }) => ({
   topics: many(forumTopics),
@@ -590,6 +597,11 @@ export const insertGallerySchema = createInsertSchema(gallery).omit({
   createdAt: true,
 });
 
+export const insertGalleryLikeSchema = createInsertSchema(galleryLikes).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertAnnouncementSchema = createInsertSchema(announcements).omit({
   id: true,
   createdAt: true,
@@ -707,6 +719,9 @@ export type InsertQuiz = z.infer<typeof insertQuizSchema>;
 
 export type GalleryItem = typeof gallery.$inferSelect;
 export type InsertGalleryItem = z.infer<typeof insertGallerySchema>;
+
+export type GalleryLike = typeof galleryLikes.$inferSelect;
+export type InsertGalleryLike = z.infer<typeof insertGalleryLikeSchema>;
 
 export type Announcement = typeof announcements.$inferSelect;
 export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;

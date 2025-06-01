@@ -1,6 +1,6 @@
 import { 
   users, teams, venues, competitions, players, matches, lineups, playerStats, teamStats,
-  matchPerformances, articles, socialPosts, polls, quizzes, gallery, announcements, 
+  matchPerformances, articles, socialPosts, polls, quizzes, gallery, galleryLikes, announcements, 
   triviaQuestions, triviaLeaderboard, forumCategories, forumTopics, forumPosts, 
   forumPostLikes, userProfiles, communityEvents, eventParticipants,
   type User, type InsertUser, type Team, type InsertTeam, type Venue, type InsertVenue,
@@ -9,6 +9,7 @@ import {
   type PlayerStats, type InsertPlayerStats, type MatchPerformance, type InsertMatchPerformance,
   type Article, type InsertArticle, type SocialPost, type InsertSocialPost, type Poll, type InsertPoll,
   type Quiz, type InsertQuiz, type GalleryItem, type InsertGalleryItem,
+  type GalleryLike, type InsertGalleryLike,
   type Announcement, type InsertAnnouncement,
   type TriviaQuestion, type InsertTriviaQuestion, type TriviaLeaderboard, type InsertTriviaLeaderboard,
   type ForumCategory, type InsertForumCategory, type ForumTopic, type InsertForumTopic,
@@ -77,6 +78,11 @@ export interface IStorage {
   getGalleryItems(): Promise<GalleryItem[]>;
   createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem>;
   deleteGalleryItem(id: number): Promise<void>;
+  
+  // Gallery likes
+  likeGalleryItem(galleryItemId: number, userIp: string, userAgent?: string): Promise<boolean>;
+  unlikeGalleryItem(galleryItemId: number, userIp: string): Promise<boolean>;
+  hasUserLikedGalleryItem(galleryItemId: number, userIp: string): Promise<boolean>;
 
   // Announcements
   getAnnouncements(): Promise<Announcement[]>;
