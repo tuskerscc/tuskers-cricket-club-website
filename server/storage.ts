@@ -95,22 +95,25 @@ export interface IStorage {
   // Statistics
   getTeamStats(): Promise<{
     matchesWon: number;
+    matchesLost: number;
+    matchesDraw: number;
     totalMatches: number;
     totalRuns: number;
     wicketsTaken: number;
-    totalOvers: number;
-    runsAgainst: number;
-    oversAgainst: number;
+    oversBowled: number;
+    winRate: number;
     nrr: number;
   }>;
   updateTeamStats(data: {
     matchesWon: number;
+    matchesLost: number;
+    matchesDraw: number;
     totalMatches: number;
     totalRuns: number;
     wicketsTaken: number;
-    totalOvers: number;
-    runsAgainst: number;
-    oversAgainst: number;
+    oversBowled: number;
+    winRate: number;
+    nrr: number;
   }): Promise<void>;
 
   // Trivia
@@ -435,35 +438,58 @@ export class DatabaseStorage implements IStorage {
     matchesDraw: number;
     totalMatches: number;
     totalRuns: number;
-    averageScore: number;
-    winPercentage: number;
+    wicketsTaken: number;
+    oversBowled: number;
+    winRate: number;
+    nrr: number;
   }> {
     try {
-      const allMatches = await db.select().from(matches);
+      // Use raw SQL to handle both old and new table structures
+      const result = await db.execute(`
+        SELECT 
+          COUNT(*) as total_matches,
+          COUNT(CASE WHEN 
+            (match_result = 'Won' OR result LIKE '%won%' OR result LIKE '%Won%') 
+            THEN 1 END) as matches_won,
+          COUNT(CASE WHEN 
+            (match_result = 'Lost' OR result LIKE '%lost%' OR result LIKE '%Lost%') 
+            THEN 1 END) as matches_lost,
+          COUNT(CASE WHEN 
+            (match_result = 'Draw' OR result LIKE '%draw%' OR result LIKE '%Draw%') 
+            THEN 1 END) as matches_draw,
+          COALESCE(SUM(tuskers_score), COALESCE(SUM(CAST(SPLIT_PART(home_team_score, '/', 1) AS INTEGER)), 0)) as total_runs,
+          COALESCE(SUM(opponent_wickets), 0) as wickets_taken,
+          COALESCE(SUM(CASE WHEN opponent_overs IS NOT NULL THEN 
+            CAST(SPLIT_PART(opponent_overs, '.', 1) AS FLOAT) + 
+            CAST(COALESCE(SPLIT_PART(opponent_overs, '.', 2), '0') AS FLOAT) / 6.0 
+            ELSE 0 END), 0) as overs_bowled,
+          COALESCE(SUM(CASE WHEN tuskers_overs IS NOT NULL THEN 
+            CAST(SPLIT_PART(tuskers_overs, '.', 1) AS FLOAT) + 
+            CAST(COALESCE(SPLIT_PART(tuskers_overs, '.', 2), '0') AS FLOAT) / 6.0 
+            ELSE 0 END), 0) as overs_faced,
+          COALESCE(SUM(opponent_score), 0) as opponent_runs
+        FROM matches
+      `);
+
+      const stats = result.rows[0] as any;
       
-      let matchesWon = 0;
-      let matchesLost = 0;
-      let matchesDraw = 0;
-      let totalRuns = 0;
+      const totalMatches = parseInt(stats.total_matches) || 0;
+      const matchesWon = parseInt(stats.matches_won) || 0;
+      const matchesLost = parseInt(stats.matches_lost) || 0;
+      const matchesDraw = parseInt(stats.matches_draw) || 0;
+      const totalRuns = parseInt(stats.total_runs) || 0;
+      const wicketsTaken = parseInt(stats.wickets_taken) || 0;
+      const oversBowled = parseFloat(stats.overs_bowled) || 0;
+      const oversFaced = parseFloat(stats.overs_faced) || 0;
+      const opponentRuns = parseInt(stats.opponent_runs) || 0;
 
-      allMatches.forEach(match => {
-        if (match.matchResult === 'Won') {
-          matchesWon++;
-        } else if (match.matchResult === 'Lost') {
-          matchesLost++;
-        } else if (match.matchResult === 'Draw') {
-          matchesDraw++;
-        }
+      // Calculate win rate
+      const winRate = totalMatches > 0 ? (matchesWon / totalMatches) * 100 : 0;
 
-        // Add Tuskers CC total runs
-        if (match.tuskersScore) {
-          totalRuns += match.tuskersScore;
-        }
-      });
-
-      const totalMatches = allMatches.length;
-      const averageScore = totalMatches > 0 ? totalRuns / totalMatches : 0;
-      const winPercentage = totalMatches > 0 ? (matchesWon / totalMatches) * 100 : 0;
+      // Calculate NRR: (total runs / overs faced) - (opponent runs / overs bowled)
+      const runRate = oversFaced > 0 ? totalRuns / oversFaced : 0;
+      const concededRate = oversBowled > 0 ? opponentRuns / oversBowled : 0;
+      const nrr = runRate - concededRate;
 
       return {
         matchesWon,
@@ -471,8 +497,10 @@ export class DatabaseStorage implements IStorage {
         matchesDraw,
         totalMatches,
         totalRuns,
-        averageScore: Math.round(averageScore * 100) / 100,
-        winPercentage: Math.round(winPercentage * 100) / 100
+        wicketsTaken,
+        oversBowled: Math.round(oversBowled * 100) / 100,
+        winRate: Math.round(winRate * 100) / 100,
+        nrr: Math.round(nrr * 1000) / 1000
       };
     } catch (error) {
       console.error('Error fetching team stats:', error);
@@ -482,8 +510,10 @@ export class DatabaseStorage implements IStorage {
         matchesDraw: 0,
         totalMatches: 0,
         totalRuns: 0,
-        averageScore: 0,
-        winPercentage: 0
+        wicketsTaken: 0,
+        oversBowled: 0,
+        winRate: 0,
+        nrr: 0
       };
     }
   }
