@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import EnhancedAdmin from "@/pages/EnhancedAdmin";
+import ComprehensiveAdmin from "@/pages/ComprehensiveAdmin";
 import AdminLogin from "@/pages/AdminLogin";
 import MatchPerformance from "@/pages/MatchPerformance";
 
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/forum/create-topic" component={CreateTopic} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={EnhancedAdmin} />
+      <Route path="/admin/comprehensive" component={ComprehensiveAdmin} />
       <Route path="/admin/match-performance" component={MatchPerformance} />
       <Route path="/match-performance" component={MatchPerformance} />
       <Route path="/fan-scoring" component={FanScoring} />
