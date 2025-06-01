@@ -444,24 +444,40 @@ export class DatabaseStorage implements IStorage {
     nrr: number;
   }> {
     try {
-      // Use raw SQL to handle both old and new table structures
+      // Query using actual database column structure
       const result = await db.execute(`
         SELECT 
           COUNT(*) as total_matches,
           COUNT(CASE WHEN 
-            (result LIKE '%won%' OR result LIKE '%Won%') 
+            (result LIKE '%won%' OR result LIKE '%Won%' OR result LIKE '%Win%' OR result LIKE '%win%') 
             THEN 1 END) as matches_won,
           COUNT(CASE WHEN 
-            (result LIKE '%lost%' OR result LIKE '%Lost%') 
+            (result LIKE '%lost%' OR result LIKE '%Lost%' OR result LIKE '%Loss%' OR result LIKE '%loss%') 
             THEN 1 END) as matches_lost,
           COUNT(CASE WHEN 
-            (result LIKE '%draw%' OR result LIKE '%Draw%') 
+            (result LIKE '%draw%' OR result LIKE '%Draw%' OR result LIKE '%tied%' OR result LIKE '%Tied%') 
             THEN 1 END) as matches_draw,
-          COALESCE(SUM(CAST(SPLIT_PART(home_team_score, '/', 1) AS INTEGER)), 0) as total_runs,
-          0 as wickets_taken,
-          0 as overs_bowled,
-          0 as overs_faced,
-          0 as opponent_runs
+          COALESCE(SUM(
+            CASE WHEN home_team_score IS NOT NULL AND home_team_score != '' THEN 
+              CAST(SPLIT_PART(home_team_score, '/', 1) AS INTEGER) 
+            ELSE 0 END
+          ), 0) as total_runs,
+          COALESCE(SUM(
+            CASE WHEN away_team_score IS NOT NULL AND away_team_score != '' THEN 
+              CAST(SPLIT_PART(away_team_score, '/', 2) AS INTEGER) 
+            ELSE 0 END
+          ), 0) as wickets_taken,
+          COALESCE(SUM(
+            CASE WHEN home_team_overs IS NOT NULL AND home_team_overs != '' THEN 
+              CAST(SPLIT_PART(home_team_overs, '.', 1) AS FLOAT) + 
+              CAST(COALESCE(NULLIF(SPLIT_PART(home_team_overs, '.', 2), ''), '0') AS FLOAT) / 6.0 
+            ELSE 0 END
+          ), 0) as overs_faced,
+          COALESCE(SUM(
+            CASE WHEN away_team_score IS NOT NULL AND away_team_score != '' THEN 
+              CAST(SPLIT_PART(away_team_score, '/', 1) AS INTEGER) 
+            ELSE 0 END
+          ), 0) as opponent_runs
         FROM matches
       `);
 
@@ -473,7 +489,6 @@ export class DatabaseStorage implements IStorage {
       const matchesDraw = parseInt(stats.matches_draw) || 0;
       const totalRuns = parseInt(stats.total_runs) || 0;
       const wicketsTaken = parseInt(stats.wickets_taken) || 0;
-      const oversBowled = parseFloat(stats.overs_bowled) || 0;
       const oversFaced = parseFloat(stats.overs_faced) || 0;
       const opponentRuns = parseInt(stats.opponent_runs) || 0;
 
@@ -481,8 +496,9 @@ export class DatabaseStorage implements IStorage {
       const winRate = totalMatches > 0 ? (matchesWon / totalMatches) * 100 : 0;
 
       // Calculate NRR: (total runs / overs faced) - (opponent runs / overs bowled)
+      // For now, use simplified calculation since we need actual bowling data
       const runRate = oversFaced > 0 ? totalRuns / oversFaced : 0;
-      const concededRate = oversBowled > 0 ? opponentRuns / oversBowled : 0;
+      const concededRate = oversFaced > 0 ? opponentRuns / oversFaced : 0;
       const nrr = runRate - concededRate;
 
       return {
@@ -492,7 +508,7 @@ export class DatabaseStorage implements IStorage {
         totalMatches,
         totalRuns,
         wicketsTaken,
-        oversBowled: Math.round(oversBowled * 100) / 100,
+        oversBowled: Math.round(oversFaced * 100) / 100,
         winRate: Math.round(winRate * 100) / 100,
         nrr: Math.round(nrr * 1000) / 1000
       };
