@@ -25,7 +25,35 @@ const articles: Article[] = [];
 const galleryItems: GalleryItem[] = [];
 const triviaQuestions: TriviaQuestion[] = [];
 
-const announcements: Announcement[] = [];
+const announcements: Announcement[] = [
+  {
+    id: 1,
+    title: "Welcome to Tuskers Cricket Club Official Website",
+    content: "We are excited to launch our new official website with enhanced features including live match updates, player statistics, and community forum. Stay connected with us for all the latest news and updates!",
+    type: "general",
+    priority: "high",
+    isActive: true,
+    createdAt: new Date('2024-01-15'),
+  },
+  {
+    id: 2,
+    title: "Upcoming Match: Tuskers vs Lightning Bolts",
+    content: "Get ready for an exciting match this Saturday at 2:00 PM at our home ground. Team selection and strategy discussions are underway. Come support your favorite team!",
+    type: "match",
+    priority: "medium",
+    isActive: true,
+    createdAt: new Date('2024-01-20'),
+  },
+  {
+    id: 3,
+    title: "Training Session Schedule Updated",
+    content: "New training schedule is now available. All players are required to attend the practice sessions starting Monday. Please check with the coaching staff for detailed timings.",
+    type: "training",
+    priority: "medium",
+    isActive: true,
+    createdAt: new Date('2024-01-22'),
+  }
+];
 const socialPosts: SocialPost[] = [];
 const polls: Poll[] = [];
 const quizzes: Quiz[] = [];
