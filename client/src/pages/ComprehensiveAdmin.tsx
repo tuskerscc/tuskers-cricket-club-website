@@ -88,7 +88,19 @@ function ComprehensiveAdminContent() {
 
   // Form instances
   const playerForm = useForm();
-  const articleForm = useForm();
+  const articleForm = useForm({
+    defaultValues: {
+      title: '',
+      slug: '',
+      excerpt: '',
+      content: '',
+      featuredImage: '',
+      author: 'Admin',
+      category: 'News',
+      isFeatured: false,
+      isPublished: true
+    }
+  });
   const galleryForm = useForm();
   const announcementForm = useForm();
   const matchForm = useForm();
@@ -514,7 +526,11 @@ function ComprehensiveAdminContent() {
                 <CardTitle className="text-[#1e3a8a]">Create New Article</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={articleForm.handleSubmit((data) => createArticleMutation.mutate(data))} className="space-y-4">
+                <form onSubmit={articleForm.handleSubmit((data) => {
+                  // Auto-generate slug if not provided
+                  const slug = data.slug || data.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+                  createArticleMutation.mutate({...data, slug});
+                })} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="title">Title *</Label>
