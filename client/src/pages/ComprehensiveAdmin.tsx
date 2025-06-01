@@ -693,7 +693,11 @@ function ComprehensiveAdminContent() {
                         <div className="flex justify-between items-start">
                           <CardTitle className="text-lg">{article.title}</CardTitle>
                           <div className="flex gap-1">
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => setEditingItem({ type: 'article', item: article })}
+                            >
                               <Edit2 className="w-4 h-4" />
                             </Button>
                             <Button
