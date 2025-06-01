@@ -311,8 +311,9 @@ function ComprehensiveAdminContent() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Players Tab */}
-          <TabsContent value="players" className="space-y-6">
+          {/* Players Tab - Admin Only */}
+          {userRole === 'admin' && (
+            <TabsContent value="players" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-[#1e3a8a]">Add New Player</CardTitle>
@@ -568,6 +569,7 @@ function ComprehensiveAdminContent() {
               </CardContent>
             </Card>
           </TabsContent>
+          )}
 
           {/* Articles Tab */}
           <TabsContent value="articles" className="space-y-6">
