@@ -213,7 +213,7 @@ function ComprehensiveAdminContent() {
   });
 
   const createMatchPerformanceMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/match-performances', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/match-performances', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/match-performances'] });
       queryClient.invalidateQueries({ queryKey: ['/api/stats/team'] });
