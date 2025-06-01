@@ -221,20 +221,19 @@ export default function CreateTopic() {
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Action Buttons */}
             <div className="flex gap-4 pt-4">
               <Button
                 type="button"
-                variant="outline"
-                onClick={() => setLocation('/forum')}
-                className="border-blue-300/50 text-blue-100 hover:bg-white/10"
+                onClick={handleCancel}
+                className="bg-gradient-to-r from-amber-400 to-yellow-500 text-blue-900 px-6 py-2 rounded-lg font-semibold border-2 border-amber-400 hover:from-amber-500 hover:to-yellow-600 transition-all"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={createTopicMutation.isPending || !title.trim() || !content.trim() || !categoryId}
-                className="bg-amber-500 hover:bg-amber-600 text-blue-900 font-semibold flex items-center gap-2"
+                className="bg-gradient-to-r from-amber-400 to-yellow-500 text-blue-900 px-6 py-2 rounded-lg font-semibold border-2 border-amber-400 hover:from-amber-500 hover:to-yellow-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {createTopicMutation.isPending ? (
                   <>
