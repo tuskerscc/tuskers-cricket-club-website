@@ -26,6 +26,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = req.body;
       
+      console.log('Login attempt:', { username, passwordLength: password?.length });
+      
       // Define user credentials and roles
       let userRole = null;
       let isValidLogin = false;
@@ -33,9 +35,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (username === 'admin' && password === 'MAt@51BlaX') {
         userRole = 'admin';
         isValidLogin = true;
+        console.log('Admin login successful');
       } else if (username === 'contentwriter' && password === 'ContentWriter2024!') {
         userRole = 'contentwriter';
         isValidLogin = true;
+        console.log('Content writer login successful');
+      } else {
+        console.log('Login failed - invalid credentials');
       }
       
       if (isValidLogin) {
