@@ -102,7 +102,7 @@ function ComprehensiveAdminContent() {
 
   // Mutations
   const createPlayerMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/players', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/players', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/players'] });
       playerForm.reset();
@@ -115,7 +115,7 @@ function ComprehensiveAdminContent() {
 
   const updatePlayerMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest(`/api/players/${id}`, 'PUT', data),
+      apiRequest('PUT', `/api/players/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/players'] });
       setEditingItem(null);
@@ -124,7 +124,7 @@ function ComprehensiveAdminContent() {
   });
 
   const deletePlayerMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/players/${id}`, 'DELETE'),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/players/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/players'] });
       toast({ title: "Success", description: "Player deleted successfully" });
@@ -132,7 +132,7 @@ function ComprehensiveAdminContent() {
   });
 
   const createArticleMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/articles', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/articles', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
       articleForm.reset();
@@ -142,7 +142,7 @@ function ComprehensiveAdminContent() {
 
   const updateArticleMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest(`/api/articles/${id}`, 'PUT', data),
+      apiRequest('PUT', `/api/articles/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
       setEditingItem(null);
@@ -151,7 +151,7 @@ function ComprehensiveAdminContent() {
   });
 
   const deleteArticleMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/articles/${id}`, 'DELETE'),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/articles/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
       toast({ title: "Success", description: "Article deleted successfully" });
@@ -159,7 +159,7 @@ function ComprehensiveAdminContent() {
   });
 
   const createGalleryMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/gallery', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/gallery', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gallery'] });
       galleryForm.reset();
@@ -169,7 +169,7 @@ function ComprehensiveAdminContent() {
 
   const updateGalleryMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest(`/api/gallery/${id}`, 'PUT', data),
+      apiRequest('PUT', `/api/gallery/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gallery'] });
       setEditingItem(null);
@@ -178,7 +178,7 @@ function ComprehensiveAdminContent() {
   });
 
   const deleteGalleryMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/gallery/${id}`, 'DELETE'),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/gallery/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gallery'] });
       toast({ title: "Success", description: "Gallery item deleted successfully" });
@@ -186,7 +186,7 @@ function ComprehensiveAdminContent() {
   });
 
   const createAnnouncementMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/announcements', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/announcements', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/announcements'] });
       announcementForm.reset();
@@ -196,7 +196,7 @@ function ComprehensiveAdminContent() {
 
   const updateAnnouncementMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest(`/api/announcements/${id}`, 'PUT', data),
+      apiRequest('PUT', `/api/announcements/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/announcements'] });
       setEditingItem(null);
@@ -205,7 +205,7 @@ function ComprehensiveAdminContent() {
   });
 
   const deleteAnnouncementMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/announcements/${id}`, 'DELETE'),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/announcements/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/announcements'] });
       toast({ title: "Success", description: "Announcement deleted successfully" });
