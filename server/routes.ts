@@ -881,6 +881,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/forum/topics", async (req, res) => {
+    try {
+      const { title, content, categoryId } = req.body;
+      
+      if (!title || !content || !categoryId) {
+        return res.status(400).json({ error: "Title, content, and category are required" });
+      }
+
+      const topic = await storage.createForumTopic({
+        title,
+        content,
+        categoryId: parseInt(categoryId),
+        userId: 1, // Mock user ID for now
+        slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+        isSticky: false,
+        isLocked: false,
+        viewCount: 0,
+        replyCount: 0,
+      });
+      
+      res.json(topic);
+    } catch (error) {
+      console.error("Failed to create forum topic:", error);
+      res.status(500).json({ error: "Failed to create forum topic" });
+    }
+  });
+
   // Community Events endpoints
   app.get("/api/community/events", async (req, res) => {
     try {

@@ -17,6 +17,7 @@ import Gallery from "@/pages/Gallery";
 
 import Contact from "@/pages/Contact";
 import Forum from "@/pages/Forum";
+import CreateTopic from "@/pages/CreateTopic";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/gallery" component={Gallery} />
       <Route path="/contact" component={Contact} />
       <Route path="/forum" component={Forum} />
+      <Route path="/forum/create-topic" component={CreateTopic} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin/match-performance" component={MatchPerformance} />
