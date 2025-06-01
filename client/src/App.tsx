@@ -32,6 +32,7 @@ function Router() {
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={EnhancedAdmin} />
       <Route path="/admin/match-performance" component={MatchPerformance} />
+      <Route path="/match-performance" component={MatchPerformance} />
       <Route path="/fan-scoring" component={FanScoring} />
       <Route path="/scoring/fan" component={FanScoring} />
 

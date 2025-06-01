@@ -440,7 +440,18 @@ function EnhancedAdminContent() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="role">Role</Label>
-                        <Input {...playerForm.register("role")} placeholder="e.g., Batsman, Bowler" required />
+                        <Select onValueChange={(value) => playerForm.setValue("role", value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select player role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Batsman">Batsman</SelectItem>
+                            <SelectItem value="Bowler">Bowler</SelectItem>
+                            <SelectItem value="All-rounder">All-rounder</SelectItem>
+                            <SelectItem value="Wicketkeeper">Wicketkeeper</SelectItem>
+                            <SelectItem value="Wicketkeeper-Batsman">Wicketkeeper-Batsman</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="jerseyNumber">Jersey Number</Label>
@@ -448,15 +459,42 @@ function EnhancedAdminContent() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="battingStyle">Batting Style</Label>
-                        <Input {...playerForm.register("battingStyle")} placeholder="e.g., Right-handed" />
+                        <Select onValueChange={(value) => playerForm.setValue("battingStyle", value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select batting style" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Right-handed">Right-handed</SelectItem>
+                            <SelectItem value="Left-handed">Left-handed</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
+                      {playerForm.watch("role") && !["Batsman", "Wicketkeeper"].includes(playerForm.watch("role")) && (
+                        <div className="space-y-2">
+                          <Label htmlFor="bowlingStyle">Bowling Style</Label>
+                          <Select onValueChange={(value) => playerForm.setValue("bowlingStyle", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select bowling style" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Right-arm fast">Right-arm fast</SelectItem>
+                              <SelectItem value="Left-arm fast">Left-arm fast</SelectItem>
+                              <SelectItem value="Right-arm medium">Right-arm medium</SelectItem>
+                              <SelectItem value="Left-arm medium">Left-arm medium</SelectItem>
+                              <SelectItem value="Right-arm off-spin">Right-arm off-spin</SelectItem>
+                              <SelectItem value="Left-arm orthodox">Left-arm orthodox</SelectItem>
+                              <SelectItem value="Right-arm leg-spin">Right-arm leg-spin</SelectItem>
+                              <SelectItem value="Left-arm chinaman">Left-arm chinaman</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                       <div className="space-y-2">
-                        <Label htmlFor="bowlingStyle">Bowling Style</Label>
-                        <Input {...playerForm.register("bowlingStyle")} placeholder="e.g., Right-arm fast" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="photo">Photo URL</Label>
-                        <Input {...playerForm.register("photo")} placeholder="https://example.com/photo.jpg" />
+                        <Label htmlFor="photo">Photo</Label>
+                        <div className="flex flex-col gap-2">
+                          <Input {...playerForm.register("photo")} type="file" accept="image/*" />
+                          <p className="text-xs text-gray-500">Upload player photo from device</p>
+                        </div>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -490,14 +528,9 @@ function EnhancedAdminContent() {
                               <CardTitle className="text-base sm:text-lg">{player.name}</CardTitle>
                               <p className="text-sm text-gray-600">#{player.jerseyNumber} • {player.role}</p>
                             </div>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => deletePlayerMutation.mutate(player.id)}
-                              disabled={deletePlayerMutation.isPending}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <Badge variant="secondary" className="text-xs">
+                              Player #{player.id}
+                            </Badge>
                           </div>
                         </CardHeader>
                         <CardContent className="pt-2">
@@ -639,14 +672,9 @@ function EnhancedAdminContent() {
                         <CardHeader>
                           <div className="flex justify-between items-start gap-2">
                             <CardTitle className="text-base sm:text-lg break-words">{article.title}</CardTitle>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => deleteArticleMutation.mutate(article.id)}
-                              disabled={deleteArticleMutation.isPending}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <Badge variant="outline" className="text-xs">
+                              Article #{article.id}
+                            </Badge>
                           </div>
                         </CardHeader>
                         <CardContent>
@@ -713,14 +741,9 @@ function EnhancedAdminContent() {
                         <CardHeader className="pb-2">
                           <div className="flex justify-between items-start">
                             <CardTitle className="text-base break-words">{item.title}</CardTitle>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => deleteGalleryMutation.mutate(item.id)}
-                              disabled={deleteGalleryMutation.isPending}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <Badge variant="outline" className="text-xs">
+                              Gallery #{item.id}
+                            </Badge>
                           </div>
                         </CardHeader>
                         <CardContent className="pt-2">
