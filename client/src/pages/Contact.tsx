@@ -195,6 +195,15 @@ export default function Contact() {
           </div>
         </div>
 
+        {/* Back to Home */}
+        <div className="text-center mt-12">
+          <a
+            href="/"
+            className="inline-block bg-white text-[#1e3a8a] border-2 border-[#1e3a8a] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#eff6ff] transition-colors"
+          >
+            Back to Home
+          </a>
+        </div>
 
       </div>
     </div>
