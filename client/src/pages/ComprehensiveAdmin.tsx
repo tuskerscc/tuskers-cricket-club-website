@@ -408,7 +408,31 @@ function ComprehensiveAdminContent() {
                                 <DialogHeader>
                                   <DialogTitle>Edit Player</DialogTitle>
                                 </DialogHeader>
-                                {/* Edit form would go here */}
+                                {editingItem && (
+                                  <div className="space-y-4">
+                                    <Input 
+                                      defaultValue={editingItem.name} 
+                                      placeholder="Player name"
+                                      onChange={(e) => setEditingItem({...editingItem, name: e.target.value})}
+                                    />
+                                    <Input 
+                                      type="number"
+                                      defaultValue={editingItem.jerseyNumber || ''}
+                                      placeholder="Jersey number"
+                                      onChange={(e) => setEditingItem({...editingItem, jerseyNumber: parseInt(e.target.value)})}
+                                    />
+                                    <Button 
+                                      onClick={() => {
+                                        updatePlayerMutation.mutate({
+                                          id: editingItem.id,
+                                          data: editingItem
+                                        });
+                                      }}
+                                    >
+                                      Update Player
+                                    </Button>
+                                  </div>
+                                )}
                               </DialogContent>
                             </Dialog>
                             <Button
@@ -486,6 +510,14 @@ function ComprehensiveAdminContent() {
                   <div>
                     <Label htmlFor="content">Content *</Label>
                     <Textarea {...articleForm.register("content", { required: true })} placeholder="Article content..." rows={6} />
+                  </div>
+                  <div>
+                    <Label htmlFor="author">Author *</Label>
+                    <Input {...articleForm.register("author", { required: true })} placeholder="Author name" />
+                  </div>
+                  <div>
+                    <Label htmlFor="category">Category *</Label>
+                    <Input {...articleForm.register("category", { required: true })} placeholder="Category" />
                   </div>
                   <Button type="submit" disabled={createArticleMutation.isPending}>
                     {createArticleMutation.isPending ? "Creating..." : "Create Article"}
