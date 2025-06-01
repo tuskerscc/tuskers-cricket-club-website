@@ -186,14 +186,16 @@ export default function FanZone() {
           <h3 className="text-xl font-bold text-[#1e3a8a] mb-4">Match Gallery</h3>
           {recentGallery.length > 0 ? (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                 {recentGallery.map((item) => (
                   <div key={item.id} className="relative group">
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.title} 
-                      className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity shadow-lg hover:shadow-xl"
-                    />
+                    <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                      <img 
+                        src={item.imageUrl} 
+                        alt={item.title} 
+                        className="max-w-full max-h-full object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                      />
+                    </div>
                     <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-lg p-1">
                       <GalleryHeartButton 
                         galleryItemId={item.id} 
