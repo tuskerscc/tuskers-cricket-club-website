@@ -1296,11 +1296,12 @@ function ComprehensiveAdminContent() {
                     slug: formData.get('slug') as string,
                     excerpt: formData.get('excerpt') as string,
                     content: formData.get('content') as string,
-                    author: formData.get('author') as string,
-                    category: formData.get('category') as string,
+                    author: formData.get('author') as string || editingItem.item.author,
+                    category: formData.get('category') as string || editingItem.item.category,
                     isFeatured: formData.get('isFeatured') === 'on',
                     isPublished: formData.get('isPublished') === 'on'
                   };
+                  console.log('Submitting article update:', data);
                   updateArticleMutation.mutate({ id: editingItem.item.id, data });
                 }} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
