@@ -410,17 +410,63 @@ function ComprehensiveAdminContent() {
                                 </DialogHeader>
                                 {editingItem && (
                                   <div className="space-y-4">
-                                    <Input 
-                                      defaultValue={editingItem.name} 
-                                      placeholder="Player name"
-                                      onChange={(e) => setEditingItem({...editingItem, name: e.target.value})}
-                                    />
-                                    <Input 
-                                      type="number"
-                                      defaultValue={editingItem.jerseyNumber || ''}
-                                      placeholder="Jersey number"
-                                      onChange={(e) => setEditingItem({...editingItem, jerseyNumber: parseInt(e.target.value)})}
-                                    />
+                                    <div>
+                                      <Label>Player Name</Label>
+                                      <Input 
+                                        value={editingItem.name} 
+                                        placeholder="Player name"
+                                        onChange={(e) => setEditingItem({...editingItem, name: e.target.value})}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label>Jersey Number</Label>
+                                      <Input 
+                                        type="number"
+                                        value={editingItem.jerseyNumber || ''}
+                                        placeholder="Jersey number"
+                                        onChange={(e) => setEditingItem({...editingItem, jerseyNumber: parseInt(e.target.value)})}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label>Role</Label>
+                                      <Select onValueChange={(value) => setEditingItem({...editingItem, role: value})}>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder={editingItem.role || "Select role"} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="Batsman">Batsman</SelectItem>
+                                          <SelectItem value="Bowler">Bowler</SelectItem>
+                                          <SelectItem value="All Rounder">All Rounder</SelectItem>
+                                          <SelectItem value="Wicket Keeper">Wicket Keeper</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div>
+                                      <Label>Batting Style</Label>
+                                      <Select onValueChange={(value) => setEditingItem({...editingItem, battingStyle: value})}>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder={editingItem.battingStyle || "Select style"} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="Right Handed">Right Handed</SelectItem>
+                                          <SelectItem value="Left Handed">Left Handed</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox 
+                                        checked={editingItem.isCaptain || false}
+                                        onCheckedChange={(checked) => setEditingItem({...editingItem, isCaptain: checked as boolean})}
+                                      />
+                                      <Label>Captain</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox 
+                                        checked={editingItem.isViceCaptain || false}
+                                        onCheckedChange={(checked) => setEditingItem({...editingItem, isViceCaptain: checked as boolean})}
+                                      />
+                                      <Label>Vice Captain</Label>
+                                    </div>
                                     <Button 
                                       onClick={() => {
                                         updatePlayerMutation.mutate({
@@ -428,8 +474,9 @@ function ComprehensiveAdminContent() {
                                           data: editingItem
                                         });
                                       }}
+                                      disabled={updatePlayerMutation.isPending}
                                     >
-                                      Update Player
+                                      {updatePlayerMutation.isPending ? "Updating..." : "Update Player"}
                                     </Button>
                                   </div>
                                 )}
@@ -517,7 +564,19 @@ function ComprehensiveAdminContent() {
                   </div>
                   <div>
                     <Label htmlFor="category">Category *</Label>
-                    <Input {...articleForm.register("category", { required: true })} placeholder="Category" />
+                    <Select onValueChange={(value) => articleForm.setValue("category", value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Match Report">Match Report</SelectItem>
+                        <SelectItem value="News">News</SelectItem>
+                        <SelectItem value="Player Profile">Player Profile</SelectItem>
+                        <SelectItem value="Training">Training</SelectItem>
+                        <SelectItem value="Events">Events</SelectItem>
+                        <SelectItem value="Announcements">Announcements</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <Button type="submit" disabled={createArticleMutation.isPending}>
                     {createArticleMutation.isPending ? "Creating..." : "Create Article"}
@@ -866,6 +925,24 @@ function ComprehensiveAdminContent() {
                                     min="0"
                                     placeholder="0"
                                   />
+                                </div>
+                                <div>
+                                  <Label>Dismissal Type</Label>
+                                  <Select onValueChange={(value) => matchForm.setValue(`player_${playerId}.dismissalType`, value)}>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="How Out?" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="Not Out">Not Out</SelectItem>
+                                      <SelectItem value="Bowled">Bowled</SelectItem>
+                                      <SelectItem value="Caught">Caught</SelectItem>
+                                      <SelectItem value="LBW">LBW</SelectItem>
+                                      <SelectItem value="Run Out">Run Out</SelectItem>
+                                      <SelectItem value="Stumped">Stumped</SelectItem>
+                                      <SelectItem value="Hit Wicket">Hit Wicket</SelectItem>
+                                      <SelectItem value="Retired Hurt">Retired Hurt</SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </div>
                                 <div>
                                   <Label>Catches</Label>
