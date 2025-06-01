@@ -431,65 +431,59 @@ export class DatabaseStorage implements IStorage {
 
   async getTeamStats(): Promise<{
     matchesWon: number;
+    matchesLost: number;
+    matchesDraw: number;
     totalMatches: number;
     totalRuns: number;
-    wicketsTaken: number;
-    totalOvers: number;
-    runsAgainst: number;
-    oversAgainst: number;
-    nrr: number;
+    averageScore: number;
+    winPercentage: number;
   }> {
     try {
-      const allStats = await db.select().from(teamStats);
+      const allMatches = await db.select().from(matches);
       
-      if (allStats.length === 0) {
-        return {
-          matchesWon: 0,
-          totalMatches: 0,
-          totalRuns: 0,
-          wicketsTaken: 0,
-          totalOvers: 0,
-          runsAgainst: 0,
-          oversAgainst: 0,
-          nrr: 0
-        };
-      }
-      
-      // Calculate aggregated statistics
-      const totalMatchesPlayed = allStats.length;
-      const totalMatchesWon = allStats.reduce((sum, stat) => sum + (stat.matchesWon || 0), 0);
-      const sumTotalRuns = allStats.reduce((sum, stat) => sum + (stat.totalRuns || 0), 0);
-      const sumWicketsTaken = allStats.reduce((sum, stat) => sum + (stat.wicketsTaken || 0), 0);
-      const sumTotalOvers = allStats.reduce((sum, stat) => sum + (stat.totalOvers || 0), 0);
-      const sumRunsAgainst = allStats.reduce((sum, stat) => sum + (stat.runsAgainst || 0), 0);
-      const sumOversAgainst = allStats.reduce((sum, stat) => sum + (stat.oversAgainst || 0), 0);
-      
-      // Calculate NRR: (sum total_runs ÷ sum total_overs) - (sum runs_against ÷ sum overs_against)
-      const runRate = sumTotalOvers > 0 ? sumTotalRuns / sumTotalOvers : 0;
-      const concededRate = sumOversAgainst > 0 ? sumRunsAgainst / sumOversAgainst : 0;
-      const nrr = runRate - concededRate;
-      
+      let matchesWon = 0;
+      let matchesLost = 0;
+      let matchesDraw = 0;
+      let totalRuns = 0;
+
+      allMatches.forEach(match => {
+        if (match.matchResult === 'Won') {
+          matchesWon++;
+        } else if (match.matchResult === 'Lost') {
+          matchesLost++;
+        } else if (match.matchResult === 'Draw') {
+          matchesDraw++;
+        }
+
+        // Add Tuskers CC total runs
+        if (match.tuskersScore) {
+          totalRuns += match.tuskersScore;
+        }
+      });
+
+      const totalMatches = allMatches.length;
+      const averageScore = totalMatches > 0 ? totalRuns / totalMatches : 0;
+      const winPercentage = totalMatches > 0 ? (matchesWon / totalMatches) * 100 : 0;
+
       return {
-        matchesWon: totalMatchesWon,
-        totalMatches: totalMatchesPlayed,
-        totalRuns: sumTotalRuns,
-        wicketsTaken: sumWicketsTaken,
-        totalOvers: sumTotalOvers,
-        runsAgainst: sumRunsAgainst,
-        oversAgainst: sumOversAgainst,
-        nrr: parseFloat(nrr.toFixed(3))
+        matchesWon,
+        matchesLost,
+        matchesDraw,
+        totalMatches,
+        totalRuns,
+        averageScore: Math.round(averageScore * 100) / 100,
+        winPercentage: Math.round(winPercentage * 100) / 100
       };
     } catch (error) {
       console.error('Error fetching team stats:', error);
       return {
         matchesWon: 0,
+        matchesLost: 0,
+        matchesDraw: 0,
         totalMatches: 0,
         totalRuns: 0,
-        wicketsTaken: 0,
-        totalOvers: 0,
-        runsAgainst: 0,
-        oversAgainst: 0,
-        nrr: 0
+        averageScore: 0,
+        winPercentage: 0
       };
     }
   }

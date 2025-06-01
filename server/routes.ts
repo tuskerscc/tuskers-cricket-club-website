@@ -867,17 +867,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create a new match record
       const newMatch = await storage.createMatch({
-        homeTeamId: 1, // Tuskers team ID
-        awayTeamId: null,
-        venueId: null,
-        competitionId: null,
-        matchDate: new Date(matchData.date),
-        status: 'completed',
-        homeTeamScore: null,
-        awayTeamScore: null,
-        result: matchData.result,
-        summary: `vs ${matchData.opponent} at ${matchData.venue}`,
-        liveData: null
+        opponentTeam: matchData.opponentTeam,
+        venue: matchData.venue,
+        matchDate: new Date(matchData.matchDate),
+        matchResult: matchData.matchResult,
+        tuskersScore: matchData.tuskersScore || 0,
+        tuskersOvers: matchData.tuskersOvers || null,
+        tuskersWickets: matchData.tuskersWickets || 0,
+        opponentScore: matchData.opponentScore || 0,
+        opponentOvers: matchData.opponentOvers || null,
+        opponentWickets: matchData.opponentWickets || 0,
+        status: 'completed'
       });
 
       // Update player stats based on performance
