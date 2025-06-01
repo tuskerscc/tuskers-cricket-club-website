@@ -528,18 +528,7 @@ export default function Forum() {
               </div>
             </div>
 
-            {/* Community Events */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-[#1e3a8a]" />
-                Upcoming Events
-              </h3>
-              <Link href="/community/events">
-                <button className="w-full bg-[#1e3a8a] text-white py-2 rounded-lg hover:bg-blue-800 transition-colors">
-                  View All Events
-                </button>
-              </Link>
-            </div>
+
           </div>
         </div>
       </div>
