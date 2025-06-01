@@ -337,8 +337,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/articles", async (req, res) => {
     try {
       const articles = await storage.getArticles();
+      console.log('Articles fetched from database:', articles.length, 'articles');
+      console.log('Article IDs:', articles.map(a => a.id));
       res.json(articles);
     } catch (error) {
+      console.error('Failed to fetch articles:', error);
       res.status(500).json({ error: "Failed to fetch articles" });
     }
   });
