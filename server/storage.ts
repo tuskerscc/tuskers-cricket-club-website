@@ -81,6 +81,8 @@ export interface IStorage {
   // Announcements
   getAnnouncements(): Promise<Announcement[]>;
   createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement>;
+  updateAnnouncement(id: number, announcement: Partial<InsertAnnouncement>): Promise<void>;
+  deleteAnnouncement(id: number): Promise<void>;
 
   // Player Stats
   updatePlayerStats(playerId: number, stats: Partial<PlayerStats>): Promise<void>;

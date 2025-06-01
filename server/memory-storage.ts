@@ -389,6 +389,20 @@ export class MemoryStorage implements IStorage {
     return newAnnouncement;
   }
 
+  async updateAnnouncement(id: number, announcement: Partial<InsertAnnouncement>): Promise<void> {
+    const index = announcements.findIndex(a => a.id === id);
+    if (index !== -1) {
+      announcements[index] = { ...announcements[index], ...announcement };
+    }
+  }
+
+  async deleteAnnouncement(id: number): Promise<void> {
+    const index = announcements.findIndex(a => a.id === id);
+    if (index !== -1) {
+      announcements.splice(index, 1);
+    }
+  }
+
   // Player Stats
   async updatePlayerStats(playerId: number, stats: Partial<PlayerStats>): Promise<void> {
     const player = players.find(p => p.id === playerId);

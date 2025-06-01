@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
-import Admin from "@/pages/Admin";
+import EnhancedAdmin from "@/pages/EnhancedAdmin";
 import AdminLogin from "@/pages/AdminLogin";
 import MatchPerformance from "@/pages/MatchPerformance";
 
@@ -30,7 +30,7 @@ function Router() {
       <Route path="/forum" component={Forum} />
       <Route path="/forum/create-topic" component={CreateTopic} />
       <Route path="/admin/login" component={AdminLogin} />
-      <Route path="/admin" component={Admin} />
+      <Route path="/admin" component={EnhancedAdmin} />
       <Route path="/admin/match-performance" component={MatchPerformance} />
       <Route path="/fan-scoring" component={FanScoring} />
       <Route path="/scoring/fan" component={FanScoring} />
