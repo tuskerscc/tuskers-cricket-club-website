@@ -178,6 +178,16 @@ export const gallery = pgTable("gallery", {
   imageUrl: text("image_url").notNull(),
   category: text("category").notNull(), // match, training, celebration, etc.
   matchId: integer("match_id").references(() => matches.id),
+  likesCount: integer("likes_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Gallery likes table for tracking individual user likes
+export const galleryLikes = pgTable("gallery_likes", {
+  id: serial("id").primaryKey(),
+  galleryItemId: integer("gallery_item_id").references(() => gallery.id).notNull(),
+  userIp: text("user_ip").notNull(), // Using IP address to track likes from anonymous users
+  userAgent: text("user_agent"), // Store browser info for additional uniqueness
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -439,11 +449,12 @@ export const playerStatsRelations = relations(playerStats, ({ one }) => ({
   }),
 }));
 
-export const galleryRelations = relations(gallery, ({ one }) => ({
+export const galleryRelations = relations(gallery, ({ one, many }) => ({
   match: one(matches, {
     fields: [gallery.matchId],
     references: [matches.id],
   }),
+  likes: many(galleryLikes),
 }));
 
 // Forum Relations
@@ -512,6 +523,8 @@ export const eventParticipantsRelations = relations(eventParticipants, ({ one })
     references: [users.id],
   }),
 }));
+
+
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
