@@ -187,12 +187,22 @@ export default function FanZone() {
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                 {recentGallery.map((item) => (
-                  <img 
-                    key={item.id}
-                    src={item.imageUrl} 
-                    alt={item.title} 
-                    className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity shadow-lg hover:shadow-xl"
-                  />
+                  <div key={item.id} className="relative group">
+                    <img 
+                      src={item.imageUrl} 
+                      alt={item.title} 
+                      className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity shadow-lg hover:shadow-xl"
+                    />
+                    <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-lg p-1">
+                      <GalleryHeartButton 
+                        galleryItemId={item.id} 
+                        initialLikesCount={item.likesCount || 0}
+                      />
+                    </div>
+                    <div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+                      {item.title}
+                    </div>
+                  </div>
                 ))}
               </div>
               <button 

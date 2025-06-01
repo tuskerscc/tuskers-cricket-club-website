@@ -421,6 +421,86 @@ export class DatabaseStorage implements IStorage {
     await db.delete(gallery).where(eq(gallery.id, id));
   }
 
+  // Gallery likes functionality
+  async likeGalleryItem(galleryItemId: number, userIp: string, userAgent?: string): Promise<boolean> {
+    try {
+      // Check if user already liked this item
+      const existingLike = await db
+        .select()
+        .from(galleryLikes)
+        .where(and(
+          eq(galleryLikes.galleryItemId, galleryItemId),
+          eq(galleryLikes.userIp, userIp)
+        ));
+
+      if (existingLike.length > 0) {
+        return false; // Already liked
+      }
+
+      // Add like
+      await db.insert(galleryLikes).values({
+        galleryItemId,
+        userIp,
+        userAgent: userAgent || null
+      });
+
+      // Update likes count
+      await db
+        .update(gallery)
+        .set({ 
+          likesCount: sql`${gallery.likesCount} + 1`
+        })
+        .where(eq(gallery.id, galleryItemId));
+
+      return true;
+    } catch (error) {
+      console.error('Error liking gallery item:', error);
+      return false;
+    }
+  }
+
+  async unlikeGalleryItem(galleryItemId: number, userIp: string): Promise<boolean> {
+    try {
+      // Remove like
+      const result = await db
+        .delete(galleryLikes)
+        .where(and(
+          eq(galleryLikes.galleryItemId, galleryItemId),
+          eq(galleryLikes.userIp, userIp)
+        ));
+
+      // Update likes count
+      await db
+        .update(gallery)
+        .set({ 
+          likesCount: sql`${gallery.likesCount} - 1`
+        })
+        .where(eq(gallery.id, galleryItemId));
+
+      return true;
+    } catch (error) {
+      console.error('Error unliking gallery item:', error);
+      return false;
+    }
+  }
+
+  async hasUserLikedGalleryItem(galleryItemId: number, userIp: string): Promise<boolean> {
+    try {
+      const existingLike = await db
+        .select()
+        .from(galleryLikes)
+        .where(and(
+          eq(galleryLikes.galleryItemId, galleryItemId),
+          eq(galleryLikes.userIp, userIp)
+        ));
+
+      return existingLike.length > 0;
+    } catch (error) {
+      console.error('Error checking gallery like:', error);
+      return false;
+    }
+  }
+
   async getAnnouncements(): Promise<Announcement[]> {
     return await db
       .select()

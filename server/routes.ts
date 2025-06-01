@@ -545,6 +545,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Gallery like/unlike endpoints
+  app.post('/api/gallery/:id/like', async (req, res) => {
+    try {
+      const galleryItemId = parseInt(req.params.id);
+      const userIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
+      const userAgent = req.get('User-Agent');
+
+      const success = await storage.likeGalleryItem(galleryItemId, userIp, userAgent);
+      
+      if (success) {
+        res.json({ success: true, message: 'Gallery item liked' });
+      } else {
+        res.status(400).json({ success: false, message: 'Already liked or error occurred' });
+      }
+    } catch (error) {
+      console.error("Error liking gallery item:", error);
+      res.status(500).json({ success: false, message: "Failed to like gallery item" });
+    }
+  });
+
+  app.delete('/api/gallery/:id/like', async (req, res) => {
+    try {
+      const galleryItemId = parseInt(req.params.id);
+      const userIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
+
+      const success = await storage.unlikeGalleryItem(galleryItemId, userIp);
+      
+      res.json({ success, message: success ? 'Gallery item unliked' : 'Not liked or error occurred' });
+    } catch (error) {
+      console.error("Error unliking gallery item:", error);
+      res.status(500).json({ success: false, message: "Failed to unlike gallery item" });
+    }
+  });
+
+  app.get('/api/gallery/:id/liked', async (req, res) => {
+    try {
+      const galleryItemId = parseInt(req.params.id);
+      const userIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
+
+      const isLiked = await storage.hasUserLikedGalleryItem(galleryItemId, userIp);
+      
+      res.json({ isLiked });
+    } catch (error) {
+      console.error("Error checking gallery like status:", error);
+      res.status(500).json({ isLiked: false });
+    }
+  });
+
   // Statistics endpoints
   app.get("/api/stats/team", async (req, res) => {
     try {
