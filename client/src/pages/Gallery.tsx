@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { GalleryItem } from '@shared/schema';
+import GalleryHeartButton from '@/components/GalleryHeartButton';
 
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -22,7 +23,7 @@ export default function Gallery() {
       <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a] to-[#1e40af] py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-[#fcd34d] mb-4">Match Gallery</h1>
+            <h1 className="text-4xl font-bold text-[#fcd34d] mb-4">Gallery</h1>
             <p className="text-xl text-white/80">Capturing memorable moments from Tuskers CC</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -45,7 +46,7 @@ export default function Gallery() {
     <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a] to-[#1e40af] py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-[#fcd34d] mb-4">Match Gallery</h1>
+          <h1 className="text-4xl font-bold text-[#fcd34d] mb-4">Gallery</h1>
           <p className="text-xl text-white/80">Capturing memorable moments from TUSKERS CRICKET CLUB</p>
         </div>
 
@@ -75,15 +76,25 @@ export default function Gallery() {
               onClick={() => setSelectedImage(item)}
             >
               <div className="relative">
-                <img
-                  src={item.imageUrl}
-                  alt={item.title}
-                  className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
-                />
+                <div className="w-full h-64 bg-gray-100 flex items-center justify-center">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="max-w-full max-h-full object-contain hover:opacity-90 transition-opacity duration-300"
+                  />
+                </div>
                 <div className="absolute top-4 left-4">
                   <span className="bg-[#1e3a8a] text-white px-3 py-1 rounded-full text-sm font-semibold capitalize">
                     {item.category}
                   </span>
+                </div>
+                <div className="absolute top-4 right-4">
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <GalleryHeartButton 
+                      galleryItemId={item.id} 
+                      initialLikesCount={item.likesCount || 0}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -133,18 +144,26 @@ export default function Gallery() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                <img
-                  src={selectedImage.imageUrl}
-                  alt={selectedImage.title}
-                  className="w-full h-96 object-cover"
-                />
+                <div className="w-full h-96 bg-gray-100 flex items-center justify-center">
+                  <img
+                    src={selectedImage.imageUrl}
+                    alt={selectedImage.title}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
               </div>
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-bold text-[#1e3a8a]">{selectedImage.title}</h2>
-                  <span className="bg-[#1e3a8a] text-white px-3 py-1 rounded-full text-sm font-semibold capitalize">
-                    {selectedImage.category}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <GalleryHeartButton 
+                      galleryItemId={selectedImage.id} 
+                      initialLikesCount={selectedImage.likesCount || 0}
+                    />
+                    <span className="bg-[#1e3a8a] text-white px-3 py-1 rounded-full text-sm font-semibold capitalize">
+                      {selectedImage.category}
+                    </span>
+                  </div>
                 </div>
                 {selectedImage.description && (
                   <p className="text-gray-600 mb-4">{selectedImage.description}</p>
