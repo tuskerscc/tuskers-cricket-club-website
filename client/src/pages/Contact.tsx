@@ -1,181 +1,241 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { MapPin, Phone, Mail, Clock, Users, Trophy } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Mail, Phone, MapPin, Clock } from "lucide-react";
 
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: ""
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission
+    console.log("Form submitted:", formData);
+    // You can add form submission logic here
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a] to-[#1e40af]">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a] via-[#1e40af] to-[#2563eb] py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-[#fcd34d] mb-4">
-            Contact Tuskers CC
+          <h1 className="text-4xl md:text-5xl font-bold text-[#fcd34d] mb-4">
+            CONTACT TUSKERS CC
           </h1>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto">
-            Get in touch with Kandy's premier cricket club. Whether you're interested in joining, 
-            attending matches, or have questions about our facilities.
+          <p className="text-lg text-[#bfdbfe] max-w-2xl mx-auto">
+            Get in touch with us for any inquiries, membership information, or to join our cricket community.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Information */}
-          <div className="space-y-6">
-            <Card className="bg-blue-600 text-white border-0">
+          <div className="lg:col-span-1 space-y-6">
+            <Card className="bg-white/10 backdrop-blur-sm border-[#fcd34d]/20">
               <CardHeader>
-                <CardTitle className="text-2xl text-yellow-400">Get In Touch</CardTitle>
+                <CardTitle className="text-[#fcd34d] text-xl">Get In Touch</CardTitle>
+                <CardDescription className="text-[#bfdbfe]">
+                  Reach out to us through any of these channels
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-yellow-400 p-3 rounded-full">
-                    <Mail className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-yellow-400">Email</p>
-                    <p className="text-white">tuskerscckandy@gmail.com</p>
-                  </div>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-3 text-[#bfdbfe]">
+                  <Mail className="h-5 w-5 text-[#fcd34d]" />
+                  <span>info@tuskerscc.com</span>
                 </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="bg-yellow-400 p-3 rounded-full">
-                    <Phone className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-yellow-400">Phone</p>
-                    <p className="text-white">+94 XXX XXX XXX</p>
-                  </div>
+                <div className="flex items-center space-x-3 text-[#bfdbfe]">
+                  <Phone className="h-5 w-5 text-[#fcd34d]" />
+                  <span>+1 (555) 123-4567</span>
                 </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="bg-yellow-400 p-3 rounded-full">
-                    <MapPin className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-yellow-400">Location</p>
-                    <p className="text-white">Kandy, Sri Lanka</p>
-                  </div>
+                <div className="flex items-center space-x-3 text-[#bfdbfe]">
+                  <MapPin className="h-5 w-5 text-[#fcd34d]" />
+                  <span>Cricket Ground, Sports Complex<br />City, State 12345</span>
                 </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="bg-yellow-400 p-3 rounded-full">
-                    <Clock className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-yellow-400">Office Hours</p>
-                    <p className="text-white">Mon - Fri: 9:00 AM - 6:00 PM</p>
-                    <p className="text-white">Sat - Sun: 8:00 AM - 8:00 PM</p>
-                  </div>
+                <div className="flex items-center space-x-3 text-[#bfdbfe]">
+                  <Clock className="h-5 w-5 text-[#fcd34d]" />
+                  <span>Mon-Fri: 9AM-6PM<br />Weekends: 8AM-8PM</span>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quick Info Cards */}
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Card className="bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-800">
-                <CardContent className="p-6 text-center">
-                  <Users className="h-10 w-10 text-blue-600 dark:text-blue-400 mx-auto mb-3" />
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Join the Club</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Become part of Kandy's cricket community
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white dark:bg-gray-800 border-yellow-200 dark:border-yellow-800">
-                <CardContent className="p-6 text-center">
-                  <Trophy className="h-10 w-10 text-yellow-600 dark:text-yellow-400 mx-auto mb-3" />
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Championships</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Learn about our tournament success
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Quick Actions */}
+            <Card className="bg-white/10 backdrop-blur-sm border-[#fcd34d]/20">
+              <CardHeader>
+                <CardTitle className="text-[#fcd34d] text-xl">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button 
+                  className="w-full bg-[#f59e0b] hover:bg-[#fcd34d] text-[#1e3a8a] font-semibold border border-[#fcd34d]"
+                  onClick={() => window.open('https://web.facebook.com/profile.php?id=61576572946310', '_blank')}
+                >
+                  Follow us on Facebook
+                </Button>
+                <Button 
+                  className="w-full bg-[#f59e0b] hover:bg-[#fcd34d] text-[#1e3a8a] font-semibold border border-[#fcd34d]"
+                  onClick={() => window.location.href = 'mailto:info@tuskerscc.com'}
+                >
+                  Send us an Email
+                </Button>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Contact Form */}
-          <Card className="bg-white dark:bg-gray-800">
-            <CardHeader>
-              <CardTitle className="text-2xl text-blue-600 dark:text-blue-400">Send us a Message</CardTitle>
-              <p className="text-gray-600 dark:text-gray-300">
-                We'll get back to you within 24 hours
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" placeholder="Your first name" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" placeholder="Your last name" />
-                </div>
-              </div>
+          <div className="lg:col-span-2">
+            <Card className="bg-white/10 backdrop-blur-sm border-[#fcd34d]/20">
+              <CardHeader>
+                <CardTitle className="text-[#fcd34d] text-2xl">Send us a Message</CardTitle>
+                <CardDescription className="text-[#bfdbfe]">
+                  Fill out the form below and we'll get back to you as soon as possible.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-[#fcd34d] mb-2">
+                        Full Name *
+                      </label>
+                      <Input
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        required
+                        className="bg-white/20 border-[#fcd34d]/30 text-white placeholder-[#bfdbfe] focus:border-[#fcd34d]"
+                        placeholder="Your full name"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-[#fcd34d] mb-2">
+                        Email Address *
+                      </label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        className="bg-white/20 border-[#fcd34d]/30 text-white placeholder-[#bfdbfe] focus:border-[#fcd34d]"
+                        placeholder="your.email@example.com"
+                      />
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="your.email@example.com" />
-              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-[#fcd34d] mb-2">
+                        Phone Number
+                      </label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="bg-white/20 border-[#fcd34d]/30 text-white placeholder-[#bfdbfe] focus:border-[#fcd34d]"
+                        placeholder="Your phone number"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="subject" className="block text-sm font-medium text-[#fcd34d] mb-2">
+                        Subject *
+                      </label>
+                      <Input
+                        id="subject"
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleInputChange}
+                        required
+                        className="bg-white/20 border-[#fcd34d]/30 text-white placeholder-[#bfdbfe] focus:border-[#fcd34d]"
+                        placeholder="What is this regarding?"
+                      />
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone (Optional)</Label>
-                <Input id="phone" type="tel" placeholder="+94 XXX XXX XXX" />
-              </div>
+                  <div>
+                    <label htmlFor="message" className="block text-sm font-medium text-[#fcd34d] mb-2">
+                      Message *
+                    </label>
+                    <Textarea
+                      id="message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      required
+                      rows={6}
+                      className="bg-white/20 border-[#fcd34d]/30 text-white placeholder-[#bfdbfe] focus:border-[#fcd34d] resize-none"
+                      placeholder="Tell us more about your inquiry..."
+                    />
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="subject">Subject</Label>
-                <Input id="subject" placeholder="What is this regarding?" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
-                <Textarea 
-                  id="message" 
-                  placeholder="Tell us how we can help you..."
-                  className="min-h-[120px]"
-                />
-              </div>
-
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                <Mail className="h-4 w-4 mr-2" />
-                Send Message
-              </Button>
-
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                Your information is secure and will only be used to respond to your inquiry.
-              </p>
-            </CardContent>
-          </Card>
+                  <Button 
+                    type="submit"
+                    className="w-full bg-[#f59e0b] hover:bg-[#fcd34d] text-[#1e3a8a] font-semibold text-lg py-3 border border-[#fcd34d] transition-all duration-200"
+                  >
+                    Send Message
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Additional Information */}
-        <div className="mt-12 text-center">
-          <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0 max-w-4xl mx-auto">
-            <CardContent className="p-8">
-              <h3 className="text-2xl font-bold text-yellow-400 mb-4">
-                Visit Tuskers Cricket Ground
-              </h3>
-              <p className="text-lg mb-6">
-                Experience the excitement of cricket in the heart of Kandy. Our ground features 
-                modern facilities, excellent viewing areas, and a welcoming atmosphere for all cricket enthusiasts.
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Card className="bg-white/10 backdrop-blur-sm border-[#fcd34d]/20">
+            <CardHeader>
+              <CardTitle className="text-[#fcd34d] text-xl flex items-center">
+                <img 
+                  src="/attached_assets/image_1748762020608.png" 
+                  alt="Join the Club" 
+                  className="h-8 w-8 mr-3"
+                />
+                Join the Club
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-[#bfdbfe] mb-4">
+                Become part of our cricket community and enjoy exclusive benefits, training sessions, and match opportunities.
               </p>
-              <div className="grid md:grid-cols-3 gap-6 text-center">
-                <div>
-                  <h4 className="font-semibold text-yellow-400 mb-2">Match Days</h4>
-                  <p>Experience live cricket action with our passionate fans</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-yellow-400 mb-2">Training Sessions</h4>
-                  <p>Professional coaching available for all skill levels</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-yellow-400 mb-2">Event Hosting</h4>
-                  <p>Ground available for tournaments and private events</p>
-                </div>
-              </div>
+              <Button className="bg-[#f59e0b] hover:bg-[#fcd34d] text-[#1e3a8a] font-semibold border border-[#fcd34d]">
+                Learn More
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/10 backdrop-blur-sm border-[#fcd34d]/20">
+            <CardHeader>
+              <CardTitle className="text-[#fcd34d] text-xl flex items-center">
+                <img 
+                  src="/attached_assets/image_1748762020608.png" 
+                  alt="Championships" 
+                  className="h-8 w-8 mr-3"
+                />
+                Championships
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-[#bfdbfe] mb-4">
+                Learn about our tournament success and upcoming championship opportunities for all skill levels.
+              </p>
+              <Button className="bg-[#f59e0b] hover:bg-[#fcd34d] text-[#1e3a8a] font-semibold border border-[#fcd34d]">
+                View Achievements
+              </Button>
             </CardContent>
           </Card>
         </div>
