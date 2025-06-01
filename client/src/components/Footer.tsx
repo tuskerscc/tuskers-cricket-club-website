@@ -39,24 +39,24 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Quick Links</h4>
+            <h4 className="text-lg font-bold text-[#fcd34d] mb-4">QUICK LINKS</h4>
             <ul className="space-y-3">
-              <li><a href="/" className="text-[#bfdbfe] hover:text-white transition-colors">Home</a></li>
-              <li><a href="#squad" className="text-[#bfdbfe] hover:text-white transition-colors">Squad</a></li>
-              <li><a href="#trivia" className="text-[#bfdbfe] hover:text-white transition-colors">Trivia</a></li>
-              <li><a href="/news" className="text-[#bfdbfe] hover:text-white transition-colors">News</a></li>
-              <li><a href="/contact" className="text-[#bfdbfe] hover:text-white transition-colors">Contact</a></li>
-              <li><a href="#fanzone" className="text-[#bfdbfe] hover:text-white transition-colors">Fan Zone</a></li>
+              <li><a href="/" className="text-[#bfdbfe] hover:text-white transition-colors uppercase">HOME</a></li>
+              <li><a href="#squad" className="text-[#bfdbfe] hover:text-white transition-colors uppercase">SQUAD</a></li>
+              <li><a href="#trivia" className="text-[#bfdbfe] hover:text-white transition-colors uppercase">TRIVIA</a></li>
+              <li><a href="/news" className="text-[#bfdbfe] hover:text-white transition-colors uppercase">NEWS</a></li>
+              <li><a href="/contact" className="text-[#bfdbfe] hover:text-white transition-colors uppercase">CONTACT</a></li>
+              <li><a href="#fanzone" className="text-[#bfdbfe] hover:text-white transition-colors uppercase">FAN ZONE</a></li>
             </ul>
           </div>
 
           {/* Fan Zone */}
           <div>
-            <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Fan Zone</h4>
+            <h4 className="text-lg font-bold text-[#fcd34d] mb-4">FAN ZONE</h4>
             <ul className="space-y-3">
-              <li><a href="/gallery" className="text-[#bfdbfe] hover:text-white transition-colors">Gallery</a></li>
-              <li><a href="#trivia" className="text-[#bfdbfe] hover:text-white transition-colors">Cricket Trivia</a></li>
-              <li><a href="/forum" className="text-[#bfdbfe] hover:text-white transition-colors">Community Forum</a></li>
+              <li><a href="/gallery" className="text-[#bfdbfe] hover:text-white transition-colors uppercase">GALLERY</a></li>
+              <li><a href="#trivia" className="text-[#bfdbfe] hover:text-white transition-colors uppercase">CRICKET TRIVIA</a></li>
+              <li><a href="/forum" className="text-[#bfdbfe] hover:text-white transition-colors uppercase">COMMUNITY FORUM</a></li>
             </ul>
           </div>
 
