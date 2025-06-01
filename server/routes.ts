@@ -97,6 +97,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/admin/role', async (req, res) => {
+    try {
+      const isLoggedIn = (req.session as any)?.adminLoggedIn;
+      const userRole = (req.session as any)?.userRole || 'admin';
+      
+      if (!isLoggedIn) {
+        return res.status(401).json({ success: false, message: 'Not authenticated' });
+      }
+      
+      res.json({ role: userRole });
+    } catch (error) {
+      console.error('Admin role fetch error:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+
   app.post('/api/admin/logout', async (req, res) => {
     try {
       delete (req.session as any).adminLoggedIn;

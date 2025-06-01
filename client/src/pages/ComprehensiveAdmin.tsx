@@ -108,6 +108,11 @@ function ComprehensiveAdminContent() {
   const matchForm = useForm();
 
   // Queries
+  const { data: userRole = 'admin' } = useQuery<string>({ 
+    queryKey: ['/api/admin/role'],
+    retry: false,
+    select: (data: any) => data?.role || 'admin'
+  });
   const { data: players = [] } = useQuery<Player[]>({ queryKey: ['/api/players'] });
   
   // Filter players based on search and status
@@ -274,12 +279,24 @@ function ComprehensiveAdminContent() {
           <p className="text-xl text-blue-100">Comprehensive Admin Panel</p>
         </div>
 
-        <Tabs defaultValue="players" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
-            <TabsTrigger value="players" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Players
-            </TabsTrigger>
+        <Tabs defaultValue={userRole === 'content_writer' ? 'articles' : 'players'} className="w-full">
+          <TabsList className={`grid w-full mb-6 ${userRole === 'content_writer' ? 'grid-cols-3' : 'grid-cols-6'}`}>
+            {userRole === 'admin' && (
+              <>
+                <TabsTrigger value="players" className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Players
+                </TabsTrigger>
+                <TabsTrigger value="matches" className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4" />
+                  Match Performance
+                </TabsTrigger>
+                <TabsTrigger value="stats" className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  Team Stats
+                </TabsTrigger>
+              </>
+            )}
             <TabsTrigger value="articles" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Articles
@@ -291,14 +308,6 @@ function ComprehensiveAdminContent() {
             <TabsTrigger value="announcements" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
               Announcements
-            </TabsTrigger>
-            <TabsTrigger value="matches" className="flex items-center gap-2">
-              <Trophy className="w-4 h-4" />
-              Match Performance
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Team Stats
             </TabsTrigger>
           </TabsList>
 
@@ -600,8 +609,17 @@ function ComprehensiveAdminContent() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="tags">Tags</Label>
-                      <Input {...articleForm.register("tags")} placeholder="tag1, tag2, tag3" />
+                      <Label htmlFor="author">Author *</Label>
+                      <Select onValueChange={(value) => articleForm.setValue("author", value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select author" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Admin">Admin</SelectItem>
+                          <SelectItem value="Content Writer">Content Writer</SelectItem>
+                          <SelectItem value="Others">Others</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox 
@@ -615,10 +633,7 @@ function ComprehensiveAdminContent() {
                     <Label htmlFor="content">Content *</Label>
                     <Textarea {...articleForm.register("content", { required: true })} placeholder="Article content..." rows={6} />
                   </div>
-                  <div>
-                    <Label htmlFor="author">Author *</Label>
-                    <Input {...articleForm.register("author", { required: true })} placeholder="Author name" />
-                  </div>
+
                   <div>
                     <Label htmlFor="category">Category *</Label>
                     <Select onValueChange={(value) => articleForm.setValue("category", value)}>
@@ -626,12 +641,14 @@ function ComprehensiveAdminContent() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="IPL">IPL</SelectItem>
+                        <SelectItem value="ICC">ICC</SelectItem>
                         <SelectItem value="Match Report">Match Report</SelectItem>
                         <SelectItem value="News">News</SelectItem>
                         <SelectItem value="Player Profile">Player Profile</SelectItem>
                         <SelectItem value="Training">Training</SelectItem>
                         <SelectItem value="Events">Events</SelectItem>
-                        <SelectItem value="Announcements">Announcements</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
