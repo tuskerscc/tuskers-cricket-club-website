@@ -16,6 +16,7 @@ import Article from "@/pages/Article";
 import Gallery from "@/pages/Gallery";
 
 import Contact from "@/pages/Contact";
+import Forum from "@/pages/Forum";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/news/:slug" component={Article} />
       <Route path="/gallery" component={Gallery} />
       <Route path="/contact" component={Contact} />
+      <Route path="/forum" component={Forum} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin/match-performance" component={MatchPerformance} />
