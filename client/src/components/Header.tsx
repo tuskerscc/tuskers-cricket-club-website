@@ -35,6 +35,12 @@ export default function Header() {
 
             {/* Desktop Navigation - Right aligned and uppercase */}
             <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+              <Link
+                href="/"
+                className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base uppercase"
+              >
+                HOME
+              </Link>
               <a
                 href="#squad"
                 className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base uppercase"
@@ -100,6 +106,13 @@ export default function Header() {
           {isMobileMenuOpen && (
             <div className="lg:hidden mt-4 pb-4 border-t border-blue-700">
               <div className="flex flex-col space-y-3 pt-4">
+                <Link
+                  href="/"
+                  className="text-[#fcd34d] hover:text-white font-medium transition-colors py-2 uppercase"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  HOME
+                </Link>
                 <a
                   href="#squad"
                   className="text-[#fcd34d] hover:text-white font-medium transition-colors py-2 uppercase"
