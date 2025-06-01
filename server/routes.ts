@@ -26,15 +26,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = req.body;
       
-      // Simple credentials for demo (in production, use environment variables and hashed passwords)
-      const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'MAt@51BlaX';
+      // Define user credentials and roles
+      let userRole = null;
+      let isValidLogin = false;
       
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-        // Set session
+      if (username === 'admin' && password === 'MAt@51BlaX') {
+        userRole = 'admin';
+        isValidLogin = true;
+      } else if (username === 'contentwriter' && password === 'ContentWriter2024!') {
+        userRole = 'contentwriter';
+        isValidLogin = true;
+      }
+      
+      if (isValidLogin) {
+        // Set session with role
         req.session.adminLoggedIn = true;
+        req.session.userRole = userRole;
         
-        res.json({ success: true, message: 'Login successful' });
+        res.json({ success: true, message: 'Login successful', role: userRole });
       } else {
         res.status(401).json({ success: false, message: 'Invalid credentials' });
       }
@@ -48,7 +57,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/verify', async (req, res) => {
     try {
       if (req.session && req.session.adminLoggedIn) {
-        res.json({ success: true, message: 'Authenticated' });
+        res.json({ 
+          success: true, 
+          message: 'Authenticated',
+          role: req.session.userRole || 'admin'
+        });
       } else {
         res.status(401).json({ success: false, message: 'Not authenticated' });
       }
