@@ -1,3 +1,5 @@
+import logoPath from "@assets/image_1748758628764.png";
+
 export default function Footer() {
 
   return (
@@ -7,9 +9,11 @@ export default function Footer() {
           {/* Club Info */}
           <div>
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-12 h-12 bg-[#f59e0b] rounded-lg flex items-center justify-center">
-                <span className="text-[#1e3a8a] font-bold text-lg">TC</span>
-              </div>
+              <img
+                src={logoPath}
+                alt="TUSKERS CRICKET CLUB"
+                className="h-12 w-auto object-contain"
+              />
               <div>
                 <h3 className="text-xl font-bold text-[#fcd34d]">TUSKERS CRICKET CLUB</h3>
               </div>
