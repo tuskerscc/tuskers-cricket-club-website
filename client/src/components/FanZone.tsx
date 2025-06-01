@@ -189,11 +189,11 @@ export default function FanZone() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                 {recentGallery.map((item) => (
                   <div key={item.id} className="relative group">
-                    <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                    <div className="w-full h-48 bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center shadow-lg">
                       <img 
                         src={item.imageUrl} 
                         alt={item.title} 
-                        className="max-w-full max-h-full object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                        className="max-w-full max-h-full object-contain cursor-pointer hover:opacity-80 transition-opacity rounded-xl"
                       />
                     </div>
                     <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-lg p-1">
@@ -202,7 +202,7 @@ export default function FanZone() {
                         initialLikesCount={item.likesCount || 0}
                       />
                     </div>
-                    <div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+                    <div className="absolute bottom-2 left-2 right-8 bg-black/50 text-white px-2 py-1 rounded text-xs truncate">
                       {item.title}
                     </div>
                   </div>
