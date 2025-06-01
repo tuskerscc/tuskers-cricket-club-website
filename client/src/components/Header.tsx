@@ -13,15 +13,15 @@ export default function Header() {
     <header className="sticky top-0 z-50">
       {/* Logo Section */}
       <div className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] py-4">
-        <div className="container-responsive">
-          <Link href="/" className="flex items-center justify-center space-x-3">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center space-x-3">
             <img
               src={logoPath}
               alt="TUSKERS CRICKET CLUB"
-              className="h-16 sm:h-20 w-auto object-contain"
+              className="h-12 sm:h-16 md:h-20 w-auto object-contain"
             />
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#fcd34d] leading-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#fcd34d] leading-tight">
                 <span className="block sm:hidden">TUSKERS CC</span>
                 <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
               </h1>
@@ -32,51 +32,51 @@ export default function Header() {
       
       {/* Main Navigation */}
       <nav className="bg-gradient-to-r from-[#1e40af] to-[#1e3a8a] shadow-lg">
-        <div className="container-responsive py-3 sm:py-4">
-          <div className="flex items-center justify-center">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-8">
+            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8 mx-auto">
               <a
                 href="#squad"
-                className="text-[#fcd34d] hover:text-white font-medium transition-colors"
+                className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base"
               >
                 Squad
               </a>
 
               <a
                 href="#trivia"
-                className="text-[#fcd34d] hover:text-white font-medium transition-colors"
+                className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base"
               >
                 Trivia
               </a>
               <Link
                 href="/news"
-                className="text-[#fcd34d] hover:text-white font-medium transition-colors"
+                className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base"
               >
                 News
               </Link>
               <Link
                 href="/contact"
-                className="text-[#fcd34d] hover:text-white font-medium transition-colors"
+                className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base"
               >
                 Contact
               </Link>
               <Link
                 href="/forum"
-                className="text-[#fcd34d] hover:text-white font-medium transition-colors"
+                className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base"
               >
                 Community Forum
               </Link>
               <a
                 href="#fanzone"
-                className="text-[#fcd34d] hover:text-white font-medium transition-colors"
+                className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base"
               >
                 Fan Zone
               </a>
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="lg:hidden">
+            <div className="lg:hidden ml-auto">
               <button
                 onClick={toggleMobileMenu}
                 className="text-[#fcd34d] hover:text-white transition-colors"

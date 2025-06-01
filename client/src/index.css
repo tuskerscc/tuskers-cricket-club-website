@@ -119,6 +119,50 @@
     animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
+  /* Container utilities */
+  .container-responsive {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+  }
+
+  /* Responsive grid utilities */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+
+  .grid-responsive-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6;
+  }
+
+  .grid-responsive-3 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+  }
+
+  /* Text responsive utilities */
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl md:text-2xl lg:text-3xl;
+  }
+
+  .text-responsive-md {
+    @apply text-base sm:text-lg md:text-xl;
+  }
+
+  /* Spacing responsive utilities */
+  .space-responsive {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+  }
+
+  .padding-responsive {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  .margin-responsive {
+    @apply m-4 sm:m-6 lg:m-8;
+  }
+
   @keyframes bounce-subtle {
     0%, 100% {
       transform: translateY(0);
