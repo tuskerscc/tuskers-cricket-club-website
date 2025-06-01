@@ -10,31 +10,30 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 relative">
-      {/* Logo positioned outside header rectangle */}
-      <div className="absolute left-2 sm:left-4 top-2 z-20">
-        <Link href="/" className="flex items-center space-x-3">
-          <img
-            src={logoPath}
-            alt="TUSKERS CRICKET CLUB"
-            className="h-12 sm:h-14 md:h-16 w-auto object-contain"
-          />
-          <div>
-            <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-[#fcd34d] leading-tight">
-              <span className="block sm:hidden">TUSKERS CC</span>
-              <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
-            </h1>
-          </div>
-        </Link>
-      </div>
-
-      {/* Header Rectangle */}
-      <div className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] py-2 sm:py-3 shadow-lg ml-44 sm:ml-60 md:ml-72 lg:ml-80">
+    <header className="sticky top-0 z-50">
+      {/* Header Rectangle with increased height */}
+      <div className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] py-4 sm:py-5 shadow-lg relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
+            {/* Logo and Club Name - Left aligned */}
+            <div className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20">
+              <Link href="/" className="flex items-center space-x-3">
+                <img
+                  src={logoPath}
+                  alt="TUSKERS CRICKET CLUB"
+                  className="h-12 sm:h-14 md:h-16 w-auto object-contain"
+                />
+                <div>
+                  <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-[#fcd34d] leading-tight">
+                    <span className="block sm:hidden">TUSKERS CC</span>
+                    <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
+                  </h1>
+                </div>
+              </Link>
+            </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+            {/* Desktop Navigation - Centered */}
+            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8 mx-auto">
               <a
                 href="#squad"
                 className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base"
@@ -73,8 +72,8 @@ export default function Header() {
               </a>
             </div>
 
-            {/* Mobile Menu Button */}
-            <div className="lg:hidden">
+            {/* Mobile Menu Button - Right aligned */}
+            <div className="lg:hidden ml-auto">
               <button
                 onClick={toggleMobileMenu}
                 className="text-[#fcd34d] hover:text-white transition-colors"

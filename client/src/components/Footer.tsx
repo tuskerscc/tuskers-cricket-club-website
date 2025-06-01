@@ -3,8 +3,8 @@ import logoPath from "@assets/Tuskers CC Logo.png";
 export default function Footer() {
 
   return (
-    <footer className="bg-[#1e3a8a] text-white py-8 sm:py-12 lg:py-16">
-      <div className="container-responsive">
+    <footer className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] text-white py-8 sm:py-12 lg:py-16 relative">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* Club Info */}
           <div>
@@ -12,10 +12,10 @@ export default function Footer() {
               <img
                 src={logoPath}
                 alt="TUSKERS CRICKET CLUB"
-                className="h-12 w-auto object-contain"
+                className="h-12 sm:h-14 w-auto object-contain"
               />
               <div>
-                <h3 className="text-xl font-bold text-[#fcd34d]">TUSKERS CRICKET CLUB</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-[#fcd34d]">TUSKERS CRICKET CLUB</h3>
               </div>
             </div>
             <p className="text-[#bfdbfe] mb-4 leading-relaxed">
