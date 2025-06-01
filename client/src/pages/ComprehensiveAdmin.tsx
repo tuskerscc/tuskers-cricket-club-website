@@ -1275,6 +1275,116 @@ function ComprehensiveAdminContent() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Edit Dialog */}
+        {editingItem && (
+          <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  Edit {editingItem.type === 'article' ? 'Article' : 
+                       editingItem.type === 'gallery' ? 'Gallery Item' : 'Announcement'}
+                </DialogTitle>
+              </DialogHeader>
+              
+              {editingItem.type === 'article' && (
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target as HTMLFormElement);
+                  const data = {
+                    title: formData.get('title') as string,
+                    slug: formData.get('slug') as string,
+                    excerpt: formData.get('excerpt') as string,
+                    content: formData.get('content') as string,
+                    author: formData.get('author') as string,
+                    category: formData.get('category') as string,
+                    isFeatured: formData.get('isFeatured') === 'on',
+                    isPublished: formData.get('isPublished') === 'on'
+                  };
+                  updateArticleMutation.mutate({ id: editingItem.item.id, data });
+                }} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-title">Title</Label>
+                      <Input name="title" defaultValue={editingItem.item.title} />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-slug">Slug</Label>
+                      <Input name="slug" defaultValue={editingItem.item.slug} />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-excerpt">Excerpt</Label>
+                      <Textarea name="excerpt" defaultValue={editingItem.item.excerpt} rows={2} />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-author">Author</Label>
+                      <Select name="author" defaultValue={editingItem.item.author}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Admin">Admin</SelectItem>
+                          <SelectItem value="Content Writer">Content Writer</SelectItem>
+                          <SelectItem value="Others">Others</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-category">Category</Label>
+                      <Select name="category" defaultValue={editingItem.item.category}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="IPL">IPL</SelectItem>
+                          <SelectItem value="ICC">ICC</SelectItem>
+                          <SelectItem value="Match Report">Match Report</SelectItem>
+                          <SelectItem value="News">News</SelectItem>
+                          <SelectItem value="Player Profile">Player Profile</SelectItem>
+                          <SelectItem value="Training">Training</SelectItem>
+                          <SelectItem value="Events">Events</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          name="isFeatured" 
+                          defaultChecked={editingItem.item.isFeatured}
+                          className="rounded"
+                        />
+                        <Label>Featured Article</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          name="isPublished" 
+                          defaultChecked={editingItem.item.isPublished}
+                          className="rounded"
+                        />
+                        <Label>Published</Label>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-content">Content</Label>
+                    <Textarea name="content" defaultValue={editingItem.item.content} rows={6} />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline" onClick={() => setEditingItem(null)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={updateArticleMutation.isPending}>
+                      {updateArticleMutation.isPending ? "Updating..." : "Update Article"}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
