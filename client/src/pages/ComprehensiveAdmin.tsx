@@ -85,6 +85,8 @@ function ComprehensiveAdminContent() {
   const queryClient = useQueryClient();
   const [editingItem, setEditingItem] = useState<any>(null);
   const [selectedPlayers, setSelectedPlayers] = useState<number[]>([]);
+  const [playerSearchQuery, setPlayerSearchQuery] = useState('');
+  const [playerStatusFilter, setPlayerStatusFilter] = useState<'all' | 'active' | 'retired'>('all');
 
   // Form instances
   const playerForm = useForm();
@@ -107,6 +109,16 @@ function ComprehensiveAdminContent() {
 
   // Queries
   const { data: players = [] } = useQuery<Player[]>({ queryKey: ['/api/players'] });
+  
+  // Filter players based on search and status
+  const filteredPlayers = players.filter(player => {
+    const matchesSearch = player.name.toLowerCase().includes(playerSearchQuery.toLowerCase());
+    const isPlayerActive = (player as any).isActive !== false;
+    const matchesStatus = playerStatusFilter === 'all' || 
+      (playerStatusFilter === 'active' && isPlayerActive) ||
+      (playerStatusFilter === 'retired' && !isPlayerActive);
+    return matchesSearch && matchesStatus;
+  });
   const { data: articles = [] } = useQuery<Article[]>({ queryKey: ['/api/articles'] });
   const { data: gallery = [] } = useQuery<GalleryItem[]>({ queryKey: ['/api/gallery'] });
   const { data: announcements = [] } = useQuery<Announcement[]>({ queryKey: ['/api/announcements'] });
@@ -387,6 +399,13 @@ function ComprehensiveAdminContent() {
                       />
                       <Label>Vice Captain</Label>
                     </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        checked={playerForm.watch("isActive") !== false}
+                        onCheckedChange={(checked) => playerForm.setValue("isActive", !!checked)}
+                      />
+                      <Label>Active Player</Label>
+                    </div>
                   </div>
                   <Button type="submit" disabled={createPlayerMutation.isPending}>
                     {createPlayerMutation.isPending ? "Adding..." : "Add Player"}
@@ -397,11 +416,33 @@ function ComprehensiveAdminContent() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-[#1e3a8a]">Players List ({players.length})</CardTitle>
+                <CardTitle className="text-[#1e3a8a]">Players List ({filteredPlayers.length})</CardTitle>
+                <div className="flex gap-4 mt-4">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Search players by name..."
+                      value={playerSearchQuery}
+                      onChange={(e) => setPlayerSearchQuery(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="w-40">
+                    <Select value={playerStatusFilter} onValueChange={(value: 'all' | 'active' | 'retired') => setPlayerStatusFilter(value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Filter status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Players</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="retired">Retired</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {players.map((player) => (
+                  {filteredPlayers.map((player) => (
                     <Card key={player.id} className="border">
                       <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
