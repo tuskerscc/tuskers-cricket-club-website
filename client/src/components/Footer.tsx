@@ -25,7 +25,7 @@ export default function Footer() {
               <a href="https://web.facebook.com/profile.php?id=61576572946310" target="_blank" rel="noopener noreferrer" className="text-[#bfdbfe] hover:text-[#fcd34d] transition-colors">
                 <i className="fab fa-facebook text-2xl"></i>
               </a>
-              <a href="mailto:info@tuskerscc.com" className="text-[#bfdbfe] hover:text-[#fcd34d] transition-colors">
+              <a href="mailto:tuskerscckandy@gmail.com" className="text-[#bfdbfe] hover:text-[#fcd34d] transition-colors">
                 <i className="fas fa-envelope text-2xl"></i>
               </a>
             </div>

@@ -30,8 +30,8 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a] via-[#1e40af] to-[#2563eb] py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#1e3a8a] via-[#1e40af] to-[#2563eb] py-4 sm:py-8 px-2 sm:px-4 lg:px-6">
+      <div className="w-full max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-[#fcd34d] mb-4">
@@ -55,15 +55,15 @@ export default function Contact() {
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-3 text-[#bfdbfe]">
                   <Mail className="h-5 w-5 text-[#fcd34d]" />
-                  <span>info@tuskerscc.com</span>
+                  <span>tuskerscckandy@gmail.com</span>
                 </div>
                 <div className="flex items-center space-x-3 text-[#bfdbfe]">
                   <Phone className="h-5 w-5 text-[#fcd34d]" />
-                  <span>+1 (555) 123-4567</span>
+                  <span>+94 755123878 / +94 750890951</span>
                 </div>
                 <div className="flex items-center space-x-3 text-[#bfdbfe]">
                   <MapPin className="h-5 w-5 text-[#fcd34d]" />
-                  <span>Cricket Ground, Sports Complex<br />City, State 12345</span>
+                  <span>Digana, Kandy, Sri Lanka. 20186</span>
                 </div>
                 <div className="flex items-center space-x-3 text-[#bfdbfe]">
                   <Clock className="h-5 w-5 text-[#fcd34d]" />
@@ -86,7 +86,7 @@ export default function Contact() {
                 </Button>
                 <Button 
                   className="w-full bg-[#f59e0b] hover:bg-[#fcd34d] text-[#1e3a8a] font-semibold border border-[#fcd34d]"
-                  onClick={() => window.location.href = 'mailto:info@tuskerscc.com'}
+                  onClick={() => window.location.href = 'mailto:tuskerscckandy@gmail.com'}
                 >
                   Send us an Email
                 </Button>
@@ -195,50 +195,7 @@ export default function Contact() {
           </div>
         </div>
 
-        {/* Additional Information */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card className="bg-white/10 backdrop-blur-sm border-[#fcd34d]/20">
-            <CardHeader>
-              <CardTitle className="text-[#fcd34d] text-xl flex items-center">
-                <img 
-                  src="/attached_assets/image_1748762020608.png" 
-                  alt="Join the Club" 
-                  className="h-8 w-8 mr-3"
-                />
-                Join the Club
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-[#bfdbfe] mb-4">
-                Become part of our cricket community and enjoy exclusive benefits, training sessions, and match opportunities.
-              </p>
-              <Button className="bg-[#f59e0b] hover:bg-[#fcd34d] text-[#1e3a8a] font-semibold border border-[#fcd34d]">
-                Learn More
-              </Button>
-            </CardContent>
-          </Card>
 
-          <Card className="bg-white/10 backdrop-blur-sm border-[#fcd34d]/20">
-            <CardHeader>
-              <CardTitle className="text-[#fcd34d] text-xl flex items-center">
-                <img 
-                  src="/attached_assets/image_1748762020608.png" 
-                  alt="Championships" 
-                  className="h-8 w-8 mr-3"
-                />
-                Championships
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-[#bfdbfe] mb-4">
-                Learn about our tournament success and upcoming championship opportunities for all skill levels.
-              </p>
-              <Button className="bg-[#f59e0b] hover:bg-[#fcd34d] text-[#1e3a8a] font-semibold border border-[#fcd34d]">
-                View Achievements
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );

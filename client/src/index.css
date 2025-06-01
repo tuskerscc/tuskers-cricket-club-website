@@ -11,6 +11,48 @@
   }
 }
 
+/* Global responsiveness improvements */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  font-size: 16px;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Ensure all containers are responsive */
+.container {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Mobile-first text scaling */
+@media (max-width: 640px) {
+  .text-4xl { font-size: 2rem; }
+  .text-5xl { font-size: 2.5rem; }
+  .text-6xl { font-size: 3rem; }
+}
+
 :root {
   --background: 220 13% 97%; /* #F8FAFC */
   --foreground: 222 84% 5%; /* #0F172A */
