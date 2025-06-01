@@ -413,9 +413,13 @@ export class MemoryStorage implements IStorage {
 
   // Match Performances
   async createMatchPerformance(performance: InsertMatchPerformance): Promise<MatchPerformance> {
-    const newPerformance: MatchPerformance = { ...performance, id: nextId++ };
+    const newPerformance: MatchPerformance = { ...performance, id: nextId++, createdAt: new Date() };
     matchPerformances.push(newPerformance);
     return newPerformance;
+  }
+
+  async getMatchPerformances(): Promise<MatchPerformance[]> {
+    return matchPerformances;
   }
 
   async getMatchPerformances(matchId: number): Promise<(MatchPerformance & { player: Player })[]> {

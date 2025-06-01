@@ -892,7 +892,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add simplified match performance routes for comprehensive admin
+  app.post("/api/match-performances", async (req, res) => {
+    try {
+      const { opponentTeam, venue, matchDate, result, selectedPlayers, playerStats } = req.body;
+      
+      // Create match performance record
+      const performance = await storage.createMatchPerformance({
+        opponentTeam,
+        venue,
+        matchDate: new Date(matchDate),
+        result
+      });
+
+      // Record player statistics if provided
+      if (playerStats && playerStats.length > 0) {
+        await storage.updatePlayerStatsFromMatch(performance.id, playerStats);
+      }
+
+      res.json(performance);
+    } catch (error) {
+      console.error('Error creating match performance:', error);
+      res.status(500).json({ error: 'Failed to create match performance' });
+    }
+  });
+
   app.get("/api/match-performances", async (req, res) => {
+    try {
+      const performances = await storage.getMatchPerformances();
+      res.json(performances);
+    } catch (error) {
+      console.error('Error fetching match performances:', error);
+      res.status(500).json({ error: 'Failed to fetch match performances' });
+    }
+  });
+
+  app.get("/api/match-performances-detailed", async (req, res) => {
     try {
       const matches = await storage.getMatches();
       const performances = [];

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -80,7 +80,7 @@ interface PlayerStats {
   catches: number | null;
 }
 
-export default function ComprehensiveAdmin() {
+function ComprehensiveAdminContent() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -964,4 +964,45 @@ export default function ComprehensiveAdmin() {
       </div>
     </div>
   );
+}
+
+export default function ComprehensiveAdmin() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    checkAdminAuth();
+  }, []);
+
+  const checkAdminAuth = async () => {
+    try {
+      const response = await fetch('/api/admin/verify', {
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        setIsAuthenticated(true);
+      } else {
+        window.location.href = '/admin/login';
+      }
+    } catch (error) {
+      window.location.href = '/admin/login';
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a] to-[#3b82f6] flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return <ComprehensiveAdminContent />;
 }
