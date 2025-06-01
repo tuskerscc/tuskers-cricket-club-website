@@ -848,6 +848,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Match Performance endpoints
+  app.post("/api/match-performance/manual", async (req, res) => {
+    try {
+      const { matchData, playerPerformances } = req.body;
+      
+      // Create a new match record
+      const newMatch = await storage.createMatch({
+        homeTeamId: 1, // Tuskers team ID
+        awayTeamId: null,
+        venueId: null,
+        competitionId: null,
+        matchDate: new Date(matchData.date),
+        status: 'completed',
+        homeTeamScore: null,
+        awayTeamScore: null,
+        result: matchData.result,
+        summary: `vs ${matchData.opponent} at ${matchData.venue}`,
+        liveData: null
+      });
+
+      // Update player stats based on performance
+      await storage.updatePlayerStatsFromMatch(newMatch.id, playerPerformances.map((perf: any) => ({
+        matchId: newMatch.id,
+        playerId: perf.playerId,
+        runsScored: perf.runsScored || 0,
+        ballsFaced: perf.ballsFaced || 0,
+        fours: perf.fours || 0,
+        sixes: perf.sixes || 0,
+        wicketsTaken: perf.wicketsTaken || 0,
+        runsConceded: perf.runsConceded || 0,
+        ballsBowled: perf.ballsBowled || 0,
+        catches: perf.catches || 0,
+        stumpings: perf.stumpings || 0,
+        runOuts: perf.runOuts || 0,
+        dismissalType: null
+      })));
+
+      res.json({ success: true, matchId: newMatch.id });
+    } catch (error) {
+      console.error('Error creating match performance:', error);
+      res.status(500).json({ error: 'Failed to create match performance' });
+    }
+  });
+
+  app.get("/api/match-performances", async (req, res) => {
+    try {
+      const matches = await storage.getMatches();
+      const performances = [];
+      
+      for (const match of matches) {
+        const matchPerformances = await storage.getMatchPerformances(match.id);
+        if (matchPerformances.length > 0) {
+          performances.push({
+            match,
+            performances: matchPerformances
+          });
+        }
+      }
+      
+      res.json(performances);
+    } catch (error) {
+      console.error('Error fetching match performances:', error);
+      res.status(500).json({ error: 'Failed to fetch match performances' });
+    }
+  });
+
   // Player stats endpoints
   app.put("/api/players/:id/stats", async (req, res) => {
     try {

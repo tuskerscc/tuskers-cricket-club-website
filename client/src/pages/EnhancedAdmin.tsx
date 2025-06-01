@@ -54,6 +54,10 @@ function EnhancedAdminContent() {
     queryKey: ['/api/stats/team']
   });
 
+  const { data: matchPerformances = [] } = useQuery<any[]>({
+    queryKey: ['/api/match-performances']
+  });
+
   // Forms
   const playerForm = useForm({
     defaultValues: {
@@ -415,11 +419,12 @@ function EnhancedAdminContent() {
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardContent className="p-4 sm:p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 mb-6 bg-white/20">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-6 mb-6 bg-white/20">
                 <TabsTrigger value="players" className="text-xs sm:text-sm">Players</TabsTrigger>
                 <TabsTrigger value="announcements" className="text-xs sm:text-sm">Updates</TabsTrigger>
                 <TabsTrigger value="articles" className="text-xs sm:text-sm">Articles</TabsTrigger>
                 <TabsTrigger value="gallery" className="text-xs sm:text-sm">Gallery</TabsTrigger>
+                <TabsTrigger value="performance" className="text-xs sm:text-sm">Performance</TabsTrigger>
                 <TabsTrigger value="stats" className="text-xs sm:text-sm">Stats</TabsTrigger>
               </TabsList>
 
@@ -727,6 +732,75 @@ function EnhancedAdminContent() {
                         </CardContent>
                       </Card>
                     ))}
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Match Performance Tab */}
+              <TabsContent value="performance" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Performance Entry Form - Left Side */}
+                  <div className="bg-white rounded-lg p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-bold text-[#1e3a8a] mb-4">Add Match Performance</h3>
+                    <div className="text-center py-8">
+                      <Activity className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <p className="text-gray-600 mb-4">Use the dedicated match performance page for detailed entry</p>
+                      <Button 
+                        onClick={() => window.open('/match-performance', '_blank')}
+                        className="bg-[#1e3a8a] hover:bg-[#1e3a8a]/90"
+                      >
+                        Open Performance Entry
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Performance Dataset Display - Right Side */}
+                  <div className="bg-white rounded-lg p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-bold text-[#1e3a8a] mb-4">Recent Match Performances</h3>
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                      {matchPerformances.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                          <BarChart3 className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                          <p>No match performances recorded yet</p>
+                        </div>
+                      ) : (
+                        matchPerformances.map((matchData: any, index: number) => (
+                          <Card key={index} className="border border-gray-200">
+                            <CardContent className="p-4">
+                              <div className="flex justify-between items-start mb-3">
+                                <div>
+                                  <h4 className="font-semibold text-sm">{matchData.match?.title || 'Match'}</h4>
+                                  <p className="text-xs text-gray-500">
+                                    {matchData.match?.matchDate ? new Date(matchData.match.matchDate).toLocaleDateString() : 'Date not available'}
+                                  </p>
+                                </div>
+                                <Badge variant={matchData.match?.result === 'Won' ? 'default' : 'secondary'}>
+                                  {matchData.match?.result || 'Unknown'}
+                                </Badge>
+                              </div>
+                              
+                              {matchData.performances && matchData.performances.length > 0 && (
+                                <div className="space-y-2">
+                                  <h5 className="text-xs font-medium text-gray-700">Top Performers:</h5>
+                                  <div className="grid grid-cols-1 gap-2">
+                                    {matchData.performances.slice(0, 3).map((perf: any, perfIndex: number) => (
+                                      <div key={perfIndex} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded">
+                                        <span className="font-medium">{perf.player?.name || 'Unknown Player'}</span>
+                                        <div className="flex gap-2 text-gray-600">
+                                          {perf.runsScored > 0 && <span>{perf.runsScored}r</span>}
+                                          {perf.wicketsTaken > 0 && <span>{perf.wicketsTaken}w</span>}
+                                          {perf.catches > 0 && <span>{perf.catches}c</span>}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
               </TabsContent>
