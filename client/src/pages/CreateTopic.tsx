@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Image, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,14 +16,54 @@ export default function CreateTopic() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<ForumCategory[]>({
     queryKey: ['/api/forum/categories'],
   });
 
+  // Handle image upload
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "Error",
+          description: "Image size must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+
   const createTopicMutation = useMutation({
-    mutationFn: async (data: { title: string; content: string; categoryId: number }) => {
-      return await apiRequest('/api/forum/topics', 'POST', data);
+    mutationFn: async (data: { title: string; content: string; categoryId: number; image?: File }) => {
+      const formData = new FormData();
+      formData.append('title', data.title);
+      formData.append('content', data.content);
+      formData.append('categoryId', data.categoryId.toString());
+      if (data.image) {
+        formData.append('image', data.image);
+      }
+      
+      return await fetch('/api/forum/topics', {
+        method: 'POST',
+        body: formData,
+      }).then(res => res.json());
     },
     onSuccess: (topic: any) => {
       toast({
@@ -59,7 +99,12 @@ export default function CreateTopic() {
       title: title.trim(),
       content: content.trim(),
       categoryId: parseInt(categoryId),
+      image: selectedImage || undefined,
     });
+  };
+
+  const handleCancel = () => {
+    setLocation('/forum');
   };
 
   return (
@@ -129,6 +174,50 @@ export default function CreateTopic() {
               />
               <div className="text-right text-sm text-blue-200 mt-1">
                 {content.length}/5000 characters
+              </div>
+            </div>
+
+            {/* Image Upload */}
+            <div>
+              <label className="block text-amber-400 font-semibold mb-2">
+                Attach Image (Optional)
+              </label>
+              <div className="space-y-4">
+                {!imagePreview ? (
+                  <div className="border-2 border-dashed border-blue-300/30 rounded-lg p-6 text-center">
+                    <Image className="mx-auto h-12 w-12 text-blue-300 mb-4" />
+                    <div className="text-blue-200 mb-4">
+                      <p className="text-lg font-medium">Add an image to your topic</p>
+                      <p className="text-sm">PNG, JPG, GIF up to 5MB</p>
+                    </div>
+                    <label className="inline-block">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                      <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-blue-900 px-6 py-2 rounded-lg font-semibold border-2 border-amber-400 hover:from-amber-500 hover:to-yellow-600 transition-all cursor-pointer inline-block">
+                        Choose Image
+                      </span>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="max-w-full h-48 object-cover rounded-lg border border-blue-300/30"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

@@ -11,38 +11,33 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Logo Section */}
-      <div className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] py-4">
+      {/* Combined Header with Logo and Navigation */}
+      <div className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] py-2 sm:py-3 shadow-lg">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center space-x-3">
-            <img
-              src={logoPath}
-              alt="TUSKERS CRICKET CLUB"
-              className="h-12 sm:h-16 md:h-20 w-auto object-contain"
-            />
-            <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#fcd34d] leading-tight">
-                <span className="block sm:hidden">TUSKERS CC</span>
-                <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
-              </h1>
-            </div>
-          </Link>
-        </div>
-      </div>
-      
-      {/* Main Navigation */}
-      <nav className="bg-gradient-to-r from-[#1e40af] to-[#1e3a8a] shadow-lg">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
+            {/* Logo and Club Name */}
+            <Link href="/" className="flex items-center space-x-3">
+              <img
+                src={logoPath}
+                alt="TUSKERS CRICKET CLUB"
+                className="h-10 sm:h-12 md:h-14 w-auto object-contain"
+              />
+              <div>
+                <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-[#fcd34d] leading-tight">
+                  <span className="block sm:hidden">TUSKERS CC</span>
+                  <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
+                </h1>
+              </div>
+            </Link>
+
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8 mx-auto">
+            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
               <a
                 href="#squad"
                 className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base"
               >
                 Squad
               </a>
-
               <a
                 href="#trivia"
                 className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base"
@@ -76,7 +71,7 @@ export default function Header() {
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="lg:hidden ml-auto">
+            <div className="lg:hidden">
               <button
                 onClick={toggleMobileMenu}
                 className="text-[#fcd34d] hover:text-white transition-colors"
@@ -148,7 +143,7 @@ export default function Header() {
             </div>
           )}
         </div>
-      </nav>
+      </div>
     </header>
   );
 }
