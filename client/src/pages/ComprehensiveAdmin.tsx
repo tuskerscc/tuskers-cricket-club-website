@@ -137,6 +137,9 @@ function ComprehensiveAdminContent() {
       queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
       articleForm.reset();
       toast({ title: "Success", description: "Article created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create article", variant: "destructive" });
     }
   });
 
@@ -359,11 +362,17 @@ function ComprehensiveAdminContent() {
                   </div>
                   <div className="flex gap-4">
                     <div className="flex items-center space-x-2">
-                      <Checkbox {...playerForm.register("isCaptain")} />
+                      <Checkbox 
+                        checked={playerForm.watch("isCaptain") || false}
+                        onCheckedChange={(checked) => playerForm.setValue("isCaptain", !!checked)}
+                      />
                       <Label>Captain</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox {...playerForm.register("isViceCaptain")} />
+                      <Checkbox 
+                        checked={playerForm.watch("isViceCaptain") || false}
+                        onCheckedChange={(checked) => playerForm.setValue("isViceCaptain", !!checked)}
+                      />
                       <Label>Vice Captain</Label>
                     </div>
                   </div>
@@ -467,7 +476,10 @@ function ComprehensiveAdminContent() {
                       <Input {...articleForm.register("tags")} placeholder="tag1, tag2, tag3" />
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox {...articleForm.register("isFeatured")} />
+                      <Checkbox 
+                        checked={articleForm.watch("isFeatured") || false}
+                        onCheckedChange={(checked) => articleForm.setValue("isFeatured", !!checked)}
+                      />
                       <Label>Featured Article</Label>
                     </div>
                   </div>
