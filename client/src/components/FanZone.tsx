@@ -181,9 +181,9 @@ export default function FanZone() {
           </div>
         </div>
 
-        {/* Match Gallery at the end */}
+        {/* Gallery at the end */}
         <div className="bg-gradient-to-br from-[#eff6ff] to-purple-50 rounded-2xl p-6">
-          <h3 className="text-xl font-bold text-[#1e3a8a] mb-4">Match Gallery</h3>
+          <h3 className="text-xl font-bold text-[#1e3a8a] mb-4">Gallery</h3>
           {recentGallery.length > 0 ? (
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
