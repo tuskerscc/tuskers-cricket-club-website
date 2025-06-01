@@ -164,11 +164,22 @@ function ComprehensiveAdminContent() {
     mutationFn: (data: any) => apiRequest('POST', '/api/articles', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
-      articleForm.reset();
+      articleForm.reset({
+        title: '',
+        slug: '',
+        excerpt: '',
+        content: '',
+        featuredImage: '',
+        author: 'Admin',
+        category: 'News',
+        isFeatured: false,
+        isPublished: true
+      });
       toast({ title: "Success", description: "Article created successfully" });
     },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to create article", variant: "destructive" });
+    onError: (error: any) => {
+      console.error('Article creation error:', error);
+      toast({ title: "Error", description: error.message || "Failed to create article", variant: "destructive" });
     }
   });
 
@@ -579,6 +590,15 @@ function ComprehensiveAdminContent() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={articleForm.handleSubmit((data) => {
+                  console.log('Form data:', data);
+                  console.log('Form errors:', articleForm.formState.errors);
+                  
+                  // Validate required fields
+                  if (!data.title || !data.content || !data.author || !data.category) {
+                    toast({ title: "Error", description: "Please fill in all required fields", variant: "destructive" });
+                    return;
+                  }
+                  
                   // Auto-generate slug if not provided
                   const slug = data.slug || data.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
                   createArticleMutation.mutate({...data, slug});
