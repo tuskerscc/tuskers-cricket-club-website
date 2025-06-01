@@ -10,28 +10,28 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 relative">
-      {/* Logo and Club Name positioned outside header rectangle */}
-      <div className="absolute left-2 sm:left-4 top-2 z-30">
-        <Link href="/" className="flex items-center space-x-3">
-          <img
-            src={logoPath}
-            alt="TUSKERS CRICKET CLUB"
-            className="h-16 sm:h-20 md:h-24 lg:h-28 w-auto object-contain"
-          />
-          <div>
-            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#fcd34d] leading-tight">
-              <span className="block sm:hidden">TUSKERS CC</span>
-              <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
-            </h1>
-          </div>
-        </Link>
-      </div>
-
-      {/* Header Rectangle with navigation on the right */}
-      <div className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] py-4 sm:py-5 shadow-lg ml-48 sm:ml-64 md:ml-80 lg:ml-96">
+    <header className="sticky top-0 z-50">
+      {/* Complete Header Rectangle Background */}
+      <div className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] py-4 sm:py-5 shadow-lg">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-between">
+            
+            {/* Logo and Club Name - Left side */}
+            <div className="flex items-center space-x-3">
+              <Link href="/" className="flex items-center space-x-3">
+                <img
+                  src={logoPath}
+                  alt="TUSKERS CRICKET CLUB"
+                  className="h-12 sm:h-14 md:h-16 lg:h-18 w-auto object-contain"
+                />
+                <div>
+                  <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-[#fcd34d] leading-tight">
+                    <span className="block sm:hidden">TUSKERS CC</span>
+                    <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
+                  </h1>
+                </div>
+              </Link>
+            </div>
 
             {/* Desktop Navigation - Right aligned and uppercase */}
             <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
