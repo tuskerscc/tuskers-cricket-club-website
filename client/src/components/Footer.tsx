@@ -18,7 +18,7 @@ export default function Footer() {
               Passionate cricket, extraordinary talent, and unwavering dedication. Join us on our journey to excellence.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-[#bfdbfe] hover:text-[#fcd34d] transition-colors">
+              <a href="https://web.facebook.com/profile.php?id=61576572946310" target="_blank" rel="noopener noreferrer" className="text-[#bfdbfe] hover:text-[#fcd34d] transition-colors">
                 <i className="fab fa-facebook text-xl"></i>
               </a>
               <a href="#" className="text-[#bfdbfe] hover:text-[#fcd34d] transition-colors">
@@ -37,11 +37,11 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Quick Links</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-[#bfdbfe] hover:text-white transition-colors">Home</a></li>
-              <li><a href="#matches" className="text-[#bfdbfe] hover:text-white transition-colors">Match Center</a></li>
+              <li><a href="/" className="text-[#bfdbfe] hover:text-white transition-colors">Home</a></li>
               <li><a href="#squad" className="text-[#bfdbfe] hover:text-white transition-colors">Squad</a></li>
-              <li><a href="#news" className="text-[#bfdbfe] hover:text-white transition-colors">Latest Updates</a></li>
-              <li><a href="#starting11" className="text-[#bfdbfe] hover:text-white transition-colors">Starting 11</a></li>
+              <li><a href="#trivia" className="text-[#bfdbfe] hover:text-white transition-colors">Trivia</a></li>
+              <li><a href="/news" className="text-[#bfdbfe] hover:text-white transition-colors">News</a></li>
+              <li><a href="/contact" className="text-[#bfdbfe] hover:text-white transition-colors">Contact</a></li>
               <li><a href="#fanzone" className="text-[#bfdbfe] hover:text-white transition-colors">Fan Zone</a></li>
             </ul>
           </div>
@@ -50,10 +50,9 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-bold text-[#fcd34d] mb-4">Fan Zone</h4>
             <ul className="space-y-3">
-              <li><a href="#gallery" className="text-[#bfdbfe] hover:text-white transition-colors">Gallery</a></li>
+              <li><a href="/gallery" className="text-[#bfdbfe] hover:text-white transition-colors">Gallery</a></li>
               <li><a href="#trivia" className="text-[#bfdbfe] hover:text-white transition-colors">Cricket Trivia</a></li>
-              <li><a href="#forum" className="text-[#bfdbfe] hover:text-white transition-colors">Community Forum</a></li>
-              <li><a href="#events" className="text-[#bfdbfe] hover:text-white transition-colors">Events</a></li>
+              <li><a href="/forum" className="text-[#bfdbfe] hover:text-white transition-colors">Community Forum</a></li>
             </ul>
           </div>
 
