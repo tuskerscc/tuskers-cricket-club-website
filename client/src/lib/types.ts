@@ -32,8 +32,13 @@ export interface LiveMatchData {
 
 export interface TeamStats {
   matchesWon: number;
+  matchesLost: number;
+  matchesDraw: number;
+  totalMatches: number;
   totalRuns: number;
   wicketsTaken: number;
+  oversBowled: number;
+  winRate: number;
   nrr: number;
 }
 

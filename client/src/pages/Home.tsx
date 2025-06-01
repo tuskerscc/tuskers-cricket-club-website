@@ -69,7 +69,7 @@ export default function Home() {
                   <i className="fas fa-percentage text-[#1e3a8a] text-2xl"></i>
                 </div>
                 <h3 className="text-3xl font-bold text-[#fcd34d] mb-2">
-                  {(stats as any)?.winningRate?.toFixed(1) || '0.0'}%
+                  {stats?.winRate?.toFixed(1) || '0.0'}%
                 </h3>
                 <p className="text-white/90 font-medium">Win Rate</p>
               </div>

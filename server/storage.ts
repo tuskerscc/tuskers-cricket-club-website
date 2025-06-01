@@ -449,25 +449,19 @@ export class DatabaseStorage implements IStorage {
         SELECT 
           COUNT(*) as total_matches,
           COUNT(CASE WHEN 
-            (match_result = 'Won' OR result LIKE '%won%' OR result LIKE '%Won%') 
+            (result LIKE '%won%' OR result LIKE '%Won%') 
             THEN 1 END) as matches_won,
           COUNT(CASE WHEN 
-            (match_result = 'Lost' OR result LIKE '%lost%' OR result LIKE '%Lost%') 
+            (result LIKE '%lost%' OR result LIKE '%Lost%') 
             THEN 1 END) as matches_lost,
           COUNT(CASE WHEN 
-            (match_result = 'Draw' OR result LIKE '%draw%' OR result LIKE '%Draw%') 
+            (result LIKE '%draw%' OR result LIKE '%Draw%') 
             THEN 1 END) as matches_draw,
-          COALESCE(SUM(tuskers_score), COALESCE(SUM(CAST(SPLIT_PART(home_team_score, '/', 1) AS INTEGER)), 0)) as total_runs,
-          COALESCE(SUM(opponent_wickets), 0) as wickets_taken,
-          COALESCE(SUM(CASE WHEN opponent_overs IS NOT NULL THEN 
-            CAST(SPLIT_PART(opponent_overs, '.', 1) AS FLOAT) + 
-            CAST(COALESCE(SPLIT_PART(opponent_overs, '.', 2), '0') AS FLOAT) / 6.0 
-            ELSE 0 END), 0) as overs_bowled,
-          COALESCE(SUM(CASE WHEN tuskers_overs IS NOT NULL THEN 
-            CAST(SPLIT_PART(tuskers_overs, '.', 1) AS FLOAT) + 
-            CAST(COALESCE(SPLIT_PART(tuskers_overs, '.', 2), '0') AS FLOAT) / 6.0 
-            ELSE 0 END), 0) as overs_faced,
-          COALESCE(SUM(opponent_score), 0) as opponent_runs
+          COALESCE(SUM(CAST(SPLIT_PART(home_team_score, '/', 1) AS INTEGER)), 0) as total_runs,
+          0 as wickets_taken,
+          0 as overs_bowled,
+          0 as overs_faced,
+          0 as opponent_runs
         FROM matches
       `);
 
