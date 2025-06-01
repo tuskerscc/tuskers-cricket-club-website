@@ -30,7 +30,68 @@ const socialPosts: SocialPost[] = [];
 const polls: Poll[] = [];
 const quizzes: Quiz[] = [];
 const triviaLeaderboard: TriviaLeaderboard[] = [];
-const forumCategories: ForumCategory[] = [];
+const forumCategories: ForumCategory[] = [
+  {
+    id: 1,
+    name: "Official News & Announcements",
+    description: "Official club news, match announcements, and important updates",
+    color: "#1e3a8a",
+    icon: "📢",
+    sortOrder: 1,
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    id: 2,
+    name: "Match Day Hub",
+    description: "Live match discussions, match previews, and post-match analysis",
+    color: "#dc2626",
+    icon: "🏏",
+    sortOrder: 2,
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    id: 3,
+    name: "Training Ground & Coaching",
+    description: "Training tips, coaching advice, and skill development discussions",
+    color: "#059669",
+    icon: "🎯",
+    sortOrder: 3,
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    id: 4,
+    name: "The Pavilion (General Discussion)",
+    description: "General cricket chat, club activities, and community discussions",
+    color: "#7c3aed",
+    icon: "💬",
+    sortOrder: 4,
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    id: 5,
+    name: "Get Involved: Volunteering & Club Support",
+    description: "Volunteer opportunities, club events, and ways to support the team",
+    color: "#ea580c",
+    icon: "🤝",
+    sortOrder: 5,
+    isActive: true,
+    createdAt: new Date()
+  },
+  {
+    id: 6,
+    name: "Suggestions & Feedback",
+    description: "Your ideas for improving the club and website feedback",
+    color: "#0891b2",
+    icon: "💡",
+    sortOrder: 6,
+    isActive: true,
+    createdAt: new Date()
+  }
+];
 const forumTopics: ForumTopic[] = [];
 const forumPosts: ForumPost[] = [];
 const communityEvents: CommunityEvent[] = [];

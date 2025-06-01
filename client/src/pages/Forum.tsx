@@ -12,7 +12,11 @@ import {
   Clock,
   Plus,
   Search,
-  Filter
+  Filter,
+  Heart,
+  Share2,
+  MessageCircle,
+  ThumbsUp
 } from 'lucide-react';
 import type { ForumCategory, ForumTopic, UserProfile } from '@shared/schema';
 
@@ -145,38 +149,49 @@ export default function Forum() {
                 <div className="divide-y">
                   {categories.map(category => (
                     <Link key={category.id} href={`/forum/category/${category.id}`}>
-                      <div className="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
+                      <div className="p-6 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 cursor-pointer border-l-4 border-transparent hover:border-amber-400">
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-4">
                             <div 
-                              className="w-12 h-12 rounded-lg flex items-center justify-center text-white text-xl font-bold"
+                              className="w-16 h-16 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg transform hover:scale-105 transition-transform"
                               style={{ backgroundColor: category.color || '#1e3a8a' }}
                             >
                               {category.icon || category.name.charAt(0)}
                             </div>
-                            <div>
-                              <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
-                              <p className="text-gray-600 text-sm mb-2">{category.description}</p>
-                              <div className="flex items-center gap-4 text-sm text-gray-500">
-                                <span>{category.topicCount} topics</span>
-                                <span>{category.postCount} posts</span>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-[#1e3a8a] mb-2 text-lg hover:text-amber-600 transition-colors">
+                                {category.name}
+                              </h3>
+                              <p className="text-gray-700 text-sm mb-3 leading-relaxed">
+                                {category.description}
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500">
+                                <div className="flex items-center gap-1">
+                                  <MessageSquare className="w-3 h-3" />
+                                  {(category as any).topicCount || 0} topics
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Users className="w-3 h-3" />
+                                  {(category as any).postCount || 0} posts
+                                </div>
                               </div>
                             </div>
                           </div>
-                          
-                          {category.lastTopic && (
-                            <div className="text-right text-sm">
-                              <div className="font-medium text-gray-900 truncate max-w-48">
-                                {category.lastTopic.title}
-                              </div>
-                              <div className="text-gray-500">
-                                by {category.lastTopic.user}
-                              </div>
-                              <div className="text-gray-400">
-                                {new Date(category.lastTopic.createdAt).toLocaleDateString()}
+                          <div className="text-right ml-4">
+                            <div className="bg-gradient-to-br from-blue-100 to-indigo-100 px-3 py-2 rounded-lg">
+                              <div className="text-[#1e3a8a] font-semibold text-sm">Latest Activity</div>
+                              <div className="text-gray-600 text-xs mt-1">
+                                {(category as any).lastTopic ? (
+                                  <>
+                                    <div className="truncate max-w-32">{(category as any).lastTopic.title}</div>
+                                    <div>by {(category as any).lastTopic.user}</div>
+                                  </>
+                                ) : (
+                                  <div>No posts yet</div>
+                                )}
                               </div>
                             </div>
-                          )}
+                          </div>
                         </div>
                       </div>
                     </Link>
@@ -242,9 +257,58 @@ export default function Forum() {
                                 {topic.viewCount}
                               </div>
                             </div>
+                            
+                            {/* Interactive Buttons */}
+                            <div className="flex items-center gap-2 mb-2">
+                              <button 
+                                className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors text-xs"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  // Handle like functionality
+                                }}
+                              >
+                                <Heart className="w-3 h-3" />
+                                <span>Like</span>
+                              </button>
+                              
+                              <button 
+                                className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors text-xs"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  // Handle comment functionality
+                                }}
+                              >
+                                <MessageCircle className="w-3 h-3" />
+                                <span>Reply</span>
+                              </button>
+                              
+                              <button 
+                                className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-green-50 hover:text-green-600 transition-colors text-xs"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  // Handle share functionality
+                                  if (navigator.share) {
+                                    navigator.share({
+                                      title: topic.title,
+                                      text: topic.content.substring(0, 100) + '...',
+                                      url: window.location.origin + `/forum/topic/${topic.slug}`
+                                    });
+                                  } else {
+                                    navigator.clipboard.writeText(window.location.origin + `/forum/topic/${topic.slug}`);
+                                  }
+                                }}
+                              >
+                                <Share2 className="w-3 h-3" />
+                                <span>Share</span>
+                              </button>
+                            </div>
+                            
                             {topic.lastReplyAt && (
                               <div className="text-xs text-gray-400">
-                                Last reply {new Date(topic.lastReplyAt).toLocaleDateString()}
+                                Last reply {topic.lastReplyAt ? new Date(topic.lastReplyAt).toLocaleDateString() : 'Never'}
                                 {topic.lastReplyUser && (
                                   <div>by {topic.lastReplyUser.displayName}</div>
                                 )}

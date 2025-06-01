@@ -79,11 +79,7 @@ export default function Footer() {
             <p className="text-[#bfdbfe] mb-4 md:mb-0">
               © 2024 Tuskers Cricket Club. All rights reserved.
             </p>
-            <div className="flex space-x-6">
-              <a href="#" className="text-[#bfdbfe] hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="text-[#bfdbfe] hover:text-white transition-colors">Terms of Service</a>
-              <a href="#" className="text-[#bfdbfe] hover:text-white transition-colors">Cookie Policy</a>
-            </div>
+
           </div>
         </div>
       </div>
