@@ -55,20 +55,19 @@ export const players = pgTable("players", {
 // Matches table
 export const matches = pgTable("matches", {
   id: serial("id").primaryKey(),
-  homeTeamId: integer("home_team_id").references(() => teams.id),
-  awayTeamId: integer("away_team_id").references(() => teams.id),
-  venueId: integer("venue_id").references(() => venues.id),
-  competitionId: integer("competition_id").references(() => competitions.id),
+  opponentTeam: text("opponent_team").notNull(),
+  venue: text("venue").notNull(),
   matchDate: timestamp("match_date").notNull(),
-  status: text("status").notNull().default("upcoming"), // upcoming, live, completed
-  homeTeamScore: text("home_team_score"), // e.g., "245/6"
-  awayTeamScore: text("away_team_score"),
-  homeTeamOvers: text("home_team_overs"), // e.g., "50.0"
-  awayTeamOvers: text("away_team_overs"),
-  result: text("result"), // e.g., "Tuskers CC won by 58 runs"
+  matchResult: text("match_result").notNull(), // Won, Lost, Draw, No Result
+  tuskersScore: integer("tuskers_score").default(0),
+  tuskersOvers: text("tuskers_overs"), // e.g., "50.0"
+  tuskersWickets: integer("tuskers_wickets").default(0),
+  opponentScore: integer("opponent_score").default(0),
+  opponentOvers: text("opponent_overs"), // e.g., "48.3"
+  opponentWickets: integer("opponent_wickets").default(0),
   playerOfMatch: integer("player_of_match").references(() => players.id),
-  isLive: boolean("is_live").default(false),
-  liveData: jsonb("live_data"), // current batsmen, bowlers, etc.
+  status: text("status").notNull().default("completed"), // upcoming, live, completed
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Starting lineups for matches
@@ -398,30 +397,11 @@ export const playersRelations = relations(players, ({ many, one }) => ({
 }));
 
 export const matchesRelations = relations(matches, ({ one, many }) => ({
-  homeTeam: one(teams, {
-    fields: [matches.homeTeamId],
-    references: [teams.id],
-    relationName: "homeTeam",
-  }),
-  awayTeam: one(teams, {
-    fields: [matches.awayTeamId],
-    references: [teams.id],
-    relationName: "awayTeam",
-  }),
-  venue: one(venues, {
-    fields: [matches.venueId],
-    references: [venues.id],
-  }),
-  competition: one(competitions, {
-    fields: [matches.competitionId],
-    references: [competitions.id],
-  }),
   playerOfMatch: one(players, {
     fields: [matches.playerOfMatch],
     references: [players.id],
     relationName: "playerOfMatch",
   }),
-  lineups: many(lineups),
   galleryItems: many(gallery),
   performances: many(matchPerformances),
 }));

@@ -862,8 +862,8 @@ function ComprehensiveAdminContent() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="result">Match Result *</Label>
-                      <Select onValueChange={(value) => matchForm.setValue("result", value)}>
+                      <Label htmlFor="matchResult">Match Result *</Label>
+                      <Select onValueChange={(value) => matchForm.setValue("matchResult", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select result" />
                         </SelectTrigger>
@@ -871,8 +871,81 @@ function ComprehensiveAdminContent() {
                           <SelectItem value="Won">Won</SelectItem>
                           <SelectItem value="Lost">Lost</SelectItem>
                           <SelectItem value="Draw">Draw</SelectItem>
+                          <SelectItem value="No Result">No Result</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+                  </div>
+
+                  {/* Team Totals Section */}
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-3 text-blue-900">Team Totals</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Tuskers CC Totals */}
+                      <div>
+                        <h5 className="font-medium mb-2 text-green-700">Tuskers CC</h5>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <Label>Total Score</Label>
+                            <Input 
+                              {...matchForm.register("tuskersScore", { valueAsNumber: true })}
+                              type="number" 
+                              min="0"
+                              placeholder="245"
+                            />
+                          </div>
+                          <div>
+                            <Label>Overs Faced</Label>
+                            <Input 
+                              {...matchForm.register("tuskersOvers")}
+                              placeholder="50.0"
+                            />
+                          </div>
+                          <div>
+                            <Label>Wickets Lost</Label>
+                            <Input 
+                              {...matchForm.register("tuskersWickets", { valueAsNumber: true })}
+                              type="number" 
+                              min="0"
+                              max="10"
+                              placeholder="6"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Opponent Totals */}
+                      <div>
+                        <h5 className="font-medium mb-2 text-red-700">Opponent</h5>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <Label>Total Score</Label>
+                            <Input 
+                              {...matchForm.register("opponentScore", { valueAsNumber: true })}
+                              type="number" 
+                              min="0"
+                              placeholder="187"
+                            />
+                          </div>
+                          <div>
+                            <Label>Overs Bowled</Label>
+                            <Input 
+                              {...matchForm.register("opponentOvers")}
+                              placeholder="48.3"
+                            />
+                          </div>
+                          <div>
+                            <Label>Wickets Taken</Label>
+                            <Input 
+                              {...matchForm.register("opponentWickets", { valueAsNumber: true })}
+                              type="number" 
+                              min="0"
+                              max="10"
+                              placeholder="10"
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -948,6 +1021,26 @@ function ComprehensiveAdminContent() {
                                   <Label>Catches</Label>
                                   <Input 
                                     {...matchForm.register(`player_${playerId}.catches`, { valueAsNumber: true })}
+                                    type="number" 
+                                    min="0"
+                                    placeholder="0"
+                                  />
+                                </div>
+                                {player.role === "Wicket Keeper" && (
+                                  <div>
+                                    <Label>Stumpings</Label>
+                                    <Input 
+                                      {...matchForm.register(`player_${playerId}.stumpings`, { valueAsNumber: true })}
+                                      type="number" 
+                                      min="0"
+                                      placeholder="0"
+                                    />
+                                  </div>
+                                )}
+                                <div>
+                                  <Label>Run Outs</Label>
+                                  <Input 
+                                    {...matchForm.register(`player_${playerId}.runOuts`, { valueAsNumber: true })}
                                     type="number" 
                                     min="0"
                                     placeholder="0"
