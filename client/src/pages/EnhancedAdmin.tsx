@@ -469,7 +469,7 @@ function EnhancedAdminContent() {
                           </SelectContent>
                         </Select>
                       </div>
-                      {playerForm.watch("role") && !["Batsman", "Wicketkeeper"].includes(playerForm.watch("role")) && (
+                      {playerForm.watch("role") && ["Bowler", "All-rounder", "Wicketkeeper-Batsman"].includes(playerForm.watch("role")) && (
                         <div className="space-y-2">
                           <Label htmlFor="bowlingStyle">Bowling Style</Label>
                           <Select onValueChange={(value) => playerForm.setValue("bowlingStyle", value)}>
@@ -490,10 +490,10 @@ function EnhancedAdminContent() {
                         </div>
                       )}
                       <div className="space-y-2">
-                        <Label htmlFor="photo">Photo</Label>
+                        <Label htmlFor="photo">Photo URL</Label>
                         <div className="flex flex-col gap-2">
-                          <Input {...playerForm.register("photo")} type="file" accept="image/*" />
-                          <p className="text-xs text-gray-500">Upload player photo from device</p>
+                          <Input {...playerForm.register("photo")} placeholder="https://example.com/photo.jpg" />
+                          <p className="text-xs text-gray-500">Enter photo URL or upload to image hosting service</p>
                         </div>
                       </div>
                     </div>
@@ -528,9 +528,14 @@ function EnhancedAdminContent() {
                               <CardTitle className="text-base sm:text-lg">{player.name}</CardTitle>
                               <p className="text-sm text-gray-600">#{player.jerseyNumber} • {player.role}</p>
                             </div>
-                            <Badge variant="secondary" className="text-xs">
-                              Player #{player.id}
-                            </Badge>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => deletePlayerMutation.mutate(player.id)}
+                              disabled={deletePlayerMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </CardHeader>
                         <CardContent className="pt-2">
@@ -672,9 +677,14 @@ function EnhancedAdminContent() {
                         <CardHeader>
                           <div className="flex justify-between items-start gap-2">
                             <CardTitle className="text-base sm:text-lg break-words">{article.title}</CardTitle>
-                            <Badge variant="outline" className="text-xs">
-                              Article #{article.id}
-                            </Badge>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => deleteArticleMutation.mutate(article.id)}
+                              disabled={deleteArticleMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </CardHeader>
                         <CardContent>
@@ -741,9 +751,14 @@ function EnhancedAdminContent() {
                         <CardHeader className="pb-2">
                           <div className="flex justify-between items-start">
                             <CardTitle className="text-base break-words">{item.title}</CardTitle>
-                            <Badge variant="outline" className="text-xs">
-                              Gallery #{item.id}
-                            </Badge>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => deleteGalleryMutation.mutate(item.id)}
+                              disabled={deleteGalleryMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </CardHeader>
                         <CardContent className="pt-2">
