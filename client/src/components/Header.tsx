@@ -19,22 +19,22 @@ export default function Header() {
             alt="TUSKERS CRICKET CLUB"
             className="h-16 sm:h-20 md:h-24 lg:h-28 w-auto object-contain"
           />
-          <div>
-            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#fcd34d] leading-tight">
-              <span className="block sm:hidden">TUSKERS CC</span>
-              <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
-            </h1>
-          </div>
         </Link>
       </div>
 
-      {/* Header Rectangle - starts after logo space */}
-      <div className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] py-4 sm:py-5 shadow-lg ml-48 sm:ml-64 md:ml-80 lg:ml-96">
+      {/* Header Rectangle with centered content */}
+      <div className="bg-gradient-to-r from-[#1e3a8a] to-[#1e40af] py-4 sm:py-5 shadow-lg">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-center justify-center space-y-3">
+            
+            {/* Club Name - Centered */}
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#fcd34d] leading-tight text-center">
+              <span className="block sm:hidden">TUSKERS CC</span>
+              <span className="hidden sm:block">TUSKERS CRICKET CLUB</span>
+            </h1>
 
             {/* Desktop Navigation - Centered */}
-            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8 mx-auto">
+            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
               <a
                 href="#squad"
                 className="text-[#fcd34d] hover:text-white font-medium transition-colors text-sm lg:text-base"
