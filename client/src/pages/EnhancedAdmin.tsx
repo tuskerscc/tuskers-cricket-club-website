@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit2, Save, X, Users, FileText, Image, Trophy, MessageSquare } from "lucide-react";
+import { Trash2, Edit2, Save, X, Users, FileText, Image, Trophy, MessageSquare, Activity, BarChart3 } from "lucide-react";
 import AdminProtected from "@/components/AdminProtected";
 import { Link } from "wouter";
 import type { Player, Article, GalleryItem, Team } from "@shared/schema";
