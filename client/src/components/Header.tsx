@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { useState } from "react";
-import logoPath from "@assets/Tuskers CC Logo.png";
+import logoPath from "@assets/image_1748758628764.png";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -19,7 +19,7 @@ export default function Header() {
             <img
               src={logoPath}
               alt="TUSKERS CRICKET CLUB"
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-contain"
+              className="h-10 sm:h-12 w-auto object-contain"
             />
             <div>
               <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[#fcd34d] leading-tight">

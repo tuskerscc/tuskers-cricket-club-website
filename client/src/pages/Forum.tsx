@@ -128,6 +128,126 @@ export default function Forum() {
               </div>
             </div>
 
+            {/* Recent Topics */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="p-6 border-b">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-[#1e3a8a]" />
+                  Recent Discussions
+                </h2>
+              </div>
+              
+              {topicsLoading ? (
+                <div className="p-6">
+                  <div className="animate-pulse space-y-4">
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {filteredTopics.map(topic => (
+                    <Link key={topic.id} href={`/forum/topic/${topic.slug}`}>
+                      <div className="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-4 flex-1">
+                            <div className="flex items-center gap-2">
+                              {topic.isSticky && <Pin className="w-4 h-4 text-yellow-500" />}
+                              {topic.isLocked && <Lock className="w-4 h-4 text-gray-400" />}
+                            </div>
+                            
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 mb-1 hover:text-[#1e3a8a]">
+                                {topic.title}
+                              </h3>
+                              <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">
+                                  {topic.category.name}
+                                </span>
+                                <span>by {topic.user.displayName || 'Anonymous'}</span>
+                                <span>{topic.createdAt ? new Date(topic.createdAt).toLocaleDateString() : 'Unknown'}</span>
+                              </div>
+                              <p className="text-gray-600 text-sm line-clamp-2">
+                                {topic.content.substring(0, 150)}...
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="text-right ml-4">
+                            <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                              <div className="flex items-center gap-1">
+                                <MessageSquare className="w-4 h-4" />
+                                {topic.replyCount}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Eye className="w-4 h-4" />
+                                {topic.viewCount}
+                              </div>
+                            </div>
+                            
+                            {/* Interactive Buttons */}
+                            <div className="flex items-center gap-2 mb-2">
+                              <button 
+                                className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors text-xs"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }}
+                              >
+                                <Heart className="w-3 h-3" />
+                                <span>Like</span>
+                              </button>
+                              
+                              <button 
+                                className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors text-xs"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }}
+                              >
+                                <MessageCircle className="w-3 h-3" />
+                                <span>Reply</span>
+                              </button>
+                              
+                              <button 
+                                className="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-green-50 hover:text-green-600 transition-colors text-xs"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (navigator.share) {
+                                    navigator.share({
+                                      title: topic.title,
+                                      text: topic.content.substring(0, 100) + '...',
+                                      url: window.location.origin + `/forum/topic/${topic.slug}`
+                                    });
+                                  } else {
+                                    navigator.clipboard.writeText(window.location.origin + `/forum/topic/${topic.slug}`);
+                                  }
+                                }}
+                              >
+                                <Share2 className="w-3 h-3" />
+                                <span>Share</span>
+                              </button>
+                            </div>
+                            
+                            {topic.lastReplyAt && (
+                              <div className="text-xs text-gray-400">
+                                Last reply {topic.lastReplyAt ? new Date(topic.lastReplyAt).toLocaleDateString() : 'Never'}
+                                {topic.lastReplyUser && (
+                                  <div>by {topic.lastReplyUser.displayName}</div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Forum Categories */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="p-6 border-b">
@@ -148,53 +268,55 @@ export default function Forum() {
               ) : (
                 <div className="divide-y">
                   {categories.map(category => (
-                    <Link key={category.id} href={`/forum/category/${category.id}`}>
-                      <div className="p-6 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 cursor-pointer border-l-4 border-transparent hover:border-amber-400">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start gap-4">
-                            <div 
-                              className="w-16 h-16 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg transform hover:scale-105 transition-transform"
-                              style={{ backgroundColor: category.color || '#1e3a8a' }}
-                            >
-                              {category.icon || category.name.charAt(0)}
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-bold text-[#1e3a8a] mb-2 text-lg hover:text-amber-600 transition-colors">
-                                {category.name}
-                              </h3>
-                              <p className="text-gray-700 text-sm mb-3 leading-relaxed">
-                                {category.description}
-                              </p>
-                              <div className="flex items-center gap-4 text-xs text-gray-500">
-                                <div className="flex items-center gap-1">
-                                  <MessageSquare className="w-3 h-3" />
-                                  {(category as any).topicCount || 0} topics
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Users className="w-3 h-3" />
-                                  {(category as any).postCount || 0} posts
-                                </div>
-                              </div>
-                            </div>
+                    <div 
+                      key={category.id} 
+                      className="p-6 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 cursor-pointer border-l-4 border-transparent hover:border-amber-400"
+                      onClick={() => setSelectedCategory(category.id.toString())}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4">
+                          <div 
+                            className="w-16 h-16 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg transform hover:scale-105 transition-transform"
+                            style={{ backgroundColor: category.color || '#1e3a8a' }}
+                          >
+                            {category.icon || category.name.charAt(0)}
                           </div>
-                          <div className="text-right ml-4">
-                            <div className="bg-gradient-to-br from-blue-100 to-indigo-100 px-3 py-2 rounded-lg">
-                              <div className="text-[#1e3a8a] font-semibold text-sm">Latest Activity</div>
-                              <div className="text-gray-600 text-xs mt-1">
-                                {(category as any).lastTopic ? (
-                                  <>
-                                    <div className="truncate max-w-32">{(category as any).lastTopic.title}</div>
-                                    <div>by {(category as any).lastTopic.user}</div>
-                                  </>
-                                ) : (
-                                  <div>No posts yet</div>
-                                )}
+                          <div className="flex-1">
+                            <h3 className="font-bold text-[#1e3a8a] mb-2 text-lg hover:text-amber-600 transition-colors">
+                              {category.name}
+                            </h3>
+                            <p className="text-gray-700 text-sm mb-3 leading-relaxed">
+                              {category.description}
+                            </p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <div className="flex items-center gap-1">
+                                <MessageSquare className="w-3 h-3" />
+                                {(category as any).topicCount || 0} topics
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                {(category as any).postCount || 0} posts
                               </div>
                             </div>
                           </div>
                         </div>
+                        <div className="text-right ml-4">
+                          <div className="bg-gradient-to-br from-blue-100 to-indigo-100 px-3 py-2 rounded-lg">
+                            <div className="text-[#1e3a8a] font-semibold text-sm">Latest Activity</div>
+                            <div className="text-gray-600 text-xs mt-1">
+                              {(category as any).lastTopic ? (
+                                <>
+                                  <div className="truncate max-w-32">{(category as any).lastTopic.title}</div>
+                                  <div>by {(category as any).lastTopic.user}</div>
+                                </>
+                              ) : (
+                                <div>No posts yet</div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               )}
