@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, Edit2, Save, X, Users, FileText, Image, Trophy, MessageSquare, Activity, BarChart3, Plus, CheckCircle, XCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 
 interface Player {
   id: number;
@@ -1517,60 +1518,66 @@ function ComprehensiveAdminContent() {
                       <CardTitle className="text-lg text-[#1e3a8a]">Create New Poll</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <Form {...pollForm}>
-                        <form onSubmit={pollForm.handleSubmit((data) => {
-                          const validOptions = newPollOptions.filter(opt => opt.trim() !== '');
-                          if (validOptions.length < 2) {
-                            toast({ 
-                              title: "Error", 
-                              description: "Please provide at least 2 options", 
-                              variant: "destructive" 
-                            });
-                            return;
-                          }
-                          createPollMutation.mutate({
-                            question: data.question,
-                            options: validOptions,
-                            isActive: true
-                          });
-                        })} className="space-y-4">
-                          <FormField
-                            control={pollForm.control}
-                            name="question"
-                            render={({ field }) => (
-                              <FormItem>
-                                <Label>Poll Question</Label>
-                                <FormControl>
-                                  <Input placeholder="Enter your poll question..." {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Poll Question</Label>
+                          <Input 
+                            placeholder="Enter your poll question..." 
+                            value={pollForm.watch('question') || ''}
+                            onChange={(e) => pollForm.setValue('question', e.target.value)}
                           />
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {newPollOptions.map((option, index) => (
-                              <div key={index}>
-                                <Label>Option {index + 1}{index >= 2 ? ' (Optional)' : ''}</Label>
-                                <Input
-                                  placeholder={`${index === 0 ? 'First' : index === 1 ? 'Second' : index === 2 ? 'Third' : 'Fourth'} option...`}
-                                  value={option}
-                                  onChange={(e) => {
-                                    const newOptions = [...newPollOptions];
-                                    newOptions[index] = e.target.value;
-                                    setNewPollOptions(newOptions);
-                                  }}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                          <Button 
-                            type="submit" 
-                            className="bg-[#1e3a8a] hover:bg-[#1e40af]"
-                            disabled={createPollMutation.isPending}
-                          >
-                            {createPollMutation.isPending ? 'Creating...' : 'Create Poll'}
-                          </Button>
-                        </form>
-                      </Form>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {newPollOptions.map((option, index) => (
+                            <div key={index}>
+                              <Label>Option {index + 1}{index >= 2 ? ' (Optional)' : ''}</Label>
+                              <Input
+                                placeholder={`${index === 0 ? 'First' : index === 1 ? 'Second' : index === 2 ? 'Third' : 'Fourth'} option...`}
+                                value={option}
+                                onChange={(e) => {
+                                  const newOptions = [...newPollOptions];
+                                  newOptions[index] = e.target.value;
+                                  setNewPollOptions(newOptions);
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <Button 
+                          onClick={() => {
+                            const question = pollForm.getValues('question');
+                            const validOptions = newPollOptions.filter(opt => opt.trim() !== '');
+                            
+                            if (!question || question.trim() === '') {
+                              toast({ 
+                                title: "Error", 
+                                description: "Please enter a poll question", 
+                                variant: "destructive" 
+                              });
+                              return;
+                            }
+                            
+                            if (validOptions.length < 2) {
+                              toast({ 
+                                title: "Error", 
+                                description: "Please provide at least 2 options", 
+                                variant: "destructive" 
+                              });
+                              return;
+                            }
+                            
+                            createPollMutation.mutate({
+                              question: question.trim(),
+                              options: validOptions,
+                              isActive: true
+                            });
+                          }}
+                          className="bg-[#1e3a8a] hover:bg-[#1e40af]"
+                          disabled={createPollMutation.isPending}
+                        >
+                          {createPollMutation.isPending ? 'Creating...' : 'Create Poll'}
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 </div>

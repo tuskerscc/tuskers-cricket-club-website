@@ -1420,13 +1420,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/polls/current", async (req, res) => {
     try {
       const polls = await storage.getActivePolls();
-      const currentPoll = polls.find(poll => poll.isActive);
+      const currentPoll = polls.find(poll => poll.isActive === true);
       
-      if (!currentPoll) {
-        return res.json(null);
-      }
-
-      res.json(currentPoll);
+      res.json(currentPoll || null);
     } catch (error) {
       console.error('Error fetching current poll:', error);
       res.status(500).json({ error: 'Failed to fetch current poll' });
