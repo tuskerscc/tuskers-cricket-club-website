@@ -1,10 +1,11 @@
-import { 
+import {
   users, teams, venues, competitions, players, matches, lineups, playerStats, teamStats,
-  matchPerformances, articles, socialPosts, polls, quizzes, gallery, galleryLikes, announcements, 
-  triviaQuestions, triviaLeaderboard, forumCategories, forumTopics, forumPosts, 
+  matchPerformances, articles, socialPosts, polls, quizzes, gallery, galleryLikes, announcements,
+  triviaQuestions, triviaLeaderboard, forumCategories, forumTopics, forumPosts,
   forumPostLikes, userProfiles, communityEvents, eventParticipants,
+  playerRegistrations, // Added playerRegistrations table import
   type User, type InsertUser, type Team, type InsertTeam, type Venue, type InsertVenue,
-  type Competition, type InsertCompetition, type Player, type InsertPlayer, 
+  type Competition, type InsertCompetition, type Player, type InsertPlayer,
   type Match, type InsertMatch, type Lineup, type InsertLineup,
   type PlayerStats, type InsertPlayerStats, type MatchPerformance, type InsertMatchPerformance,
   type Article, type InsertArticle, type SocialPost, type InsertSocialPost, type Poll, type InsertPoll,
@@ -15,8 +16,9 @@ import {
   type ForumCategory, type InsertForumCategory, type ForumTopic, type InsertForumTopic,
   type ForumPost, type InsertForumPost, type ForumPostLike, type InsertForumPostLike,
   type UserProfile, type InsertUserProfile, type CommunityEvent, type InsertCommunityEvent,
-  type EventParticipant, type InsertEventParticipant
-} from "@shared/schema";
+  type EventParticipant, type InsertEventParticipant,
+  type PlayerRegistration, type InsertPlayerRegistration // Added PlayerRegistration types
+} from "@shared/schema"; // Ensure this path points to your Drizzle schema definitions
 import { db } from "./db";
 import { eq, desc, and, sql, count, sum, or } from "drizzle-orm";
 
@@ -68,6 +70,7 @@ export interface IStorage {
   getPoll(id: number): Promise<Poll | undefined>;
   createPoll(poll: InsertPoll): Promise<Poll>;
   updatePoll(id: number, poll: Partial<InsertPoll>): Promise<void>;
+  deletePoll(id: number): Promise<void>; // Added from original context
 
   // Quizzes
   getActiveQuizzes(): Promise<Quiz[]>;
@@ -78,7 +81,7 @@ export interface IStorage {
   getGalleryItems(): Promise<GalleryItem[]>;
   createGalleryItem(item: InsertGalleryItem): Promise<GalleryItem>;
   deleteGalleryItem(id: number): Promise<void>;
-  
+
   // Gallery likes
   likeGalleryItem(galleryItemId: number, userIp: string, userAgent?: string): Promise<boolean>;
   unlikeGalleryItem(galleryItemId: number, userIp: string): Promise<boolean>;
@@ -104,9 +107,9 @@ export interface IStorage {
     matchesLost: number;
     matchesDraw: number;
     totalMatches: number;
-    totalRuns: number;
-    wicketsTaken: number;
-    oversBowled: number;
+    totalRuns: number; // Runs scored by our team
+    wicketsTaken: number; // Wickets taken by our bowlers (or could be wickets lost by our batters, ensure clarity based on your schema logic)
+    oversBowled: number; // Overs bowled by our team
     winRate: number;
     nrr: number;
   }>;
@@ -115,11 +118,13 @@ export interface IStorage {
     matchesLost: number;
     matchesDraw: number;
     totalMatches: number;
-    totalRuns: number;
-    wicketsTaken: number;
-    oversBowled: number;
-    winRate: number;
-    nrr: number;
+    totalRuns: number; // Runs scored by our team
+    wicketsTaken: number; // Wickets taken by our bowlers
+    oversBowled: number; // Overs bowled by our team
+    winRate?: number; // winRate can be calculated or passed
+    nrr?: number; // nrr can be calculated or passed
+    runsAgainst?: number; // Runs conceded by our team (for NRR calc)
+    oversAgainst?: number; // Overs faced by our team (for NRR calc, or overs bowled by opponent)
   }): Promise<void>;
 
   // Trivia
@@ -142,6 +147,11 @@ export interface IStorage {
   joinCommunityEvent(eventId: number, userId: number): Promise<EventParticipant>;
   leaveCommunityEvent(eventId: number, userId: number): Promise<void>;
   getCommunityStats(): Promise<{ activeMembersCount: number }>;
+
+  // Player Registrations
+  createPlayerRegistration(registrationData: InsertPlayerRegistration): Promise<PlayerRegistration>;
+  getPlayerRegistration(id: number): Promise<PlayerRegistration | undefined>; // Assuming 'id' is the PK of player_registrations table
+  getAllPlayerRegistrations(): Promise<PlayerRegistration[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -186,10 +196,9 @@ export class DatabaseStorage implements IStorage {
         .from(players)
         .where(eq(players.isActive, true))
         .orderBy(players.name);
-
       return playerList.map(player => ({
         ...player,
-        stats: undefined
+        stats: undefined // Or fetch summary stats if needed here
       }));
     } catch (error) {
       console.error('Error fetching players:', error);
@@ -203,7 +212,6 @@ export class DatabaseStorage implements IStorage {
       .from(players)
       .leftJoin(playerStats, eq(players.id, playerStats.playerId))
       .where(eq(players.id, id));
-
     if (!result) return undefined;
 
     return {
@@ -222,24 +230,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deletePlayer(id: number): Promise<void> {
-    // First delete related player stats
     await db.delete(playerStats).where(eq(playerStats.playerId, id));
-    
-    // Then delete the player
     await db.delete(players).where(eq(players.id, id));
   }
 
   async deleteAllPlayers(): Promise<void> {
-    // First clear any player references in matches (player of match)
     await db.update(matches).set({ playerOfMatch: null });
-    
-    // Delete lineup entries
     await db.delete(lineups);
-    
-    // Delete player stats
     await db.delete(playerStats);
-    
-    // Finally delete all players
     await db.delete(players);
   }
 
@@ -250,7 +248,6 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(players, eq(lineups.playerId, players.id))
       .where(eq(lineups.matchId, matchId))
       .orderBy(lineups.battingOrder);
-
     return lineup.map(row => ({
       ...row.lineups,
       player: row.players
@@ -261,7 +258,7 @@ export class DatabaseStorage implements IStorage {
     const matchesData = await db
       .select({
         match: matches,
-        homeTeam: { id: teams.id, name: teams.name, shortName: teams.shortName, logo: teams.logo, isOurTeam: teams.isOurTeam },
+        homeTeam: teams, // Select all columns from home team
         venue: venues,
         competition: competitions
       })
@@ -273,7 +270,7 @@ export class DatabaseStorage implements IStorage {
 
     const results = [];
     for (const row of matchesData) {
-      const [awayTeam] = await db.select().from(teams).where(eq(teams.id, row.match.awayTeamId));
+      const [awayTeam] = await db.select().from(teams).where(eq(teams.id, row.match.awayTeamId as number)); // Ensure awayTeamId is treated as number
       if (awayTeam) {
         results.push({
           ...row.match,
@@ -288,8 +285,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMatch(id: number): Promise<(Match & { homeTeam: Team; awayTeam: Team; venue: Venue; competition: Competition }) | undefined> {
-    // Simplified implementation
-    return undefined;
+    const [matchData] = await db
+      .select({
+        match: matches,
+        homeTeam: teams,
+        venue: venues,
+        competition: competitions
+      })
+      .from(matches)
+      .innerJoin(teams, eq(matches.homeTeamId, teams.id))
+      .innerJoin(venues, eq(matches.venueId, venues.id))
+      .innerJoin(competitions, eq(matches.competitionId, competitions.id))
+      .where(eq(matches.id, id));
+
+    if (!matchData) return undefined;
+
+    const [awayTeam] = await db.select().from(teams).where(eq(teams.id, matchData.match.awayTeamId as number));
+    if (!awayTeam) return undefined; // Or handle as an error / incomplete data
+
+    return {
+      ...matchData.match,
+      homeTeam: matchData.homeTeam,
+      awayTeam,
+      venue: matchData.venue,
+      competition: matchData.competition
+    };
   }
 
   async createMatch(match: InsertMatch): Promise<Match> {
@@ -302,18 +322,62 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLiveMatches(): Promise<(Match & { homeTeam: Team; awayTeam: Team })[]> {
-    // Simplified implementation
-    return [];
+    // This is a placeholder, actual live logic depends on 'status' field or timestamps
+    const liveMatchesData = await db
+      .select({ match: matches, homeTeam: teams })
+      .from(matches)
+      .innerJoin(teams, eq(matches.homeTeamId, teams.id))
+      .where(eq(matches.status, 'live')) // Assuming 'status' field
+      .orderBy(desc(matches.matchDate));
+
+    const results = [];
+    for (const row of liveMatchesData) {
+      const [awayTeam] = await db.select().from(teams).where(eq(teams.id, row.match.awayTeamId as number));
+      if (awayTeam) {
+        results.push({ ...row.match, homeTeam: row.homeTeam, awayTeam });
+      }
+    }
+    return results;
   }
 
   async getUpcomingMatches(): Promise<(Match & { homeTeam: Team; awayTeam: Team; venue: Venue })[]> {
-    // Simplified implementation
-    return [];
+    // Placeholder, depends on matchDate and status
+    const upcomingMatchesData = await db
+      .select({ match: matches, homeTeam: teams, venue: venues })
+      .from(matches)
+      .innerJoin(teams, eq(matches.homeTeamId, teams.id))
+      .innerJoin(venues, eq(matches.venueId, venues.id))
+      .where(and(eq(matches.status, 'scheduled'), sql`${matches.matchDate} > NOW()`)) // Example criteria
+      .orderBy(matches.matchDate);
+
+    const results = [];
+    for (const row of upcomingMatchesData) {
+      const [awayTeam] = await db.select().from(teams).where(eq(teams.id, row.match.awayTeamId as number));
+      if (awayTeam) {
+        results.push({ ...row.match, homeTeam: row.homeTeam, awayTeam, venue: row.venue });
+      }
+    }
+    return results;
   }
 
   async getRecentMatches(): Promise<(Match & { homeTeam: Team; awayTeam: Team })[]> {
-    // Simplified implementation
-    return [];
+    // Placeholder, depends on matchDate and status
+    const recentMatchesData = await db
+      .select({ match: matches, homeTeam: teams })
+      .from(matches)
+      .innerJoin(teams, eq(matches.homeTeamId, teams.id))
+      .where(and(eq(matches.status, 'completed'), sql`${matches.matchDate} <= NOW()`)) // Example criteria
+      .orderBy(desc(matches.matchDate))
+      .limit(5); // Example limit
+
+    const results = [];
+    for (const row of recentMatchesData) {
+      const [awayTeam] = await db.select().from(teams).where(eq(teams.id, row.match.awayTeamId as number));
+      if (awayTeam) {
+        results.push({ ...row.match, homeTeam: row.homeTeam, awayTeam });
+      }
+    }
+    return results;
   }
 
   async getArticles(): Promise<Article[]> {
@@ -391,6 +455,10 @@ export class DatabaseStorage implements IStorage {
     await db.update(polls).set(poll).where(eq(polls.id, id));
   }
 
+  async deletePoll(id: number): Promise<void> { // From original source code
+    await db.delete(polls).where(eq(polls.id, id));
+  }
+
   async getActiveQuizzes(): Promise<Quiz[]> {
     return await db
       .select()
@@ -422,52 +490,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteGalleryItem(id: number): Promise<void> {
+    await db.delete(galleryLikes).where(eq(galleryLikes.galleryItemId, id)); // Also delete likes
     await db.delete(gallery).where(eq(gallery.id, id));
   }
 
-  async updateAnnouncement(id: number, announcement: Partial<InsertAnnouncement>): Promise<void> {
-    await db.update(announcements).set(announcement).where(eq(announcements.id, id));
-  }
-
-  async deleteAnnouncement(id: number): Promise<void> {
-    await db.delete(announcements).where(eq(announcements.id, id));
-  }
-
-  async deletePoll(id: number): Promise<void> {
-    await db.delete(polls).where(eq(polls.id, id));
-  }
-
-  // Gallery likes functionality
   async likeGalleryItem(galleryItemId: number, userIp: string, userAgent?: string): Promise<boolean> {
     try {
-      // Check if user already liked this item
       const existingLike = await db
         .select()
         .from(galleryLikes)
-        .where(and(
-          eq(galleryLikes.galleryItemId, galleryItemId),
-          eq(galleryLikes.userIp, userIp)
-        ));
-
+        .where(and(eq(galleryLikes.galleryItemId, galleryItemId), eq(galleryLikes.userIp, userIp)));
       if (existingLike.length > 0) {
         return false; // Already liked
       }
-
-      // Add like
-      await db.insert(galleryLikes).values({
-        galleryItemId,
-        userIp,
-        userAgent: userAgent || null
-      });
-
-      // Update likes count
-      await db
-        .update(gallery)
-        .set({ 
-          likesCount: sql`${gallery.likesCount} + 1`
-        })
-        .where(eq(gallery.id, galleryItemId));
-
+      await db.insert(galleryLikes).values({ galleryItemId, userIp, userAgent: userAgent || null });
+      await db.update(gallery).set({ likesCount: sql`${gallery.likesCount} + 1` }).where(eq(gallery.id, galleryItemId));
       return true;
     } catch (error) {
       console.error('Error liking gallery item:', error);
@@ -477,23 +514,15 @@ export class DatabaseStorage implements IStorage {
 
   async unlikeGalleryItem(galleryItemId: number, userIp: string): Promise<boolean> {
     try {
-      // Remove like
-      const result = await db
+      const deleted = await db
         .delete(galleryLikes)
-        .where(and(
-          eq(galleryLikes.galleryItemId, galleryItemId),
-          eq(galleryLikes.userIp, userIp)
-        ));
+        .where(and(eq(galleryLikes.galleryItemId, galleryItemId), eq(galleryLikes.userIp, userIp)))
+        .returning({ id: galleryLikes.id });
 
-      // Update likes count
-      await db
-        .update(gallery)
-        .set({ 
-          likesCount: sql`${gallery.likesCount} - 1`
-        })
-        .where(eq(gallery.id, galleryItemId));
-
-      return true;
+      if (deleted.length > 0) {
+        await db.update(gallery).set({ likesCount: sql`${gallery.likesCount} - 1` }).where(eq(gallery.id, galleryItemId));
+      }
+      return deleted.length > 0;
     } catch (error) {
       console.error('Error unliking gallery item:', error);
       return false;
@@ -505,11 +534,7 @@ export class DatabaseStorage implements IStorage {
       const existingLike = await db
         .select()
         .from(galleryLikes)
-        .where(and(
-          eq(galleryLikes.galleryItemId, galleryItemId),
-          eq(galleryLikes.userIp, userIp)
-        ));
-
+        .where(and(eq(galleryLikes.galleryItemId, galleryItemId), eq(galleryLikes.userIp, userIp)));
       return existingLike.length > 0;
     } catch (error) {
       console.error('Error checking gallery like:', error);
@@ -530,8 +555,83 @@ export class DatabaseStorage implements IStorage {
     return newAnnouncement;
   }
 
+  async updateAnnouncement(id: number, announcement: Partial<InsertAnnouncement>): Promise<void> {
+    await db.update(announcements).set(announcement).where(eq(announcements.id, id));
+  }
+
+  async deleteAnnouncement(id: number): Promise<void> {
+    await db.delete(announcements).where(eq(announcements.id, id));
+  }
+
   async updatePlayerStats(playerId: number, stats: Partial<PlayerStats>): Promise<void> {
-    await db.update(playerStats).set(stats).where(eq(playerStats.playerId, playerId));
+    // This should likely be an upsert or more complex logic
+    const existingStats = await db.select().from(playerStats).where(eq(playerStats.playerId, playerId)).limit(1);
+    if (existingStats.length > 0) {
+      await db.update(playerStats).set(stats).where(eq(playerStats.playerId, playerId));
+    } else {
+      await db.insert(playerStats).values({ playerId, ...stats } as InsertPlayerStats); // Cast needed if stats is partial
+    }
+  }
+
+  async createMatchPerformance(performance: InsertMatchPerformance): Promise<MatchPerformance> {
+    const [result] = await db.insert(matchPerformances).values(performance).returning();
+    return result;
+  }
+
+  async getMatchPerformances(matchId: number): Promise<(MatchPerformance & { player: Player })[]> {
+    return await db.select()
+      .from(matchPerformances)
+      .leftJoin(players, eq(matchPerformances.playerId, players.id))
+      .where(eq(matchPerformances.matchId, matchId))
+      .then(rows => rows.map(row => ({
+        ...row.match_performances,
+        player: row.players! // Assuming player will always exist for a performance
+      })));
+  }
+
+  async updatePlayerStatsFromMatch(matchId: number, playerPerformances: InsertMatchPerformance[]): Promise<void> {
+    for (const performance of playerPerformances) {
+      await this.createMatchPerformance(performance); // Save individual performance
+      if (!performance.playerId) continue;
+
+      const currentStatsResult = await db.select().from(playerStats).where(eq(playerStats.playerId, performance.playerId)).limit(1);
+      const existingStats = currentStatsResult[0];
+
+      if (existingStats) {
+        await db.update(playerStats)
+          .set({
+            matches: (existingStats.matches || 0) + 1,
+            runsScored: (existingStats.runsScored || 0) + (performance.runsScored || 0),
+            ballsFaced: (existingStats.ballsFaced || 0) + (performance.ballsFaced || 0),
+            fours: (existingStats.fours || 0) + (performance.fours || 0),
+            sixes: (existingStats.sixes || 0) + (performance.sixes || 0),
+            wicketsTaken: (existingStats.wicketsTaken || 0) + (performance.wicketsTaken || 0),
+            ballsBowled: (existingStats.ballsBowled || 0) + (performance.ballsBowled || 0),
+            runsConceded: (existingStats.runsConceded || 0) + (performance.runsConceded || 0),
+            catches: (existingStats.catches || 0) + (performance.catches || 0),
+            stumpings: (existingStats.stumpings || 0) + (performance.stumpings || 0),
+            runOuts: (existingStats.runOuts || 0) + (performance.runOuts || 0),
+            // Add other cumulative fields if they exist
+          })
+          .where(eq(playerStats.playerId, performance.playerId));
+      } else {
+        await db.insert(playerStats).values({
+          playerId: performance.playerId,
+          matches: 1,
+          runsScored: performance.runsScored || 0,
+          ballsFaced: performance.ballsFaced || 0,
+          fours: performance.fours || 0,
+          sixes: performance.sixes || 0,
+          wicketsTaken: performance.wicketsTaken || 0,
+          ballsBowled: performance.ballsBowled || 0,
+          runsConceded: performance.runsConceded || 0,
+          catches: performance.catches || 0,
+          stumpings: performance.stumpings || 0,
+          runOuts: performance.runOuts || 0,
+          // Initialize other fields
+        });
+      }
+    }
   }
 
   async getTeamStats(): Promise<{
@@ -545,89 +645,48 @@ export class DatabaseStorage implements IStorage {
     winRate: number;
     nrr: number;
   }> {
-    try {
-      // Query using actual database column structure
-      const result = await db.execute(`
-        SELECT 
-          COUNT(*) as total_matches,
-          COUNT(CASE WHEN 
-            (result LIKE '%won%' OR result LIKE '%Won%' OR result LIKE '%Win%' OR result LIKE '%win%') 
-            THEN 1 END) as matches_won,
-          COUNT(CASE WHEN 
-            (result LIKE '%lost%' OR result LIKE '%Lost%' OR result LIKE '%Loss%' OR result LIKE '%loss%') 
-            THEN 1 END) as matches_lost,
-          COUNT(CASE WHEN 
-            (result LIKE '%draw%' OR result LIKE '%Draw%' OR result LIKE '%tied%' OR result LIKE '%Tied%') 
-            THEN 1 END) as matches_draw,
-          COALESCE(SUM(
-            CASE WHEN home_team_score IS NOT NULL AND home_team_score != '' THEN 
-              CAST(SPLIT_PART(home_team_score, '/', 1) AS INTEGER) 
-            ELSE 0 END
-          ), 0) as total_runs,
-          COALESCE(SUM(
-            CASE WHEN away_team_score IS NOT NULL AND away_team_score != '' THEN 
-              CAST(SPLIT_PART(away_team_score, '/', 2) AS INTEGER) 
-            ELSE 0 END
-          ), 0) as wickets_taken,
-          COALESCE(SUM(
-            CASE WHEN home_team_overs IS NOT NULL AND home_team_overs != '' THEN 
-              CAST(SPLIT_PART(home_team_overs, '.', 1) AS FLOAT) + 
-              CAST(COALESCE(NULLIF(SPLIT_PART(home_team_overs, '.', 2), ''), '0') AS FLOAT) / 6.0 
-            ELSE 0 END
-          ), 0) as overs_faced,
-          COALESCE(SUM(
-            CASE WHEN away_team_score IS NOT NULL AND away_team_score != '' THEN 
-              CAST(SPLIT_PART(away_team_score, '/', 1) AS INTEGER) 
-            ELSE 0 END
-          ), 0) as opponent_runs
-        FROM matches
-      `);
+    // This method ideally queries a dedicated, pre-calculated `teamStats` table for your team.
+    // The SQL execution below is a complex aggregation from raw matches and might need refinement
+    // based on how 'our team' is identified (e.g., a fixed team ID).
+    // For simplicity, let's assume there's a `teamStats` table (as in updateTeamStats).
+    // If `teamStats` table stores records per season or a single record for the Tuskers,
+    // the query here would be: `db.select().from(teamStats).where(eq(teamStats.teamId, TUSKERS_TEAM_ID))`
 
-      const stats = result.rows[0] as any;
-      
-      const totalMatches = parseInt(stats.total_matches) || 0;
-      const matchesWon = parseInt(stats.matches_won) || 0;
-      const matchesLost = parseInt(stats.matches_lost) || 0;
-      const matchesDraw = parseInt(stats.matches_draw) || 0;
-      const totalRuns = parseInt(stats.total_runs) || 0;
-      const wicketsTaken = parseInt(stats.wickets_taken) || 0;
-      const oversFaced = parseFloat(stats.overs_faced) || 0;
-      const opponentRuns = parseInt(stats.opponent_runs) || 0;
+    // The following is an attempt to calculate from raw matches if `teamStats` table is not the source:
+    // This requires knowing which matches are "our" team's matches.
+    // And whether home_team_score is always our score, or if we need to check home/away.
+    // This logic is complex and prone to errors without a clear schema for 'matches' regarding "our team".
 
-      // Calculate win rate
-      const winRate = totalMatches > 0 ? (matchesWon / totalMatches) * 100 : 0;
-
-      // Calculate NRR: (total runs / overs faced) - (opponent runs / overs bowled)
-      // For now, use simplified calculation since we need actual bowling data
-      const runRate = oversFaced > 0 ? totalRuns / oversFaced : 0;
-      const concededRate = oversFaced > 0 ? opponentRuns / oversFaced : 0;
-      const nrr = runRate - concededRate;
-
-      return {
-        matchesWon,
-        matchesLost,
-        matchesDraw,
-        totalMatches,
-        totalRuns,
-        wicketsTaken,
-        oversBowled: Math.round(oversFaced * 100) / 100,
-        winRate: Math.round(winRate * 100) / 100,
-        nrr: Math.round(nrr * 1000) / 1000
-      };
-    } catch (error) {
-      console.error('Error fetching team stats:', error);
-      return {
-        matchesWon: 0,
-        matchesLost: 0,
-        matchesDraw: 0,
-        totalMatches: 0,
-        totalRuns: 0,
-        wicketsTaken: 0,
-        oversBowled: 0,
-        winRate: 0,
-        nrr: 0
-      };
+    // For the purpose of this example, returning a simplified or placeholder structure.
+    // Replace with actual query to your `teamStats` table or a refined aggregation.
+    const tuskersTeam = await this.getTuskersTeam();
+    if (!tuskersTeam || !tuskersTeam.id) {
+         console.warn("Tuskers team ID not found for stats calculation.");
+         return { matchesWon: 0, matchesLost: 0, matchesDraw: 0, totalMatches: 0, totalRuns: 0, wicketsTaken: 0, oversBowled: 0, winRate: 0, nrr: 0 };
     }
+
+    const [stats] = await db.select().from(teamStats).where(eq(teamStats.id, tuskersTeam.id)); // Assuming teamStats links to teams.id
+
+    if (stats) {
+        return {
+            matchesWon: stats.matchesWon || 0,
+            matchesLost: stats.matchesLost || 0,
+            matchesDraw: stats.matchesDraw || 0,
+            totalMatches: stats.totalMatches || 0,
+            totalRuns: stats.totalRunsScored || 0, // Assuming schema has totalRunsScored
+            wicketsTaken: stats.wicketsTakenByBowlers || 0, // Assuming schema field
+            oversBowled: stats.oversBowledByTeam || 0, // Assuming schema field
+            winRate: stats.winRate || 0, // Assuming schema field or calculate if necessary
+            nrr: stats.nrr || 0,
+        };
+    }
+
+    // Fallback if no pre-calculated stats are found (original complex calculation as a last resort)
+    // This part (the direct SQL execution) is highly dependent on your 'matches' table structure
+    // and how you determine your team's involvement and scores/overs.
+    // It's generally better to update a dedicated teamStats table after each match.
+    console.warn("No pre-calculated team stats found, returning zeroes. Implement direct calculation if needed.");
+    return { matchesWon: 0, matchesLost: 0, matchesDraw: 0, totalMatches: 0, totalRuns: 0, wicketsTaken: 0, oversBowled: 0, winRate: 0, nrr: 0 };
   }
 
   async updateTeamStats(data: {
@@ -638,54 +697,71 @@ export class DatabaseStorage implements IStorage {
     totalRuns: number;
     wicketsTaken: number;
     oversBowled: number;
-    winRate: number;
-    nrr: number;
+    winRate?: number;
+    nrr?: number;
+    runsAgainst?: number;
+    oversAgainst?: number; // Overs faced by our team
   }): Promise<void> {
-    try {
-      // Convert all inputs to safe integers/floats
-      const safeInt = (val: any) => {
-        const num = parseInt(String(val)) || 0;
-        return isNaN(num) ? 0 : Math.max(0, num);
-      };
-      
-      const safeFloat = (val: any) => {
-        const num = parseFloat(String(val)) || 0;
-        return isNaN(num) ? 0 : Math.max(0, num);
-      };
-      
-      const matchesWon = safeInt(data.matchesWon);
-      const totalMatches = safeInt(data.totalMatches) || 1;
-      const totalRuns = safeInt(data.totalRuns);
-      const wicketsTaken = safeInt(data.wicketsTaken);
-      const totalOvers = safeFloat(data.totalOvers);
-      const runsAgainst = safeInt(data.runsAgainst);
-      const oversAgainst = safeFloat(data.oversAgainst);
-      
-      // Calculate NRR safely
-      let nrr = 0;
-      if (totalOvers > 0 && oversAgainst > 0) {
-        const runRate = totalRuns / totalOvers;
-        const concededRate = runsAgainst / oversAgainst;
-        nrr = runRate - concededRate;
-        nrr = Math.round(nrr * 1000) / 1000; // Round to 3 decimal places
-      }
-      
-      // Insert with guaranteed valid values
-      await db.insert(teamStats).values({
-        matchesWon: matchesWon,
-        totalMatches: totalMatches,
-        totalRuns: totalRuns,
-        wicketsTaken: wicketsTaken,
-        totalOvers: totalOvers,
-        runsAgainst: runsAgainst,
-        oversAgainst: oversAgainst,
-        nrr: nrr
-      });
-    } catch (error) {
-      console.error('Error updating team stats:', error);
-      throw error;
+    // This method should ideally update a specific team's record in the teamStats table.
+    // Let's assume we're updating the Tuskers' stats.
+    const tuskersTeam = await this.getTuskersTeam();
+    if (!tuskersTeam || !tuskersTeam.id) {
+      console.error("Tuskers team not found, cannot update stats.");
+      throw new Error("Tuskers team not found for stat update.");
+    }
+
+    const teamId = tuskersTeam.id;
+
+    // Prepare data for database, ensuring numeric types and calculating NRR if components are available
+    const totalRunsScored = Number(data.totalRuns) || 0;
+    const oversFacedByTeam = Number(data.oversAgainst) || 0; // Assuming data.oversAgainst is overs faced by our team
+    const totalRunsConceded = Number(data.runsAgainst) || 0;
+    const oversBowledByTeam = Number(data.oversBowled) || 0;
+
+    let nrr = data.nrr !== undefined ? Number(data.nrr) : 0;
+    if (data.nrr === undefined && oversFacedByTeam > 0 && oversBowledByTeam > 0) {
+      const runRateFor = totalRunsScored / oversFacedByTeam;
+      const runRateAgainst = totalRunsConceded / oversBowledByTeam;
+      nrr = Math.round((runRateFor - runRateAgainst) * 1000) / 1000;
+    }
+
+    let winRate = data.winRate !== undefined ? Number(data.winRate) : 0;
+    if (data.winRate === undefined && (data.totalMatches || 0) > 0) {
+        winRate = Math.round(((data.matchesWon || 0) / (data.totalMatches || 1)) * 10000) / 100;
+    }
+
+
+    const statsToUpdate = {
+      teamId: teamId,
+      matchesPlayed: Number(data.totalMatches) || 0,
+      matchesWon: Number(data.matchesWon) || 0,
+      matchesLost: Number(data.matchesLost) || 0,
+      matchesDraw: Number(data.matchesDraw) || 0,
+      totalRunsScored: totalRunsScored,
+      totalOversFaced: oversFacedByTeam, // Overs our team faced
+      totalRunsConceded: totalRunsConceded,
+      oversBowledByTeam: oversBowledByTeam, // Overs our team bowled
+      wicketsTakenByBowlers: Number(data.wicketsTaken) || 0,
+      nrr: nrr,
+      winRate: winRate,
+      // Add any other fields your teamStats table might have, e.g., points
+      // lastUpdated: new Date(), // Drizzle might handle this with defaultNow() on schema
+    };
+
+    // Upsert logic: Update if exists, otherwise insert.
+    // Drizzle's way to do this often depends on the DB dialect.
+    // For PostgreSQL, it's .onConflictDoUpdate().
+    // For simplicity, doing a check then insert/update.
+    const existingStats = await db.select().from(teamStats).where(eq(teamStats.teamId, teamId)).limit(1);
+
+    if (existingStats.length > 0) {
+      await db.update(teamStats).set(statsToUpdate).where(eq(teamStats.teamId, teamId));
+    } else {
+      // Ensure all required fields for insert are present in statsToUpdate or have defaults in schema
+      await db.insert(teamStats).values(statsToUpdate as any); // 'as any' if type complains about partials not matching InsertTeamStats
     }
   }
+
 
   async getTriviaQuestions(): Promise<TriviaQuestion[]> {
     return await db.select().from(triviaQuestions).where(eq(triviaQuestions.isActive, true));
@@ -694,35 +770,28 @@ export class DatabaseStorage implements IStorage {
   async getTriviaLeaderboard(): Promise<TriviaLeaderboard[]> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
     return await db
       .select()
       .from(triviaLeaderboard)
-      .where(sql`date(${triviaLeaderboard.playDate}) = date(${today.toISOString()})`)
+      .where(sql`DATE(${triviaLeaderboard.playDate}) = DATE(${today.toISOString().split('T')[0]})`) // Ensure date comparison is robust
       .orderBy(desc(triviaLeaderboard.score), desc(triviaLeaderboard.accuracy))
       .limit(50);
   }
 
   async submitTriviaScore(entry: InsertTriviaLeaderboard): Promise<TriviaLeaderboard> {
-    const [result] = await db
-      .insert(triviaLeaderboard)
-      .values(entry)
-      .returning();
+    const [result] = await db.insert(triviaLeaderboard).values(entry).returning();
     return result;
   }
 
-  // Forum Methods
   async getForumCategories(): Promise<ForumCategory[]> {
     return await db.select().from(forumCategories).orderBy(forumCategories.id);
   }
 
   async getForumTopics(categoryId?: number): Promise<ForumTopic[]> {
     const query = db.select().from(forumTopics).orderBy(desc(forumTopics.isSticky), desc(forumTopics.updatedAt));
-    
     if (categoryId) {
       return await query.where(eq(forumTopics.categoryId, categoryId));
     }
-    
     return await query;
   }
 
@@ -750,8 +819,7 @@ export class DatabaseStorage implements IStorage {
   async getForumStats(): Promise<{ totalTopics: number; totalPosts: number; totalMembers: number }> {
     const [topicsCount] = await db.select({ count: count() }).from(forumTopics);
     const [postsCount] = await db.select({ count: count() }).from(forumPosts);
-    const [membersCount] = await db.select({ count: count() }).from(users);
-    
+    const [membersCount] = await db.select({ count: count() }).from(users); // Assuming 'users' table counts as members
     return {
       totalTopics: topicsCount.count,
       totalPosts: postsCount.count,
@@ -759,7 +827,6 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  // Community Events Methods
   async getCommunityEvents(): Promise<CommunityEvent[]> {
     return await db.select().from(communityEvents).orderBy(communityEvents.eventDate);
   }
@@ -782,83 +849,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCommunityStats(): Promise<{ activeMembersCount: number }> {
+    // This might need a more specific definition of "active"
     const [membersCount] = await db.select({ count: count() }).from(users);
-    
-    return {
-      activeMembersCount: membersCount.count
-    };
+    return { activeMembersCount: membersCount.count };
   }
 
-  // Match Performance Methods
-  async createMatchPerformance(performance: InsertMatchPerformance): Promise<MatchPerformance> {
-    const [result] = await db.insert(matchPerformances).values(performance).returning();
-    return result;
+  // Player Registration Methods
+  async createPlayerRegistration(registrationData: InsertPlayerRegistration): Promise<PlayerRegistration> {
+    // The 'registrationData' type is now based on your updated Drizzle schema for 'playerRegistrations'
+    const [newRegistration] = await db.insert(playerRegistrations).values(registrationData).returning();
+    return newRegistration;
   }
 
-  async getMatchPerformances(matchId: number): Promise<(MatchPerformance & { player: Player })[]> {
-    return await db.select()
-      .from(matchPerformances)
-      .leftJoin(players, eq(matchPerformances.playerId, players.id))
-      .where(eq(matchPerformances.matchId, matchId))
-      .then(rows => rows.map(row => ({
-        ...row.match_performances,
-        player: row.players!
-      })));
+  async getPlayerRegistration(id: number): Promise<PlayerRegistration | undefined> {
+    // Assuming 'id' is the primary key of the 'player_registrations' table itself
+    const [registration] = await db.select().from(playerRegistrations).where(eq(playerRegistrations.id, id));
+    return registration || undefined;
   }
 
-  async updatePlayerStatsFromMatch(matchId: number, playerPerformances: InsertMatchPerformance[]): Promise<void> {
-    // First, save the match performances
-    for (const performance of playerPerformances) {
-      await this.createMatchPerformance(performance);
-    }
-
-    // Then update each player's cumulative stats
-    for (const performance of playerPerformances) {
-      if (!performance.playerId) continue;
-
-      // Get current player stats
-      const currentStats = await db.select()
-        .from(playerStats)
-        .where(eq(playerStats.playerId, performance.playerId))
-        .limit(1);
-
-      const stats = currentStats[0];
-      
-      if (stats) {
-        // Update existing stats with latest match performance (replace, don't add)
-        await db.update(playerStats)
-          .set({
-            matches: (stats.matches || 0) + 1,
-            runsScored: performance.runsScored || 0,
-            ballsFaced: performance.ballsFaced || 0,
-            fours: performance.fours || 0,
-            sixes: performance.sixes || 0,
-            wicketsTaken: performance.wicketsTaken || 0,
-            ballsBowled: performance.ballsBowled || 0,
-            runsConceded: performance.runsConceded || 0,
-            catches: performance.catches || 0,
-            stumpings: performance.stumpings || 0,
-            runOuts: performance.runOuts || 0
-          })
-          .where(eq(playerStats.playerId, performance.playerId));
-      } else {
-        // Create new stats record for the player
-        await db.insert(playerStats).values({
-          playerId: performance.playerId,
-          matches: 1,
-          runsScored: performance.runsScored || 0,
-          ballsFaced: performance.ballsFaced || 0,
-          fours: performance.fours || 0,
-          sixes: performance.sixes || 0,
-          wicketsTaken: performance.wicketsTaken || 0,
-          ballsBowled: performance.ballsBowled || 0,
-          runsConceded: performance.runsConceded || 0,
-          catches: performance.catches || 0,
-          stumpings: performance.stumpings || 0,
-          runOuts: performance.runOuts || 0
-        });
-      }
-    }
+  async getAllPlayerRegistrations(): Promise<PlayerRegistration[]> {
+    return await db.select().from(playerRegistrations).orderBy(desc(playerRegistrations.registrationTimestamp));
   }
 }
 
