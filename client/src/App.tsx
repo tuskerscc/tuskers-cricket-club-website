@@ -19,6 +19,7 @@ import Gallery from "@/pages/Gallery";
 import Contact from "@/pages/Contact";
 import Forum from "@/pages/Forum";
 import CreateTopic from "@/pages/CreateTopic";
+import PlayerRegistration from "@/pages/PlayerRegistration";
 
 function Router() {
   return (
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/match-performance" component={MatchPerformance} />
       <Route path="/fan-scoring" component={FanScoring} />
       <Route path="/scoring/fan" component={FanScoring} />
+      <Route path="/player-registration" component={PlayerRegistration} />
 
       <Route component={NotFound} />
     </Switch>

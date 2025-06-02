@@ -1,0 +1,156 @@
+"Create a new webpage or section on our website for a 'Tuskers CC - Player Registration Form (Season 2025/26)'. The form should be designed to collect all necessary information for new and returning players.
+
+Form Title: Tuskers CC - Player Registration Form (Season 2025/26)
+
+Introductory Text:
+"We're excited to have you join or re-join Tuskers CC! Please fill out the form below. All information provided will be handled in accordance with our Privacy Policy."
+
+The form should be divided into the following sections with the specified fields:
+
+Section 1: Personal Details
+
+Field: First Name*
+Input Type: Text
+Placeholder: e.g., Roshan
+Required: Yes
+Field: Last Name*
+Input Type: Text
+Placeholder: e.g., Perera
+Required: Yes
+Field: Date of Birth*
+Input Type: Date (DD/MM/YYYY format)
+Required: Yes
+Field: Gender*
+Input Type: Dropdown or Radio Buttons
+Options: Male, Female, Prefer not to say
+Required: Yes
+Section 2: Contact Information
+
+Field: Email Address*
+Input Type: Email
+Placeholder: e.g., yourname@example.com
+Note: "This will be our primary method of communication." (Display this note near the field)
+Required: Yes
+Field: Mobile Phone Number*
+Input Type: Phone
+Placeholder: e.g., 07X XXX XXXX
+Required: Yes
+Field: Residential Address*
+Sub-Field: Address Line 1
+Input Type: Text
+Required: Yes
+Sub-Field: Address Line 2
+Input Type: Text
+Required: No (Optional)
+Sub-Field: Town/City
+Input Type: Text
+Required: Yes
+Section 3: Cricket Experience & Preferences
+(Display this note under the section heading: "This helps us with team selection and planning")
+
+Field: Primary Playing Role(s)* (Select all that apply)
+Input Type: Checkboxes
+Options:
+[ ] Batsman
+[ ] Bowler
+[ ] Wicket-Keeper batsman
+[ ] All-rounder
+Required: Yes
+Field: Batting Style*
+Input Type: Dropdown or Radio Buttons
+Options: Right-handed Bat, Left-handed Bat
+Required: Yes
+Field: Bowling Arm
+Input Type: Dropdown or Radio Buttons
+Options: Right-arm, Left-arm, Not Applicable
+Conditional Logic: This field should ideally be visible/enabled if "Bowler" or "All-rounder" is selected in "Primary Playing Role(s)". It can be optional for "Batsman".
+Required: Conditionally (Required if "Bowler" or "All-rounder" selected)
+Field: Bowling Type
+Input Type: Dropdown
+Options: Pace, Off Spin, Leg Spin, Left-arm Orthodox, Left-arm Wrist Spin (Chinaman), Other, Not Applicable
+Conditional Logic: This field should ideally be visible/enabled if "Bowler" or "All-rounder" is selected in "Primary Playing Role(s)".
+Required: Conditionally (Required if "Bowler" or "All-rounder" selected)
+Field: Highest Level of Cricket Played Previously*
+Input Type: Dropdown
+Options:
+Beginner (New to formal cricket)
+School Level
+Club Level (Recreational/Friendly)
+Club Level (Competitive League)
+District/Provincial Level
+Other (Please specify below)
+Required: Yes
+Field: If "Other," please specify:
+Input Type: Text
+Conditional Logic: This field should only become visible/required if "Other (Please specify below)" is selected in "Highest Level of Cricket Played Previously".
+Required: No (Optional, but becomes required if "Other" is selected above)
+Field: Previous Cricket Club(s) (if any)
+Input Type: Text
+Placeholder: e.g., [Previous Club Name], [Town/City]
+Required: No
+Section 4: Medical Information
+(Display this note under the section heading: "All medical information is treated confidentially and used only to ensure your safety during club activities. It will only be shared with designated first-aiders or medical personnel in an emergency.")
+
+Field: Do you have any medical conditions, disabilities, or severe allergies (e.g., asthma, epilepsy, diabetes, reactions to insect stings/food) that the club should be aware of for your safety?*
+Input Type: Radio Buttons
+Options: ( ) Yes ( ) No
+Required: Yes
+Field: If Yes, please provide details below:
+Input Type: Text Area
+Placeholder: Describe the condition/allergy and any emergency action required.
+Conditional Logic: This field should only become visible/required if "Yes" is selected above.
+Required: Conditionally (Required if "Yes" is selected above)
+Section 5: For Players Under 18 Years Old
+(Display this note under the section heading: "This section MUST be completed by a Parent or Legal Guardian if the applicant is under 18 years of age")
+
+Field: Is the player under 18 years of age?*
+Input Type: Radio Buttons
+Options: ( ) Yes ( ) No
+Required: Yes
+(The following fields in this section should only become visible AND required if "Yes" is selected for "Is the player under 18 years of age?")
+Field: Parent/Guardian Full Name*
+Input Type: Text
+Required: Conditionally
+Field: Parent/Guardian Email Address*
+Input Type: Email
+Required: Conditionally
+Field: Parent/Guardian Mobile Phone Number*
+Input Type: Phone
+Required: Conditionally
+Field: Parental/Guardian Consent for Under-18s*
+Input Type: Checkbox
+Label: "[ ] I, as the parent/guardian of the applicant, consent to their participation in all Tuskers CC activities. I also give consent for qualified medical personnel to administer any necessary emergency medical treatment to my child."
+Required: Conditionally
+Section 6: Consents & Agreements
+
+Field: Tuskers CC Code of Conduct*
+Display Text: "Please read the following Code of Conduct summary. By checking the box, you agree to abide by these principles: 'As a member of Tuskers CC, I agree to: Uphold the spirit of cricket, demonstrating sportsmanship, fair play, and respect towards all members, opponents, officials, and spectators. Refrain from any form of abuse, discrimination, harassment, or language that is offensive or inappropriate. Adhere to all club rules, policies, and the decisions of club officials and captains. Contribute to a safe, welcoming, and positive environment for everyone involved with the club. Always act in a manner that does not bring the club or the game of cricket into disrepute.'"
+Input Type: Checkbox
+Label: "[ ] I have read, understood, and agree to abide by the Tuskers CC Code of Conduct as stated above."
+Required: Yes
+Field: Photography/Videography Consent*
+Label: "Tuskers CC may occasionally take photographs or videos of players during matches, training, and club events for use on the club website, social media, and other promotional materials. Please select your preference:"
+Input Type: Dropdown or Radio Buttons
+Options:
+I consent to the use of my (or my child's) image as described above.
+I DO NOT consent to the use of my (or my child's) image as described above.
+Required: Yes
+Field: Data Privacy & Use of Information*
+Display Text: "Please read the following information about how we use your data. By checking the box, you consent to these uses: 'By registering with Tuskers CC, I understand and agree that: The personal information I provide (including my name, contact details, date of birth, cricket experience, and any medical information supplied for safety reasons) will be collected, stored, and used by Tuskers CC. This information is required for the purposes of club administration (e.g., membership records, fee collection if applicable), communication regarding club activities (e.g., match fixtures, training schedules, social events), team selection, and to ensure my/my child's safety and well-being during club activities. Relevant personal information may be shared with team captains/managers for team organisation, league administrators for player registration (if applicable), and with medical personnel in the event of an emergency. Tuskers CC is committed to protecting members' privacy and will take reasonable measures to ensure personal data is kept secure and used only for legitimate club purposes. We will not share your data with third parties for marketing purposes.'"
+Input Type: Checkbox
+Label: "[ ] I have read, understood, and agree to the collection and use of my personal data by Tuskers CC as described above."
+Required: Yes
+Section 7: How Did You Hear About Tuskers CC? (Optional)
+
+Field: How Did You Hear About Tuskers CC?
+Input Type: Dropdown or Checkboxes
+Options: Social Media (Facebook, Instagram, etc.), Friend/Family, Club Website, Local Advertisement, Other (Please specify)
+Required: No
+Field: If "Other," please specify:
+Input Type: Text
+Conditional Logic: This field should only become visible if "Other (Please specify)" is selected above.
+Required: No
+Submission:
+
+Button: Add a submit button at the end of the form.
+Label: "Complete Registration" or "Join Tuskers CC"

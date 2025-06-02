@@ -108,10 +108,7 @@ function ComprehensiveAdminContent() {
   const galleryForm = useForm();
   const announcementForm = useForm();
   const matchForm = useForm();
-  const pollForm = useForm();
 
-  // Poll state
-  const [newPollOptions, setNewPollOptions] = useState(['', '', '', '']);
 
   // Queries
   const { data: userRole = 'admin' } = useQuery<string>({ 
