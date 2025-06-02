@@ -319,7 +319,7 @@ function ComprehensiveAdminContent() {
         </div>
 
         <Tabs defaultValue={userRole === 'content_writer' ? 'articles' : 'players'} className="w-full">
-          <TabsList className={`grid w-full mb-6 ${userRole === 'content_writer' ? 'grid-cols-3' : 'grid-cols-6'}`}>
+          <TabsList className={`grid w-full mb-6 ${userRole === 'content_writer' ? 'grid-cols-4' : 'grid-cols-7'}`}>
             {userRole === 'admin' && (
               <>
                 <TabsTrigger value="players" className="flex items-center gap-2">
@@ -347,6 +347,10 @@ function ComprehensiveAdminContent() {
             <TabsTrigger value="announcements" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
               Announcements
+            </TabsTrigger>
+            <TabsTrigger value="polls" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Polls
             </TabsTrigger>
           </TabsList>
 
@@ -558,6 +562,54 @@ function ComprehensiveAdminContent() {
                                         </SelectContent>
                                       </Select>
                                     </div>
+                                    <div>
+                                      <Label>Bowling Style {(editingItem.role === "Bowler" || editingItem.role === "All Rounder") && "*"}
+                                        {(editingItem.role === "Batsman" || editingItem.role === "Wicket Keeper Batsman") && " (Optional)"}
+                                      </Label>
+                                      <Select onValueChange={(value) => setEditingItem({...editingItem, bowlingStyle: value})}>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder={editingItem.bowlingStyle || "Select bowling style"} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="Fast Bowling">Fast Bowling</SelectItem>
+                                          <SelectItem value="Fast-Medium Bowling">Fast-Medium Bowling</SelectItem>
+                                          <SelectItem value="Medium-Fast Bowling">Medium-Fast Bowling</SelectItem>
+                                          <SelectItem value="Medium Pace Bowling">Medium Pace Bowling</SelectItem>
+                                          <SelectItem value="Slow-Medium Bowling">Slow-Medium Bowling</SelectItem>
+                                          <SelectItem value="Spin Bowling">Spin Bowling</SelectItem>
+                                          <SelectItem value="Off Spin">Off Spin</SelectItem>
+                                          <SelectItem value="Leg Spin">Leg Spin</SelectItem>
+                                          <SelectItem value="Left Arm Orthodox">Left Arm Orthodox</SelectItem>
+                                          <SelectItem value="Left Arm Chinaman">Left Arm Chinaman</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div>
+                                      <Label>Player Photo</Label>
+                                      <Input 
+                                        type="file" 
+                                        accept="image/*"
+                                        onChange={async (e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) {
+                                            const photoData = await handleFileUpload(file);
+                                            setEditingItem({...editingItem, photo: photoData});
+                                          }
+                                        }}
+                                      />
+                                      {editingItem.photo && (
+                                        <img src={editingItem.photo} alt="Player" className="mt-2 w-20 h-20 object-cover rounded" />
+                                      )}
+                                    </div>
+                                    <div>
+                                      <Label>Biography (Optional)</Label>
+                                      <Textarea 
+                                        value={editingItem.bio || ''}
+                                        placeholder="Player biography..." 
+                                        rows={3}
+                                        onChange={(e) => setEditingItem({...editingItem, bio: e.target.value})}
+                                      />
+                                    </div>
                                     <div className="flex items-center space-x-2">
                                       <Checkbox 
                                         checked={editingItem.isCaptain || false}
@@ -571,6 +623,13 @@ function ComprehensiveAdminContent() {
                                         onCheckedChange={(checked) => setEditingItem({...editingItem, isViceCaptain: checked as boolean})}
                                       />
                                       <Label>Vice Captain</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox 
+                                        checked={editingItem.isActive !== false}
+                                        onCheckedChange={(checked) => setEditingItem({...editingItem, isActive: checked as boolean})}
+                                      />
+                                      <Label>Active Player</Label>
                                     </div>
                                     <Button 
                                       onClick={() => {
