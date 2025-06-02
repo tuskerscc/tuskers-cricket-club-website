@@ -27,6 +27,7 @@ interface Player {
   bio: string | null;
   isCaptain: boolean | null;
   isViceCaptain: boolean | null;
+  isActive: boolean | null;
 }
 
 interface Article {
@@ -129,16 +130,43 @@ function ComprehensiveAdminContent() {
   const { data: announcements = [] } = useQuery<Announcement[]>({ queryKey: ['/api/announcements'] });
   const { data: teamStats = {} } = useQuery<any>({ queryKey: ['/api/stats/team'] });
 
+  // Check if role already exists
+  const checkRoleAvailability = (role: string) => {
+    const existingRoles = players.map(p => p.role);
+    const roleCount = existingRoles.filter(r => r === role).length;
+    
+    // Allow multiple batsmen and bowlers, but limit other roles
+    if (role === "Batsman" || role === "Bowler") {
+      return true;
+    }
+    if (role === "All Rounder" && roleCount >= 2) {
+      return false;
+    }
+    if (role === "Wicket Keeper Batsman" && roleCount >= 1) {
+      return false;
+    }
+    return true;
+  };
+
   // Mutations
   const createPlayerMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/players', data),
+    mutationFn: (data: any) => {
+      if (!checkRoleAvailability(data.role)) {
+        throw new Error(`Cannot add more ${data.role}s. Maximum limit reached.`);
+      }
+      return apiRequest('POST', '/api/players', data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/players'] });
       playerForm.reset();
       toast({ title: "Success", description: "Player added successfully" });
     },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to add player", variant: "destructive" });
+    onError: (error: any) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to add player", 
+        variant: "destructive" 
+      });
     }
   });
 
@@ -350,7 +378,7 @@ function ComprehensiveAdminContent() {
                           <SelectItem value="Batsman">Batsman</SelectItem>
                           <SelectItem value="Bowler">Bowler</SelectItem>
                           <SelectItem value="All Rounder">All Rounder</SelectItem>
-                          <SelectItem value="Wicket Keeper">Wicket Keeper</SelectItem>
+                          <SelectItem value="Wicket Keeper Batsman">Wicket Keeper Batsman</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -366,9 +394,12 @@ function ComprehensiveAdminContent() {
                         </SelectContent>
                       </Select>
                     </div>
-                    {(playerForm.watch("role") === "Bowler" || playerForm.watch("role") === "All Rounder") && (
+                    {(playerForm.watch("role") === "Bowler" || playerForm.watch("role") === "All Rounder" || playerForm.watch("role") === "Batsman" || playerForm.watch("role") === "Wicket Keeper Batsman") && (
                       <div>
-                        <Label htmlFor="bowlingStyle">Bowling Style</Label>
+                        <Label htmlFor="bowlingStyle">
+                          Bowling Style {(playerForm.watch("role") === "Bowler" || playerForm.watch("role") === "All Rounder") && "*"}
+                          {(playerForm.watch("role") === "Batsman" || playerForm.watch("role") === "Wicket Keeper Batsman") && " (Optional)"}
+                        </Label>
                         <Select onValueChange={(value) => playerForm.setValue("bowlingStyle", value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select bowling style" />
@@ -511,7 +542,7 @@ function ComprehensiveAdminContent() {
                                           <SelectItem value="Batsman">Batsman</SelectItem>
                                           <SelectItem value="Bowler">Bowler</SelectItem>
                                           <SelectItem value="All Rounder">All Rounder</SelectItem>
-                                          <SelectItem value="Wicket Keeper">Wicket Keeper</SelectItem>
+                                          <SelectItem value="Wicket Keeper Batsman">Wicket Keeper Batsman</SelectItem>
                                         </SelectContent>
                                       </Select>
                                     </div>
