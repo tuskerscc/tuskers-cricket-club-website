@@ -45,9 +45,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (isValidLogin) {
-        // Set session with role
+        // Set session with role and login time
         req.session.adminLoggedIn = true;
         req.session.userRole = userRole;
+        req.session.adminLoginTime = new Date().toISOString();
         
         res.json({ success: true, message: 'Login successful', role: userRole });
       } else {
