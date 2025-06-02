@@ -1517,37 +1517,60 @@ function ComprehensiveAdminContent() {
                       <CardTitle className="text-lg text-[#1e3a8a]">Create New Poll</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Poll Question</Label>
-                          <Input placeholder="Enter your poll question..." />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label>Option 1</Label>
-                            <Input placeholder="First option..." />
+                      <Form {...pollForm}>
+                        <form onSubmit={pollForm.handleSubmit((data) => {
+                          const validOptions = newPollOptions.filter(opt => opt.trim() !== '');
+                          if (validOptions.length < 2) {
+                            toast({ 
+                              title: "Error", 
+                              description: "Please provide at least 2 options", 
+                              variant: "destructive" 
+                            });
+                            return;
+                          }
+                          createPollMutation.mutate({
+                            question: data.question,
+                            options: validOptions,
+                            isActive: true
+                          });
+                        })} className="space-y-4">
+                          <FormField
+                            control={pollForm.control}
+                            name="question"
+                            render={({ field }) => (
+                              <FormItem>
+                                <Label>Poll Question</Label>
+                                <FormControl>
+                                  <Input placeholder="Enter your poll question..." {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {newPollOptions.map((option, index) => (
+                              <div key={index}>
+                                <Label>Option {index + 1}{index >= 2 ? ' (Optional)' : ''}</Label>
+                                <Input
+                                  placeholder={`${index === 0 ? 'First' : index === 1 ? 'Second' : index === 2 ? 'Third' : 'Fourth'} option...`}
+                                  value={option}
+                                  onChange={(e) => {
+                                    const newOptions = [...newPollOptions];
+                                    newOptions[index] = e.target.value;
+                                    setNewPollOptions(newOptions);
+                                  }}
+                                />
+                              </div>
+                            ))}
                           </div>
-                          <div>
-                            <Label>Option 2</Label>
-                            <Input placeholder="Second option..." />
-                          </div>
-                          <div>
-                            <Label>Option 3 (Optional)</Label>
-                            <Input placeholder="Third option..." />
-                          </div>
-                          <div>
-                            <Label>Option 4 (Optional)</Label>
-                            <Input placeholder="Fourth option..." />
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox id="autoShow" />
-                          <Label htmlFor="autoShow">Automatically show on homepage</Label>
-                        </div>
-                        <Button className="bg-[#1e3a8a] hover:bg-[#1e40af]">
-                          Create Poll
-                        </Button>
-                      </div>
+                          <Button 
+                            type="submit" 
+                            className="bg-[#1e3a8a] hover:bg-[#1e40af]"
+                            disabled={createPollMutation.isPending}
+                          >
+                            {createPollMutation.isPending ? 'Creating...' : 'Create Poll'}
+                          </Button>
+                        </form>
+                      </Form>
                     </CardContent>
                   </Card>
                 </div>
