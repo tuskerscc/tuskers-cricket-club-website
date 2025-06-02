@@ -109,6 +109,30 @@ function ComprehensiveAdminContent() {
   const announcementForm = useForm();
   const matchForm = useForm();
 
+  // Mutations for player registrations
+  const updateRegistrationMutation = useMutation({
+    mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes?: string }) => {
+      return apiRequest(`/api/admin/player-registrations/${id}`, {
+        method: 'PUT',
+        body: { status, adminNotes }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/player-registrations'] });
+      toast({
+        title: "Success",
+        description: "Registration status updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update registration: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  });
+
 
   // Queries
   const { data: userRole = 'admin' } = useQuery<string>({ 
@@ -131,8 +155,7 @@ function ComprehensiveAdminContent() {
   const { data: gallery = [] } = useQuery<GalleryItem[]>({ queryKey: ['/api/gallery'] });
   const { data: announcements = [] } = useQuery<Announcement[]>({ queryKey: ['/api/announcements'] });
   const { data: teamStats = {} } = useQuery<any>({ queryKey: ['/api/stats/team'] });
-  const { data: polls = [] } = useQuery<any[]>({ queryKey: ['/api/polls'] });
-  const { data: currentPoll = null } = useQuery<any>({ queryKey: ['/api/polls/current'] });
+  const { data: playerRegistrations = [] } = useQuery<any[]>({ queryKey: ['/api/admin/player-registrations'] });
 
   // Check if role already exists - now allowing unlimited players of all roles
   const checkRoleAvailability = (role: string) => {
