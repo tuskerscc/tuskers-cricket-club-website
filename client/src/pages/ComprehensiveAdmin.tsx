@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit2, Save, X, Users, FileText, Image, Trophy, MessageSquare, Activity, BarChart3, Plus } from "lucide-react";
+import { Trash2, Edit2, Save, X, Users, FileText, Image, Trophy, MessageSquare, Activity, BarChart3, Plus, CheckCircle, XCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -130,21 +130,9 @@ function ComprehensiveAdminContent() {
   const { data: announcements = [] } = useQuery<Announcement[]>({ queryKey: ['/api/announcements'] });
   const { data: teamStats = {} } = useQuery<any>({ queryKey: ['/api/stats/team'] });
 
-  // Check if role already exists
+  // Check if role already exists - now allowing unlimited players of all roles
   const checkRoleAvailability = (role: string) => {
-    const existingRoles = players.map(p => p.role);
-    const roleCount = existingRoles.filter(r => r === role).length;
-    
-    // Allow multiple batsmen and bowlers, but limit other roles
-    if (role === "Batsman" || role === "Bowler") {
-      return true;
-    }
-    if (role === "All Rounder" && roleCount >= 2) {
-      return false;
-    }
-    if (role === "Wicket Keeper Batsman" && roleCount >= 1) {
-      return false;
-    }
+    // All roles are now unlimited
     return true;
   };
 
@@ -1360,6 +1348,141 @@ function ComprehensiveAdminContent() {
                     <h3 className="font-semibold text-teal-800">Overs Bowled</h3>
                     <p className="text-2xl font-bold text-teal-600">{teamStats.oversBowled || 0}</p>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Polls Tab */}
+          <TabsContent value="polls" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-[#1e3a8a]">Poll Visibility Control</CardTitle>
+                <p className="text-sm text-gray-600">Control which polls appear on the homepage for fan interaction</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Chat-style interface for poll control */}
+                  <div className="bg-gray-50 rounded-lg p-4 border h-64 overflow-y-auto">
+                    <div className="space-y-3">
+                      {/* Current Poll Status */}
+                      <div className="flex items-start space-x-2">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                          A
+                        </div>
+                        <div className="bg-white rounded-lg px-3 py-2 shadow-sm max-w-sm">
+                          <p className="text-sm text-gray-700">Current poll: "Which venue is known as the Home of Cricket?"</p>
+                          <p className="text-xs text-gray-500 mt-1">Status: Visible on homepage</p>
+                        </div>
+                      </div>
+
+                      {/* Poll Options */}
+                      <div className="flex items-start space-x-2">
+                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                          S
+                        </div>
+                        <div className="bg-white rounded-lg px-3 py-2 shadow-sm max-w-sm">
+                          <p className="text-sm text-gray-700">Available poll options:</p>
+                          <div className="mt-2 space-y-1">
+                            <button className="block w-full text-left text-xs bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded">
+                              Cricket venue poll (Current)
+                            </button>
+                            <button className="block w-full text-left text-xs bg-gray-50 hover:bg-gray-100 px-2 py-1 rounded">
+                              Player performance poll
+                            </button>
+                            <button className="block w-full text-left text-xs bg-gray-50 hover:bg-gray-100 px-2 py-1 rounded">
+                              Match prediction poll
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Poll Control Actions */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="border-green-200">
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <CheckCircle className="w-6 h-6 text-green-600" />
+                          </div>
+                          <h3 className="font-semibold text-green-800 mb-2">Show Poll</h3>
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                            Make Visible
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-yellow-200">
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <Edit2 className="w-6 h-6 text-yellow-600" />
+                          </div>
+                          <h3 className="font-semibold text-yellow-800 mb-2">Change Poll</h3>
+                          <Button size="sm" variant="outline" className="border-yellow-300 text-yellow-700 hover:bg-yellow-50">
+                            Switch Poll
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200">
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <XCircle className="w-6 h-6 text-red-600" />
+                          </div>
+                          <h3 className="font-semibold text-red-800 mb-2">Hide Poll</h3>
+                          <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-50">
+                            Make Hidden
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Create New Poll */}
+                  <Card className="border-[#1e3a8a]">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-[#1e3a8a]">Create New Poll</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Poll Question</Label>
+                          <Input placeholder="Enter your poll question..." />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Option 1</Label>
+                            <Input placeholder="First option..." />
+                          </div>
+                          <div>
+                            <Label>Option 2</Label>
+                            <Input placeholder="Second option..." />
+                          </div>
+                          <div>
+                            <Label>Option 3 (Optional)</Label>
+                            <Input placeholder="Third option..." />
+                          </div>
+                          <div>
+                            <Label>Option 4 (Optional)</Label>
+                            <Input placeholder="Fourth option..." />
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="autoShow" />
+                          <Label htmlFor="autoShow">Automatically show on homepage</Label>
+                        </div>
+                        <Button className="bg-[#1e3a8a] hover:bg-[#1e40af]">
+                          Create Poll
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </CardContent>
             </Card>
