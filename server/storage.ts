@@ -142,11 +142,6 @@ export interface IStorage {
   joinCommunityEvent(eventId: number, userId: number): Promise<EventParticipant>;
   leaveCommunityEvent(eventId: number, userId: number): Promise<void>;
   getCommunityStats(): Promise<{ activeMembersCount: number }>;
-
-  // Player Registrations
-  createPlayerRegistration(data: any): Promise<any>;
-  getPlayerRegistrations(): Promise<any[]>;
-  updatePlayerRegistration(id: number, updates: any): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -185,17 +180,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPlayers(): Promise<(Player & { stats?: PlayerStats })[]> {
-    const playersWithStats = await db
-      .select()
-      .from(players)
-      .leftJoin(playerStats, eq(players.id, playerStats.playerId))
-      .where(eq(players.isActive, true))
-      .orderBy(players.name);
+    try {
+      const playerList = await db
+        .select()
+        .from(players)
+        .where(eq(players.isActive, true))
+        .orderBy(players.name);
 
-    return playersWithStats.map(row => ({
-      ...row.players,
-      stats: row.player_stats || undefined
-    }));
+      return playerList.map(player => ({
+        ...player,
+        stats: undefined
+      }));
+    } catch (error) {
+      console.error('Error fetching players:', error);
+      return [];
+    }
   }
 
   async getPlayer(id: number): Promise<(Player & { stats?: PlayerStats }) | undefined> {
@@ -426,6 +425,18 @@ export class DatabaseStorage implements IStorage {
     await db.delete(gallery).where(eq(gallery.id, id));
   }
 
+  async updateAnnouncement(id: number, announcement: Partial<InsertAnnouncement>): Promise<void> {
+    await db.update(announcements).set(announcement).where(eq(announcements.id, id));
+  }
+
+  async deleteAnnouncement(id: number): Promise<void> {
+    await db.delete(announcements).where(eq(announcements.id, id));
+  }
+
+  async deletePoll(id: number): Promise<void> {
+    await db.delete(polls).where(eq(polls.id, id));
+  }
+
   // Gallery likes functionality
   async likeGalleryItem(galleryItemId: number, userIp: string, userAgent?: string): Promise<boolean> {
     try {
@@ -621,12 +632,14 @@ export class DatabaseStorage implements IStorage {
 
   async updateTeamStats(data: {
     matchesWon: number;
+    matchesLost: number;
+    matchesDraw: number;
     totalMatches: number;
     totalRuns: number;
     wicketsTaken: number;
-    totalOvers: number;
-    runsAgainst: number;
-    oversAgainst: number;
+    oversBowled: number;
+    winRate: number;
+    nrr: number;
   }): Promise<void> {
     try {
       // Convert all inputs to safe integers/floats
@@ -848,7 +861,5 @@ export class DatabaseStorage implements IStorage {
     }
   }
 }
-
-import { MemoryStorage } from "./memory-storage";
 
 export const storage = new DatabaseStorage();
