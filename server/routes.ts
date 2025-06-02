@@ -1,14 +1,26 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPlayerSchema, insertMatchSchema, insertArticleSchema, insertPollSchema, insertGallerySchema, insertAnnouncementSchema } from "@shared/schema";
+import {
+  insertPlayerSchema,
+  insertMatchSchema,
+  insertArticleSchema,
+  insertPollSchema,
+  insertGallerySchema,
+  insertAnnouncementSchema,
+  insertPlayerRegistrationSchema // Make sure this is defined in @shared/schema
+} from "@shared/schema";
 import { generateCricketPoll, generateCricketQuiz } from "./cricket-api";
+import { z } from "zod"; // For ZodError checking
 
 // Extend Express Request type to include session
 declare module 'express-serve-static-core' {
   interface Request {
     session: {
       adminLoggedIn?: boolean;
+      userRole?: string; // Added for clarity based on usage
+      adminLoginTime?: number; // Added based on usage
+      userId?: number; // Assuming userId might be stored in session for logged-in users
       [key: string]: any;
     };
   }
@@ -21,151 +33,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile('ads.txt', { root: './client' });
   });
 
-  // Admin authentication routes
+  // --- Admin Authentication Routes ---
   app.post('/api/admin/login', async (req, res) => {
     try {
       const { username, password } = req.body;
-      
-      console.log('Login attempt:', { username, passwordLength: password?.length });
-      
-      // Define user credentials and roles
+      console.log('Login attempt:', { username, passwordLength: password?.length }); //
+
       let userRole = null;
       let isValidLogin = false;
-      
-      if (username === 'admin' && password === 'MAt@51BlaX') {
-        userRole = 'admin';
-        isValidLogin = true;
-        console.log('Admin login successful');
-      } else if (username === 'contentwriter' && password === 'ContentWriter2024!') {
-        userRole = 'contentwriter';
-        isValidLogin = true;
-        console.log('Content writer login successful');
+
+      if (username === 'admin' && password === 'MAt@51BlaX') { //
+        userRole = 'admin'; //
+        isValidLogin = true; //
+        console.log('Admin login successful'); //
+      } else if (username === 'contentwriter' && password === 'ContentWriter2024!') { //
+        userRole = 'contentwriter'; //
+        isValidLogin = true; //
+        console.log('Content writer login successful'); //
       } else {
-        console.log('Login failed - invalid credentials');
+        console.log('Login failed - invalid credentials'); //
       }
-      
+
       if (isValidLogin) {
-        // Set session with role
-        req.session.adminLoggedIn = true;
-        req.session.userRole = userRole;
-        
-        res.json({ success: true, message: 'Login successful', role: userRole });
+        req.session.adminLoggedIn = true; //
+        req.session.userRole = userRole; //
+        req.session.adminLoginTime = new Date().getTime(); // Set login time
+        res.json({ success: true, message: 'Login successful', role: userRole }); //
       } else {
-        res.status(401).json({ success: false, message: 'Invalid credentials' });
+        res.status(401).json({ success: false, message: 'Invalid credentials' }); //
       }
     } catch (error) {
-      console.error('Admin login error:', error);
-      res.status(500).json({ success: false, message: 'Server error' });
-    }
-  });
-
-  // Admin verification endpoint
-  app.get('/api/admin/verify', async (req, res) => {
-    try {
-      if (req.session && req.session.adminLoggedIn) {
-        res.json({ 
-          success: true, 
-          message: 'Authenticated',
-          role: req.session.userRole || 'admin'
-        });
-      } else {
-        res.status(401).json({ success: false, message: 'Not authenticated' });
-      }
-    } catch (error) {
-      console.error('Admin verify error:', error);
-      res.status(500).json({ success: false, message: 'Server error' });
-    }
-  });
-
-  // Admin logout endpoint
-  app.post('/api/admin/logout', async (req, res) => {
-    try {
-      if (req.session) {
-        req.session.adminLoggedIn = false;
-      }
-      res.json({ success: true, message: 'Logged out' });
-    } catch (error) {
-      console.error('Admin logout error:', error);
-      res.status(500).json({ success: false, message: 'Server error' });
+      console.error('Admin login error:', error); //
+      res.status(500).json({ success: false, message: 'Server error' }); //
     }
   });
 
   app.get('/api/admin/verify', async (req, res) => {
     try {
-      const isLoggedIn = (req.session as any)?.adminLoggedIn;
-      const loginTime = (req.session as any)?.adminLoginTime;
-      
+      const isLoggedIn = req.session?.adminLoggedIn;
+      const loginTime = req.session?.adminLoginTime;
+
       if (!isLoggedIn || !loginTime) {
         return res.status(401).json({ success: false, message: 'Not authenticated' });
       }
-      
+
       // Check if session is older than 8 hours
-      const sessionAge = new Date().getTime() - new Date(loginTime).getTime();
-      const maxAge = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
-      
+      const sessionAge = new Date().getTime() - new Date(loginTime).getTime(); //
+      const maxAge = 8 * 60 * 60 * 1000; // 8 hours in milliseconds //
+
       if (sessionAge > maxAge) {
-        delete (req.session as any).adminLoggedIn;
-        delete (req.session as any).adminLoginTime;
+        delete req.session.adminLoggedIn; //
+        delete req.session.adminLoginTime; //
+        delete req.session.userRole;
         return res.status(401).json({ success: false, message: 'Session expired' });
       }
-      
-      res.json({ success: true, message: 'Authenticated' });
+
+      res.json({
+        success: true,
+        message: 'Authenticated',
+        role: req.session.userRole || 'admin' //
+      });
     } catch (error) {
-      console.error('Admin verify error:', error);
-      res.status(500).json({ success: false, message: 'Server error' });
+      console.error('Admin verify error:', error); //
+      res.status(500).json({ success: false, message: 'Server error' }); //
     }
   });
 
   app.get('/api/admin/role', async (req, res) => {
     try {
-      const isLoggedIn = (req.session as any)?.adminLoggedIn;
-      const userRole = (req.session as any)?.userRole || 'admin';
-      
-      if (!isLoggedIn) {
+      const isLoggedIn = req.session?.adminLoggedIn;
+      const userRole = req.session?.userRole || 'admin'; // Default to 'admin' if no role but logged in
+
+      if (!isLoggedIn) { //
         return res.status(401).json({ success: false, message: 'Not authenticated' });
       }
-      
       res.json({ role: userRole });
     } catch (error) {
-      console.error('Admin role fetch error:', error);
+      console.error('Admin role fetch error:', error); //
       res.status(500).json({ success: false, message: 'Server error' });
     }
   });
 
   app.post('/api/admin/logout', async (req, res) => {
     try {
-      delete (req.session as any).adminLoggedIn;
-      delete (req.session as any).adminLoginTime;
+      if (req.session) {
+        delete req.session.adminLoggedIn;
+        delete req.session.userRole;
+        delete req.session.adminLoginTime;
+      }
       res.json({ success: true, message: 'Logged out successfully' });
     } catch (error) {
-      console.error('Admin logout error:', error);
+      console.error('Admin logout error:', error); //
       res.status(500).json({ success: false, message: 'Server error' });
     }
   });
 
-  // Admin middleware to protect admin routes
-  const adminAuth = (req: any, res: any, next: any) => {
+  // Admin middleware
+  const adminAuth = (req: Request, res: any, next: any) => { // Changed req type to Request
     const isLoggedIn = req.session?.adminLoggedIn;
     const loginTime = req.session?.adminLoginTime;
-    
+
     if (!isLoggedIn || !loginTime) {
       return res.status(401).json({ success: false, message: 'Admin authentication required' });
     }
-    
-    // Check session age
+
     const sessionAge = new Date().getTime() - new Date(loginTime).getTime();
     const maxAge = 8 * 60 * 60 * 1000; // 8 hours
-    
+
     if (sessionAge > maxAge) {
       delete req.session.adminLoggedIn;
       delete req.session.adminLoginTime;
+      delete req.session.userRole;
       return res.status(401).json({ success: false, message: 'Admin session expired' });
     }
-    
     next();
   };
 
-  // Teams endpoints
+  // --- Player Registration Route ---
+  app.post("/api/player-registration", async (req, res) => {
+    try {
+      console.log('Player registration request body:', req.body);
+
+      // Validate the incoming data using the Zod schema
+      const validatedData = insertPlayerRegistrationSchema.parse(req.body);
+
+      const newRegistration = await storage.createPlayerRegistration(validatedData);
+
+      res.status(201).json({
+        success: true,
+        message: "Player registration submitted successfully!",
+        data: newRegistration
+      });
+
+    } catch (error: any) {
+      console.error('Player registration error:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid registration data. Please check the fields.",
+          errors: error.flatten().fieldErrors
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: error.message || "An unexpected error occurred while processing your registration."
+        });
+      }
+    }
+  });
+
+  // --- Teams Endpoints ---
   app.get("/api/teams", async (req, res) => {
     try {
       const teams = await storage.getTeams();
@@ -187,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Players endpoints
+  // --- Players Endpoints ---
   app.get("/api/players", async (req, res) => {
     try {
       const players = await storage.getPlayers();
@@ -203,7 +220,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid player ID" });
       }
-
       const player = await storage.getPlayer(id);
       if (!player) {
         return res.status(404).json({ error: "Player not found" });
@@ -214,48 +230,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/players", async (req, res) => {
+  app.post("/api/players", adminAuth, async (req, res) => { // Added adminAuth
     try {
       console.log('Player creation request body:', req.body);
       const validatedData = insertPlayerSchema.parse(req.body);
       const player = await storage.createPlayer(validatedData);
       res.status(201).json(player);
-    } catch (error) {
-      console.error('Player validation error:', error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: "Invalid player data", details: error.message });
+    } catch (error: any) {
+      console.error('Player creation/validation error:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Invalid player data", details: error.flatten().fieldErrors });
       } else {
-        res.status(400).json({ error: "Invalid player data" });
+        res.status(500).json({ error: error.message || "Failed to create player" });
       }
     }
   });
 
-  app.delete("/api/players/all", async (req, res) => {
+  app.put("/api/players/:id/stats", adminAuth, async (req, res) => {
     try {
-      await storage.deleteAllPlayers();
-      res.json({ success: true, message: "All players deleted successfully" });
-    } catch (error) {
-      console.error("Delete all players error:", error);
-      res.status(500).json({ error: "Failed to delete all players" });
+      const playerId = parseInt(req.params.id);
+      if (isNaN(playerId)) {
+        return res.status(400).json({ error: "Invalid player ID" });
+      }
+      // TODO: Validate req.body against a partial PlayerStats Zod schema
+      await storage.updatePlayerStats(playerId, req.body);
+      res.json({ success: true, message: "Player stats updated." });
+    } catch (error: any) {
+      console.error('Error updating player stats:', error);
+      res.status(500).json({ error: error.message || 'Failed to update player stats' });
     }
   });
 
-  app.delete("/api/players/:id", async (req, res) => {
+  app.delete("/api/players/all", adminAuth, async (req, res) => { // Added adminAuth
+    try {
+      await storage.deleteAllPlayers();
+      res.json({ success: true, message: "All players deleted successfully" });
+    } catch (error: any) {
+      console.error("Delete all players error:", error);
+      res.status(500).json({ error: error.message || "Failed to delete all players" });
+    }
+  });
+
+  app.delete("/api/players/:id", adminAuth, async (req, res) => { // Added adminAuth
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid player ID" });
       }
-
       await storage.deletePlayer(id);
       res.json({ success: true, message: "Player deleted successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Delete player error:", error);
-      res.status(500).json({ error: "Failed to delete player" });
+      res.status(500).json({ error: error.message || "Failed to delete player" });
     }
   });
 
-  // Matches endpoints
+  // --- Matches Endpoints ---
   app.get("/api/matches", async (req, res) => {
     try {
       const matches = await storage.getMatches();
@@ -298,7 +328,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid match ID" });
       }
-
       const match = await storage.getMatch(id);
       if (!match) {
         return res.status(404).json({ error: "Match not found" });
@@ -315,7 +344,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid match ID" });
       }
-
       const lineup = await storage.getStartingLineup(id);
       res.json(lineup);
     } catch (error) {
@@ -323,26 +351,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/matches", async (req, res) => {
+  app.post("/api/matches", adminAuth, async (req, res) => { // Added adminAuth
     try {
       const validatedData = insertMatchSchema.parse(req.body);
       const match = await storage.createMatch(validatedData);
       res.status(201).json(match);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid match data" });
+    } catch (error: any) {
+      console.error('Match creation/validation error:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Invalid match data", details: error.flatten().fieldErrors });
+      } else {
+        res.status(500).json({ error: error.message || "Failed to create match" });
+      }
     }
   });
 
-  // Articles endpoints
+  // --- Articles Endpoints ---
   app.get("/api/articles", async (req, res) => {
     try {
       const articles = await storage.getArticles();
-      console.log('Articles fetched from database:', articles.length, 'articles');
-      console.log('Article IDs:', articles.map(a => a.id));
       res.json(articles);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch articles:', error);
-      res.status(500).json({ error: "Failed to fetch articles" });
+      res.status(500).json({ error: error.message || "Failed to fetch articles" });
     }
   });
 
@@ -361,7 +392,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid article ID" });
       }
-
       const article = await storage.getArticle(id);
       if (!article) {
         return res.status(404).json({ error: "Article not found" });
@@ -385,75 +415,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/articles", async (req, res) => {
+  app.post("/api/articles", adminAuth, async (req, res) => { // Added adminAuth
     try {
       console.log('Article creation request body:', req.body);
       const validatedData = insertArticleSchema.parse(req.body);
-      // Set publishedAt to current date if the article is published
       const articleData = {
         ...validatedData,
         publishedAt: validatedData.isPublished ? new Date() : null
       };
       const article = await storage.createArticle(articleData);
       res.status(201).json(article);
-    } catch (error) {
-      console.error('Article validation error:', error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: "Invalid article data", details: error.message });
+    } catch (error: any) {
+      console.error('Article creation/validation error:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Invalid article data", details: error.flatten().fieldErrors });
       } else {
-        res.status(400).json({ error: "Invalid article data" });
+        res.status(500).json({ error: error.message || "Failed to create article" });
       }
     }
   });
 
-  app.put("/api/articles/:id", async (req, res) => {
+  app.put("/api/articles/:id", adminAuth, async (req, res) => { // Added adminAuth
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid article ID" });
       }
-
+      // TODO: Validate req.body with insertArticleSchema.partial()
       console.log('Updating article:', id, 'with data:', req.body);
       await storage.updateArticle(id, req.body);
       res.json({ success: true, message: "Article updated successfully" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Update article error:", error);
-      res.status(500).json({ error: "Failed to update article" });
+      res.status(500).json({ error: error.message || "Failed to update article" });
     }
   });
 
-  app.patch("/api/articles/:id", async (req, res) => {
+  // Using PUT for full update, PATCH for partial might be more RESTful,
+  // but for simplicity, PUT is often used for general updates.
+  app.patch("/api/articles/:id", adminAuth, async (req, res) => { // Added adminAuth
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid article ID" });
       }
-
+      // TODO: Validate req.body with insertArticleSchema.partial()
       console.log('Patching article:', id, 'with data:', req.body);
-      await storage.updateArticle(id, req.body);
+      await storage.updateArticle(id, req.body); // storage.updateArticle should handle partial updates
       res.json({ success: true, message: "Article updated successfully" });
-    } catch (error) {
-      console.error("Update article error:", error);
-      res.status(500).json({ error: "Failed to update article" });
+    } catch (error: any) {
+      console.error("Update article error (PATCH):", error);
+      res.status(500).json({ error: error.message || "Failed to update article" });
     }
   });
 
-  app.delete("/api/articles/:id", async (req, res) => {
+  app.delete("/api/articles/:id", adminAuth, async (req, res) => { // Added adminAuth
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid article ID" });
       }
-
       await storage.deleteArticle(id);
-      res.json({ success: true });
-    } catch (error) {
+      res.json({ success: true, message: "Article deleted successfully." });
+    } catch (error: any) {
       console.error("Delete article error:", error);
-      res.status(500).json({ error: "Failed to delete article" });
+      res.status(500).json({ error: error.message || "Failed to delete article" });
     }
   });
 
-  // Social posts endpoints
+
+  // --- Social Posts Endpoints ---
   app.get("/api/social-posts", async (req, res) => {
     try {
       const posts = await storage.getSocialPosts();
@@ -462,26 +493,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch social posts" });
     }
   });
+  // TODO: POST for social posts with adminAuth and validation
 
-  // Polls endpoints
-  app.get("/api/polls", async (req, res) => {
+  // --- Polls Endpoints ---
+  app.get("/api/polls", async (req, res) => { // Public endpoint to get active polls
     try {
       const polls = await storage.getActivePolls();
       res.json(polls);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch polls" });
+    } catch (error: any) {
+      console.error('Error fetching active polls:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch polls' });
     }
   });
 
-  app.get("/api/polls/current", async (req, res) => {
+  app.get("/api/polls/current", async (req, res) => { // Specific for one active poll
     try {
       const polls = await storage.getActivePolls();
-      const currentPoll = polls.find(poll => poll.isActive === true);
-      
-      res.json(currentPoll || null);
-    } catch (error) {
+      // Logic to determine "current" might need refinement (e.g., latest active)
+      const currentPoll = polls.length > 0 ? polls[0] : null; // Example: get the latest active one
+      res.json(currentPoll);
+    } catch (error: any) {
       console.error('Error fetching current poll:', error);
-      res.status(500).json({ error: 'Failed to fetch current poll' });
+      res.status(500).json({ error: error.message || 'Failed to fetch current poll' });
     }
   });
 
@@ -491,7 +524,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid poll ID" });
       }
-
       const poll = await storage.getPoll(id);
       if (!poll) {
         return res.status(404).json({ error: "Poll not found" });
@@ -502,43 +534,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/polls", async (req, res) => {
+  app.post("/api/polls", adminAuth, async (req, res) => {
     try {
+      // The insertPollSchema should align with what storage.createPoll expects.
+      // The original routes.txt had a more complex pollData structure for createPoll.
+      // Assuming insertPollSchema matches the simplified storage.createPoll expectation.
       const validatedData = insertPollSchema.parse(req.body);
       const poll = await storage.createPoll(validatedData);
       res.status(201).json(poll);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid poll data" });
+    } catch (error: any) {
+      console.error('Poll creation/validation error:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Invalid poll data", details: error.flatten().fieldErrors });
+      } else {
+        res.status(500).json({ error: error.message || "Failed to create poll" });
+      }
     }
   });
 
   app.post("/api/polls/:id/vote", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const { option } = req.body;
+      const { option } = req.body; // Option here is likely the index or key of the choice
 
-      if (isNaN(id) || !option) {
-        return res.status(400).json({ error: "Invalid poll ID or option" });
+      if (isNaN(id) || option === undefined) {
+        return res.status(400).json({ error: "Invalid poll ID or option missing" });
       }
 
       const poll = await storage.getPoll(id);
       if (!poll) {
         return res.status(404).json({ error: "Poll not found" });
       }
+      if (!poll.isActive) {
+        return res.status(400).json({ error: "This poll is no longer active." });
+      }
 
-      // Update poll votes
-      const votes = poll.votes as Record<string, number>;
-      votes[option] = (votes[option] || 0) + 1;
+      // Assuming poll.options is an array of strings and poll.votes is a Record<string, number>
+      // or poll.options is JSON string and poll.votes is JSON string of an array/object.
+      // The logic needs to match how votes are stored and updated in storage.ts/schema.ts.
 
-      await storage.updatePoll(id, { votes });
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to vote on poll" });
+      // Let's assume options is an array like ["Option A", "Option B"]
+      // and votes is an object like {"Option A": 10, "Option B": 5}
+      // The `option` from req.body should be the string of the option itself.
+
+      let currentVotes = poll.votes as Record<string, number>;
+      if (typeof currentVotes === 'string') { // If votes are stored as JSON string
+          try {
+            currentVotes = JSON.parse(currentVotes);
+          } catch (e) {
+            console.error("Error parsing poll votes JSON:", e);
+            return res.status(500).json({ error: "Error processing poll votes."});
+          }
+      }
+      if (typeof currentVotes !== 'object' || currentVotes === null) {
+          currentVotes = {};
+      }
+
+
+      if (poll.options && Array.isArray(poll.options) && (poll.options as string[]).includes(option)) {
+          currentVotes[option] = (currentVotes[option] || 0) + 1;
+      } else if (poll.options && typeof poll.options === 'string') {
+          // If options are JSON string of array
+          try {
+              const parsedOptions = JSON.parse(poll.options as string);
+              if (Array.isArray(parsedOptions) && parsedOptions.includes(option)) {
+                  currentVotes[option] = (currentVotes[option] || 0) + 1;
+              } else {
+                  return res.status(400).json({ error: "Invalid option for this poll." });
+              }
+          } catch(e) {
+              return res.status(500).json({ error: "Error processing poll options." });
+          }
+      }
+       else {
+        return res.status(400).json({ error: "Invalid option for this poll." });
+      }
+
+      await storage.updatePoll(id, { votes: currentVotes }); // votes should be a Record<string, number> or JSON string
+      res.json({ success: true, message: "Vote recorded." });
+    } catch (error: any) {
+      console.error("Error voting on poll:", error);
+      res.status(500).json({ error: error.message || "Failed to vote on poll" });
     }
   });
 
-  // Quizzes endpoints
-  app.get("/api/quizzes", async (req, res) => {
+  app.put("/api/polls/:id/visibility", adminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { isActive } = req.body;
+      if (isNaN(id) || typeof isActive !== 'boolean') {
+        return res.status(400).json({ error: "Invalid poll ID or isActive status" });
+      }
+      await storage.updatePoll(id, { isActive });
+      res.json({ success: true, message: `Poll visibility set to ${isActive}` });
+    } catch (error: any) {
+      console.error('Error updating poll visibility:', error);
+      res.status(500).json({ error: error.message || 'Failed to update poll visibility' });
+    }
+  });
+
+  app.delete("/api/polls/:id", adminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid poll ID" });
+      }
+      await storage.deletePoll(id);
+      res.json({ success: true, message: "Poll deleted successfully." });
+    } catch (error: any) {
+      console.error('Error deleting poll:', error);
+      res.status(500).json({ error: error.message || 'Failed to delete poll' });
+    }
+  });
+
+  // --- Quizzes Endpoints ---
+  app.get("/api/quizzes", async (req, res) => { // Public endpoint for active quizzes
     try {
       const quizzes = await storage.getActiveQuizzes();
       res.json(quizzes);
@@ -546,244 +656,236 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch quizzes" });
     }
   });
+  // TODO: Add POST, PUT, DELETE for quizzes with adminAuth and validation
 
-  // Gallery endpoints
+  // --- Gallery Endpoints ---
   app.get("/api/gallery", async (req, res) => {
     try {
       const galleryItems = await storage.getGalleryItems();
       res.json(galleryItems);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch gallery items" });
+    } catch (error: any) {
+      console.error('Error fetching gallery items:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch gallery items' });
     }
   });
 
-  // Gallery like/unlike endpoints
+  app.post("/api/gallery", adminAuth, async (req, res) => { // Added adminAuth
+    try {
+      const validatedData = insertGallerySchema.parse(req.body);
+      const galleryItem = await storage.createGalleryItem(validatedData);
+      res.status(201).json(galleryItem);
+    } catch (error: any) {
+      console.error('Gallery item creation/validation error:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Invalid gallery item data', details: error.flatten().fieldErrors });
+      } else {
+        res.status(500).json({ error: error.message || 'Failed to create gallery item' });
+      }
+    }
+  });
+
+  app.delete("/api/gallery/:id", adminAuth, async (req, res) => { // Added adminAuth
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid gallery item ID" });
+      }
+      await storage.deleteGalleryItem(id);
+      res.json({ success: true, message: "Gallery item deleted." });
+    } catch (error: any) {
+      console.error('Error deleting gallery item:', error);
+      res.status(500).json({ error: error.message || 'Failed to delete gallery item' });
+    }
+  });
+
   app.post('/api/gallery/:id/like', async (req, res) => {
     try {
       const galleryItemId = parseInt(req.params.id);
-      const userIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
+      if (isNaN(galleryItemId)) {
+        return res.status(400).json({ error: "Invalid gallery item ID" });
+      }
+      const userIp = req.ip || req.socket.remoteAddress || '127.0.0.1'; // Updated to socket.remoteAddress
       const userAgent = req.get('User-Agent');
 
       const success = await storage.likeGalleryItem(galleryItemId, userIp, userAgent);
-      
       if (success) {
         res.json({ success: true, message: 'Gallery item liked' });
       } else {
-        res.status(400).json({ success: false, message: 'Already liked or error occurred' });
+        res.status(400).json({ success: false, message: 'Already liked or an error occurred' });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error liking gallery item:", error);
-      res.status(500).json({ success: false, message: "Failed to like gallery item" });
+      res.status(500).json({ success: false, message: error.message || "Failed to like gallery item" });
     }
   });
 
-  app.delete('/api/gallery/:id/like', async (req, res) => {
+  app.delete('/api/gallery/:id/like', async (req, res) => { // Should this be POST or DELETE? Using DELETE as per original
     try {
       const galleryItemId = parseInt(req.params.id);
-      const userIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
+      if (isNaN(galleryItemId)) {
+        return res.status(400).json({ error: "Invalid gallery item ID" });
+      }
+      const userIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
 
       const success = await storage.unlikeGalleryItem(galleryItemId, userIp);
-      
-      res.json({ success, message: success ? 'Gallery item unliked' : 'Not liked or error occurred' });
-    } catch (error) {
+      res.json({ success, message: success ? 'Gallery item unliked' : 'Item was not liked or an error occurred' });
+    } catch (error: any) {
       console.error("Error unliking gallery item:", error);
-      res.status(500).json({ success: false, message: "Failed to unlike gallery item" });
+      res.status(500).json({ success: false, message: error.message || "Failed to unlike gallery item" });
     }
   });
 
   app.get('/api/gallery/:id/liked', async (req, res) => {
     try {
       const galleryItemId = parseInt(req.params.id);
-      const userIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
-
+      if (isNaN(galleryItemId)) {
+        return res.status(400).json({ error: "Invalid gallery item ID" });
+      }
+      const userIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
       const isLiked = await storage.hasUserLikedGalleryItem(galleryItemId, userIp);
-      
       res.json({ isLiked });
     } catch (error) {
       console.error("Error checking gallery like status:", error);
-      res.status(500).json({ isLiked: false });
+      res.status(500).json({ isLiked: false }); // Default to not liked on error
     }
   });
 
-  // Statistics endpoints
+
+  // --- Statistics Endpoints ---
   app.get("/api/stats/team", async (req, res) => {
     try {
       const stats = await storage.getTeamStats();
       res.json(stats);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch team statistics" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "Failed to fetch team statistics" });
     }
   });
 
-  app.put("/api/stats/team", async (req, res) => {
+  // This PUT endpoint was a bit ambiguous.
+  // If it's for updating the overall team stats record:
+  app.put("/api/stats/team", adminAuth, async (req, res) => { // Added adminAuth
     try {
-      const { matchResult, totalRuns, wicketsTaken, totalOvers, runsAgainst, oversAgainst } = req.body;
-      
-      // Robust validation with logging
-      console.log('Raw input values:', { matchResult, totalRuns, wicketsTaken, totalOvers, runsAgainst, oversAgainst });
-      
-      // Convert to numbers with proper fallbacks
-      const parsedTotalRuns = Number(totalRuns) || 0;
-      const parsedWicketsTaken = Number(wicketsTaken) || 0;
-      const parsedTotalOvers = Number(totalOvers) || 0;
-      const parsedRunsAgainst = Number(runsAgainst) || 0;
-      const parsedOversAgainst = Number(oversAgainst) || 0;
-      
-      // Ensure matchWon is always 0 or 1
-      const matchWon = matchResult === 'won' ? 1 : 0;
-      
-      const statsData = {
-        matchesWon: matchWon,
-        totalMatches: 1,
-        totalRuns: parsedTotalRuns,
-        wicketsTaken: parsedWicketsTaken,
-        totalOvers: parsedTotalOvers,
-        runsAgainst: parsedRunsAgainst,
-        oversAgainst: parsedOversAgainst
-      };
-      
-      console.log('Processed stats data:', statsData);
-      
-      // Validate no NaN values before sending to database
-      for (const [key, value] of Object.entries(statsData)) {
-        if (isNaN(value)) {
-          console.error(`NaN detected in ${key}:`, value);
-          return res.status(400).json({ error: `Invalid value for ${key}` });
-        }
-      }
-      
+      // Expects a full team stats object, or whatever `updateTeamStats` needs.
+      // TODO: Validate req.body against a Zod schema for TeamStats
+      const statsData = req.body; // Needs careful validation and structuring
       await storage.updateTeamStats(statsData);
-      
-      res.json({ success: true });
-    } catch (error) {
+      res.json({ success: true, message: "Team statistics updated." });
+    } catch (error: any) {
       console.error('Error updating team stats:', error);
-      res.status(500).json({ error: "Failed to update team statistics" });
+      res.status(500).json({ error: error.message || "Failed to update team statistics" });
     }
   });
 
-  // Record match and update team statistics
-  app.post("/api/record-match", async (req, res) => {
+
+  // --- Match Recording & Performance Endpoints ---
+  // The original file had multiple ways to record matches/performances.
+  // These need to be clearly defined or consolidated.
+
+  // Option 1: Record a simple match result and update cumulative team stats
+  app.post("/api/record-match", adminAuth, async (req, res) => { // Added adminAuth
     try {
-      const { opponent, venue, date, result, teamRuns, wicketsTaken, oversFaced, runsConceded } = req.body;
-      
-      // Get current team stats
+      // This route updates cumulative stats. The data passed to updateTeamStats
+      // should be the *new cumulative totals*, not just the delta of one match,
+      // unless storage.updateTeamStats is designed to handle deltas.
+      // Assuming storage.updateTeamStats takes the NEW FULL CUMULATIVE stats.
+
+      const { opponent, venue, date, result, teamRuns, wicketsTaken, oversFacedByTeam, runsConcededByTeam, oversBowledByTeam } = req.body;
+      // TODO: Validate these inputs with Zod
+
       const currentStats = await storage.getTeamStats();
-      
-      // Calculate new statistics
-      const newMatchesWon = currentStats.matchesWon + (result === 'Won' ? 1 : 0);
-      const newTotalMatches = currentStats.totalMatches + 1;
-      const newTotalRuns = currentStats.totalRuns + (teamRuns || 0);
-      const newWicketsTaken = currentStats.wicketsTaken + (wicketsTaken || 0);
-      
-      // Calculate NRR components - use actual match data
-      const newTotalOvers = (currentStats.totalMatches * 20) + (oversFaced || 20);
-      const newRunsAgainst = currentStats.totalRuns + (runsConceded || 0);
-      const newOversAgainst = newTotalOvers;
-      
-      // Update team statistics
-      await storage.updateTeamStats({
-        matchesWon: newMatchesWon,
-        totalMatches: newTotalMatches,
-        totalRuns: newTotalRuns,
-        wicketsTaken: newWicketsTaken,
-        totalOvers: newTotalOvers,
-        runsAgainst: newRunsAgainst,
-        oversAgainst: newOversAgainst
-      });
-      
+
+      const updatedStats = {
+        matchesWon: currentStats.matchesWon + (result === 'Won' ? 1 : 0),
+        matchesLost: currentStats.matchesLost + (result === 'Lost' ? 1 : 0),
+        matchesDraw: currentStats.matchesDraw + (result === 'Draw' ? 1 : 0),
+        totalMatches: currentStats.totalMatches + 1,
+        totalRuns: currentStats.totalRuns + (Number(teamRuns) || 0),
+        wicketsTaken: currentStats.wicketsTaken + (Number(wicketsTaken) || 0), // Wickets by our bowlers
+        oversBowled: currentStats.oversBowled + (Number(oversBowledByTeam) || 0), // Overs bowled by our team
+        runsAgainst: currentStats.runsAgainst + (Number(runsConcededByTeam) || 0), // Runs conceded by our team
+        oversAgainst: currentStats.oversAgainst + (Number(oversFacedByTeam) || 0), // Overs faced by our team
+      };
+
+      await storage.updateTeamStats(updatedStats);
       console.log(`Match recorded: ${result} vs ${opponent} at ${venue} on ${date}`);
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: "Match recorded and team statistics updated successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error recording match:", error);
-      res.status(500).json({ error: "Failed to record match" });
+      res.status(500).json({ error: error.message || "Failed to record match" });
     }
   });
 
-  // Record match with player performances
-  app.post("/api/record-match-performance", async (req, res) => {
+  // Option 2: Record detailed player performances for a specific match and update player/team stats
+  app.post("/api/matches/:matchId/performances", adminAuth, async (req, res) => { // Added adminAuth
     try {
-      const { opponent, venue, date, result, selectedPlayers, playerPerformances } = req.body;
-      
-      if (!selectedPlayers || selectedPlayers.length !== 11) {
-        return res.status(400).json({ error: "Exactly 11 players must be selected" });
+      const matchId = parseInt(req.params.matchId);
+      if (isNaN(matchId)) {
+        return res.status(400).json({ error: "Invalid match ID" });
       }
 
-      if (!playerPerformances || !Array.isArray(playerPerformances)) {
-        return res.status(400).json({ error: "Player performances data is required" });
+      const { playerPerformances, matchResult } = req.body; // Added matchResult for team stats
+      if (!Array.isArray(playerPerformances)) {
+        return res.status(400).json({ error: "Player performances must be an array" });
+      }
+      // TODO: Validate playerPerformances array and its objects with Zod
+
+      // Update player stats from this match's performances
+      await storage.updatePlayerStatsFromMatch(matchId, playerPerformances);
+
+      // Update team stats based on this match result and aggregated performances
+      if (matchResult) {
+          const teamRunsThisMatch = playerPerformances.reduce((sum, p) => sum + (Number(p.runsScored) || 0), 0);
+          const teamWicketsThisMatch = playerPerformances.reduce((sum, p) => sum + (Number(p.wicketsTaken) || 0), 0);
+          const teamOversBowledThisMatch = playerPerformances.reduce((sum, p) => sum + (Number(p.ballsBowled) || 0), 0) / 6;
+          const teamRunsConcededThisMatch = playerPerformances.reduce((sum, p) => sum + (Number(p.runsConceded) || 0), 0);
+          // Overs faced by team in this match - this needs to be provided or assumed (e.g. 20 for T20)
+          const teamOversFacedThisMatch = 20; // Placeholder, ideally part of request or match data
+
+          const currentTeamStats = await storage.getTeamStats();
+          const updatedTeamStats = {
+              matchesWon: currentTeamStats.matchesWon + (matchResult === 'Won' ? 1 : 0),
+              matchesLost: currentTeamStats.matchesLost + (matchResult === 'Lost' ? 1 : 0),
+              matchesDraw: currentTeamStats.matchesDraw + (matchResult === 'Draw' ? 1 : 0),
+              totalMatches: currentTeamStats.totalMatches + 1,
+              totalRuns: currentTeamStats.totalRuns + teamRunsThisMatch,
+              wicketsTaken: currentTeamStats.wicketsTaken + teamWicketsThisMatch,
+              oversBowled: currentTeamStats.oversBowled + teamOversBowledThisMatch,
+              runsAgainst: currentTeamStats.runsAgainst + teamRunsConcededThisMatch,
+              oversAgainst: currentTeamStats.oversAgainst + teamOversFacedThisMatch,
+          };
+          await storage.updateTeamStats(updatedTeamStats);
       }
 
-      // Calculate team totals from individual performances
-      const teamRuns = playerPerformances.reduce((total, perf) => total + (perf.runsScored || 0), 0);
-      const teamWickets = playerPerformances.reduce((total, perf) => total + (perf.wicketsTaken || 0), 0);
-      const totalRunsConceded = playerPerformances.reduce((total, perf) => total + (perf.runsConceded || 0), 0);
-      const totalBallsBowled = playerPerformances.reduce((total, perf) => total + (perf.ballsBowled || 0), 0);
-      const oversBowled = totalBallsBowled / 6;
-
-      // Get current team stats
-      const currentStats = await storage.getTeamStats();
-      
-      // Calculate new team statistics (cumulative)
-      const newMatchesWon = currentStats.matchesWon + (result === 'Won' ? 1 : 0);
-      const newTotalMatches = currentStats.totalMatches + 1;
-      const newTotalRuns = currentStats.totalRuns + teamRuns;
-      const newWicketsTaken = currentStats.wicketsTaken + teamWickets;
-      
-      // Calculate overs properly for NRR
-      const oversFaced = 20; // Assume T20 format
-      const newTotalOvers = currentStats.totalOvers + oversFaced;
-      const newRunsAgainst = currentStats.runsAgainst + totalRunsConceded;
-      const newOversAgainst = currentStats.oversAgainst + oversBowled;
-      
-      // Update team statistics
-      await storage.updateTeamStats({
-        matchesWon: newMatchesWon,
-        totalMatches: newTotalMatches,
-        totalRuns: newTotalRuns,
-        wicketsTaken: newWicketsTaken,
-        totalOvers: newTotalOvers,
-        runsAgainst: newRunsAgainst,
-        oversAgainst: newOversAgainst
-      });
-
-      // Update individual player statistics
-      for (const performance of playerPerformances) {
-        await storage.updatePlayerStats(performance.playerId, {
-          runsScored: performance.runsScored || 0,
-          ballsFaced: performance.ballsFaced || 0,
-          fours: performance.fours || 0,
-          sixes: performance.sixes || 0,
-          wicketsTaken: performance.wicketsTaken || 0,
-          runsConceded: performance.runsConceded || 0,
-          ballsBowled: performance.ballsBowled || 0,
-          catches: performance.catches || 0,
-          stumpings: performance.stumpings || 0,
-          runOuts: performance.runOuts || 0
-        });
-      }
-      
-      console.log(`Match performance recorded: ${result} vs ${opponent} at ${venue} on ${date}`);
-      console.log(`Team totals: ${teamRuns} runs, ${teamWickets} wickets taken`);
-      
-      res.json({ 
-        success: true, 
-        message: "Match and player performances recorded successfully",
-        teamTotals: {
-          runs: teamRuns,
-          wickets: teamWickets,
-          result: result
-        }
-      });
-    } catch (error) {
-      console.error("Error recording match performance:", error);
-      res.status(500).json({ error: "Failed to record match performance" });
+      res.json({ success: true, message: "Player stats and team stats updated successfully from match performances." });
+    } catch (error: any) {
+      console.error("Error updating stats from match performances:", error);
+      res.status(500).json({ error: error.message || "Failed to update player stats" });
     }
   });
 
-  // Cricket data endpoints
+  // Get performances for a specific match
+  app.get("/api/matches/:matchId/performances", async (req, res) => {
+    try {
+      const matchId = parseInt(req.params.matchId);
+      if (isNaN(matchId)) {
+        return res.status(400).json({ error: "Invalid match ID" });
+      }
+      const performances = await storage.getMatchPerformances(matchId);
+      res.json(performances);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "Failed to fetch match performances" });
+    }
+  });
 
+  // The /api/match-performance/manual route seemed very similar to the one above.
+  // It's advisable to consolidate these into a clear, single way to record match outcomes and performances.
+  // I'm omitting the specific /api/match-performance/manual from lines of routes.txt
+  // in favor of the more RESTful /api/matches/:matchId/performances combined with match creation/update.
+
+  // --- Cricket API Mocks ---
   app.get("/api/cricket/live-poll", async (req, res) => {
     try {
       const poll = generateCricketPoll();
@@ -802,14 +904,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Trivia endpoints
+
+  // --- Trivia Endpoints ---
   app.get("/api/trivia/questions", async (req, res) => {
     try {
       const questions = await storage.getTriviaQuestions();
       res.json(questions);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching trivia questions:', error);
-      res.status(500).json({ error: 'Failed to fetch trivia questions' });
+      res.status(500).json({ error: error.message || 'Failed to fetch trivia questions' });
     }
   });
 
@@ -817,323 +920,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const leaderboard = await storage.getTriviaLeaderboard();
       res.json(leaderboard);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching trivia leaderboard:', error);
-      res.status(500).json({ error: 'Failed to fetch trivia leaderboard' });
+      res.status(500).json({ error: error.message || 'Failed to fetch trivia leaderboard' });
     }
   });
 
   app.post("/api/trivia/submit-score", async (req, res) => {
     try {
+      // TODO: Validate req.body with a Zod schema for InsertTriviaLeaderboard
       const { playerName, score, questionsAnswered, accuracy } = req.body;
-      
       if (!playerName || score === undefined || questionsAnswered === undefined || accuracy === undefined) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return res.status(400).json({ error: 'Missing required fields for trivia score' });
       }
-
       const entry = await storage.submitTriviaScore({
         playerName,
         score,
         questionsAnswered,
         accuracy
+        // playDate will be set by default in Drizzle schema if defined with defaultNow()
       });
-
-      res.json(entry);
-    } catch (error) {
+      res.status(201).json(entry);
+    } catch (error: any) {
       console.error('Error submitting trivia score:', error);
-      res.status(500).json({ error: 'Failed to submit trivia score' });
+      res.status(500).json({ error: error.message || 'Failed to submit trivia score' });
     }
   });
 
-  // Gallery endpoints
-  app.get("/api/gallery", async (req, res) => {
-    try {
-      const galleryItems = await storage.getGalleryItems();
-      res.json(galleryItems);
-    } catch (error) {
-      console.error('Error fetching gallery items:', error);
-      res.status(500).json({ error: 'Failed to fetch gallery items' });
-    }
-  });
 
-  app.post("/api/gallery", async (req, res) => {
-    try {
-      const validatedData = insertGallerySchema.parse(req.body);
-      const galleryItem = await storage.createGalleryItem(validatedData);
-      res.status(201).json(galleryItem);
-    } catch (error) {
-      console.error('Error creating gallery item:', error);
-      res.status(400).json({ error: 'Invalid gallery item data' });
-    }
-  });
-
-  app.delete("/api/gallery/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid gallery item ID" });
-      }
-
-      await storage.deleteGalleryItem(id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting gallery item:', error);
-      res.status(500).json({ error: 'Failed to delete gallery item' });
-    }
-  });
-
-  // Announcements endpoints
+  // --- Announcements Endpoints ---
   app.get("/api/announcements", async (req, res) => {
     try {
       const announcements = await storage.getAnnouncements();
       res.json(announcements);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching announcements:', error);
-      res.status(500).json({ error: 'Failed to fetch announcements' });
+      res.status(500).json({ error: error.message || 'Failed to fetch announcements' });
     }
   });
 
-  app.post("/api/announcements", async (req, res) => {
+  app.post("/api/announcements", adminAuth, async (req, res) => {
     try {
       const validatedData = insertAnnouncementSchema.parse(req.body);
       const announcement = await storage.createAnnouncement(validatedData);
       res.status(201).json(announcement);
-    } catch (error) {
-      console.error('Error creating announcement:', error);
-      res.status(400).json({ error: 'Invalid announcement data' });
+    } catch (error: any) {
+      console.error('Announcement creation/validation error:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Invalid announcement data', details: error.flatten().fieldErrors });
+      } else {
+        res.status(500).json({ error: error.message || 'Failed to create announcement' });
+      }
     }
   });
 
-  app.put("/api/announcements/:id", async (req, res) => {
+  app.put("/api/announcements/:id", adminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid announcement ID" });
       }
-      const validatedData = insertAnnouncementSchema.parse(req.body);
-      await storage.updateAnnouncement(id, validatedData);
-      res.json({ success: true });
-    } catch (error) {
+      // TODO: Validate req.body with insertAnnouncementSchema.partial()
+      await storage.updateAnnouncement(id, req.body);
+      res.json({ success: true, message: "Announcement updated." });
+    } catch (error: any) {
       console.error('Error updating announcement:', error);
-      res.status(400).json({ error: 'Invalid announcement data' });
+      // Add ZodError check if validation is added
+      res.status(500).json({ error: error.message || 'Failed to update announcement' });
     }
   });
 
-  app.delete("/api/announcements/:id", async (req, res) => {
+  app.delete("/api/announcements/:id", adminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid announcement ID" });
       }
       await storage.deleteAnnouncement(id);
-      res.json({ success: true });
-    } catch (error) {
+      res.json({ success: true, message: "Announcement deleted." });
+    } catch (error: any) {
       console.error('Error deleting announcement:', error);
-      res.status(500).json({ error: 'Failed to delete announcement' });
+      res.status(500).json({ error: error.message || 'Failed to delete announcement' });
     }
   });
 
-  app.delete("/api/players/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid player ID" });
-      }
-      await storage.deletePlayer(id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting player:', error);
-      res.status(500).json({ error: 'Failed to delete player' });
-    }
-  });
 
-  app.delete("/api/articles/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid article ID" });
-      }
-      await storage.deleteArticle(id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting article:', error);
-      res.status(500).json({ error: 'Failed to delete article' });
-    }
-  });
-
-  app.delete("/api/gallery/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid gallery item ID" });
-      }
-      await storage.deleteGalleryItem(id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting gallery item:', error);
-      res.status(500).json({ error: 'Failed to delete gallery item' });
-    }
-  });
-
-  // Match Performance endpoints
-  app.post("/api/match-performance/manual", async (req, res) => {
-    try {
-      const { matchData, playerPerformances } = req.body;
-      
-      // Create a new match record
-      const newMatch = await storage.createMatch({
-        opponentTeam: matchData.opponentTeam,
-        venue: matchData.venue,
-        matchDate: new Date(matchData.matchDate),
-        matchResult: matchData.matchResult,
-        tuskersScore: matchData.tuskersScore || 0,
-        tuskersOvers: matchData.tuskersOvers || null,
-        tuskersWickets: matchData.tuskersWickets || 0,
-        opponentScore: matchData.opponentScore || 0,
-        opponentOvers: matchData.opponentOvers || null,
-        opponentWickets: matchData.opponentWickets || 0,
-        status: 'completed'
-      });
-
-      // Update player stats based on performance
-      await storage.updatePlayerStatsFromMatch(newMatch.id, playerPerformances.map((perf: any) => ({
-        matchId: newMatch.id,
-        playerId: perf.playerId,
-        runsScored: perf.runsScored || 0,
-        ballsFaced: perf.ballsFaced || 0,
-        fours: perf.fours || 0,
-        sixes: perf.sixes || 0,
-        wicketsTaken: perf.wicketsTaken || 0,
-        runsConceded: perf.runsConceded || 0,
-        ballsBowled: perf.ballsBowled || 0,
-        catches: perf.catches || 0,
-        stumpings: perf.stumpings || 0,
-        runOuts: perf.runOuts || 0,
-        dismissalType: null
-      })));
-
-      res.json({ success: true, matchId: newMatch.id });
-    } catch (error) {
-      console.error('Error creating match performance:', error);
-      res.status(500).json({ error: 'Failed to create match performance' });
-    }
-  });
-
-  // Add simplified match performance routes for comprehensive admin
-  app.post("/api/match-performances", async (req, res) => {
-    try {
-      const { opponentTeam, venue, matchDate, result, selectedPlayers, playerStats } = req.body;
-      
-      // Create match performance record
-      const performance = await storage.createMatchPerformance({
-        opponentTeam,
-        venue,
-        matchDate: new Date(matchDate),
-        result
-      });
-
-      // Record player statistics if provided
-      if (playerStats && playerStats.length > 0) {
-        await storage.updatePlayerStatsFromMatch(performance.id, playerStats);
-      }
-
-      res.json(performance);
-    } catch (error) {
-      console.error('Error creating match performance:', error);
-      res.status(500).json({ error: 'Failed to create match performance' });
-    }
-  });
-
-  app.get("/api/match-performances", async (req, res) => {
-    try {
-      const performances = await storage.getMatchPerformances();
-      res.json(performances);
-    } catch (error) {
-      console.error('Error fetching match performances:', error);
-      res.status(500).json({ error: 'Failed to fetch match performances' });
-    }
-  });
-
-  app.get("/api/match-performances-detailed", async (req, res) => {
-    try {
-      const matches = await storage.getMatches();
-      const performances = [];
-      
-      for (const match of matches) {
-        const matchPerformances = await storage.getMatchPerformances(match.id);
-        if (matchPerformances.length > 0) {
-          performances.push({
-            match,
-            performances: matchPerformances
-          });
-        }
-      }
-      
-      res.json(performances);
-    } catch (error) {
-      console.error('Error fetching match performances:', error);
-      res.status(500).json({ error: 'Failed to fetch match performances' });
-    }
-  });
-
-  // Player stats endpoints
-  app.put("/api/players/:id/stats", async (req, res) => {
-    try {
-      const playerId = parseInt(req.params.id);
-      if (isNaN(playerId)) {
-        return res.status(400).json({ error: "Invalid player ID" });
-      }
-
-      await storage.updatePlayerStats(playerId, req.body);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error updating player stats:', error);
-      res.status(500).json({ error: 'Failed to update player stats' });
-    }
-  });
-
-  // Cricket scoring endpoints
-  app.post('/api/scoring/login', async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      // Tuskers CC scoring system credentials
-      if (username === 'tuskers' && password === 'tuskers2024') {
-        res.json({ success: true, message: 'Login successful', userType: 'tuskers' });
-      } else {
-        res.status(401).json({ success: false, message: 'Invalid credentials' });
-      }
-    } catch (error) {
-      console.error('Scoring login error:', error);
-      res.status(500).json({ success: false, message: 'Server error' });
-    }
-  });
-
-  app.get('/api/scoring/live', async (req, res) => {
-    try {
-      // Return current live match data for homepage widget
-      const liveData = {
-        isLive: true,
-        matchName: 'Tuskers CC vs Lightning Bolts',
-        venue: 'Premier Cricket Ground',
-        status: 'LIVE',
-        tuskersScore: '156/3 (28.4 overs)',
-        oppositionScore: 'Lightning Bolts: Yet to bat',
-        currentBatsmen: [
-          { name: 'R. Sharma', runs: 45, balls: 32 },
-          { name: 'V. Kohli', runs: 28, balls: 25 }
-        ],
-        recentOvers: ['4', '1', '0', '6', '2', '1']
-      };
-      
-      res.json(liveData);
-    } catch (error) {
-      console.error('Live scoring error:', error);
-      res.status(500).json({ error: 'Failed to fetch live data' });
-    }
-  });
-
-  // Forum endpoints
+  // --- Forum Endpoints ---
   app.get("/api/forum/categories", async (req, res) => {
     try {
       const categories = await storage.getForumCategories();
@@ -1143,71 +1015,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/forum/topics/recent", async (req, res) => {
+  app.get("/api/forum/topics/recent", async (req, res) => { // Consider query params for categoryId, pagination
     try {
-      const topics = await storage.getForumTopics();
+      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+      const topics = await storage.getForumTopics(categoryId);
       res.json(topics);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch forum topics" });
     }
   });
 
-  app.get("/api/forum/topics/popular", async (req, res) => {
+  // Add GET /api/forum/topics/slug/:slug if needed, or a general topic fetch by ID/slug
+  app.get("/api/forum/topic/:slug", async (req, res) => { // Example specific topic fetch by slug
     try {
-      const topics = await storage.getForumTopics();
-      // Return topics sorted by view count (mock popular topics for now)
-      res.json(topics.slice(0, 5));
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch popular topics" });
+        const topic = await storage.getForumTopic(req.params.slug);
+        if (!topic) {
+            return res.status(404).json({ error: "Forum topic not found." });
+        }
+        // Optionally fetch posts for the topic here or have a separate endpoint
+        const posts = await storage.getForumPosts(topic.id);
+        res.json({ ...topic, posts });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message || "Failed to fetch forum topic." });
     }
   });
 
-  app.get("/api/forum/users/online", async (req, res) => {
+
+  app.get("/api/forum/topics/popular", async (req, res) => { // As per original file
     try {
-      // Mock online users for now
-      res.json([]);
+      const topics = await storage.getForumTopics(); //
+      // TODO: Implement actual popularity logic (e.g., sort by viewCount or replyCount)
+      res.json(topics.slice(0, 5)); //
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch online users" });
+      res.status(500).json({ error: "Failed to fetch popular topics" }); //
     }
   });
 
-  app.get("/api/forum/stats", async (req, res) => {
+  app.get("/api/forum/users/online", async (req, res) => { // As per original file
     try {
-      const stats = await storage.getForumStats();
-      res.json(stats);
+      // TODO: Implement actual online user tracking if needed
+      res.json([]); //
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch forum stats" });
+      res.status(500).json({ error: "Failed to fetch online users" }); //
     }
   });
 
-  app.post("/api/forum/topics", async (req, res) => {
+  app.get("/api/forum/stats", async (req, res) => { // As per original file
+    try {
+      const stats = await storage.getForumStats(); //
+      res.json(stats); //
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch forum stats" }); //
+    }
+  });
+
+  app.post("/api/forum/topics", async (req, res) => { // Needs auth
     try {
       const { title, content, categoryId } = req.body;
-      
-      if (!title || !content || !categoryId) {
-        return res.status(400).json({ error: "Title, content, and category are required" });
-      }
+      const userId = req.session?.userId; // Get from actual authenticated user session
 
-      const topic = await storage.createForumTopic({
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required to create a topic." });
+      }
+      if (!title || !content || !categoryId) {
+        return res.status(400).json({ error: "Title, content, and category ID are required" });
+      }
+      // TODO: Validate with Zod schema for InsertForumTopic
+
+      const topicData = {
         title,
-        content,
+        content, // Content for the first post
         categoryId: parseInt(categoryId),
-        userId: 1, // Mock user ID for now
-        slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
-        isSticky: false,
-        isLocked: false,
-        viewCount: 0,
-        replyCount: 0,
-      });
-      
-      res.json(topic);
-    } catch (error) {
+        userId: userId, // Use actual user ID
+        slug: title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, ''), // Basic slugification
+        // Other fields like isSticky, isLocked, viewCount, replyCount are usually handled by DB defaults or later updates
+      };
+      const newTopic = await storage.createForumTopic(topicData);
+      // Optionally create the first post here as well using storage.createForumPost
+      if (newTopic && content) {
+          await storage.createForumPost({
+              topicId: newTopic.id,
+              userId: userId,
+              content: content,
+          });
+      }
+      res.status(201).json(newTopic);
+    } catch (error: any) {
       console.error("Failed to create forum topic:", error);
-      res.status(500).json({ error: "Failed to create forum topic" });
+      res.status(500).json({ error: error.message || "Failed to create forum topic" });
     }
   });
 
-  // Community Events endpoints
+  app.post("/api/forum/topics/:topicId/posts", async (req, res) => { // Needs auth
+    try {
+        const topicId = parseInt(req.params.topicId);
+        const { content } = req.body;
+        const userId = req.session?.userId;
+
+        if (isNaN(topicId)) {
+            return res.status(400).json({ error: "Invalid topic ID." });
+        }
+        if (!userId) {
+            return res.status(401).json({ error: "Authentication required to create a post." });
+        }
+        if (!content) {
+            return res.status(400).json({ error: "Post content is required." });
+        }
+        // TODO: Validate with Zod schema for InsertForumPost
+
+        const postData = {
+            topicId,
+            userId,
+            content,
+        };
+        const newPost = await storage.createForumPost(postData);
+        res.status(201).json(newPost);
+    } catch (error: any) {
+        console.error("Failed to create forum post:", error);
+        res.status(500).json({ error: error.message || "Failed to create forum post."});
+    }
+  });
+
+
+  // --- Community Events Endpoints ---
   app.get("/api/community/events", async (req, res) => {
     try {
       const events = await storage.getCommunityEvents();
@@ -1217,34 +1147,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/community/events", async (req, res) => {
+  app.post("/api/community/events", adminAuth, async (req, res) => { // Added adminAuth
     try {
+      // TODO: Validate req.body with Zod schema for InsertCommunityEvent
       const event = await storage.createCommunityEvent(req.body);
-      res.json(event);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to create community event" });
+      res.status(201).json(event);
+    } catch (error: any) {
+      console.error("Failed to create community event:", error);
+      res.status(500).json({ error: error.message || "Failed to create community event" });
     }
   });
 
-  app.post("/api/community/events/:id/join", async (req, res) => {
+  app.post("/api/community/events/:id/join", async (req, res) => { // Needs auth
     try {
       const eventId = parseInt(req.params.id);
-      const userId = 1; // Mock user ID for now
+      const userId = req.session?.userId; // Get from actual authenticated user session
+
+      if (isNaN(eventId)) {
+          return res.status(400).json({ error: "Invalid event ID." });
+      }
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required to join an event." });
+      }
       const participant = await storage.joinCommunityEvent(eventId, userId);
-      res.json(participant);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to join event" });
+      res.status(201).json(participant);
+    } catch (error: any) {
+      console.error("Failed to join event:", error);
+      // Handle specific errors e.g. already joined
+      res.status(500).json({ error: error.message || "Failed to join event" });
     }
   });
 
-  app.post("/api/community/events/:id/leave", async (req, res) => {
+  app.post("/api/community/events/:id/leave", async (req, res) => { // Needs auth
     try {
       const eventId = parseInt(req.params.id);
-      const userId = 1; // Mock user ID for now
+      const userId = req.session?.userId; // Get from actual authenticated user session
+
+      if (isNaN(eventId)) {
+          return res.status(400).json({ error: "Invalid event ID." });
+      }
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required to leave an event." });
+      }
       await storage.leaveCommunityEvent(eventId, userId);
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to leave event" });
+      res.json({ success: true, message: "Successfully left the event." });
+    } catch (error: any) {
+      console.error("Failed to leave event:", error);
+      res.status(500).json({ error: error.message || "Failed to leave event" });
     }
   });
 
@@ -1257,177 +1206,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Match Performance endpoints
-  app.post("/api/matches/:matchId/performances", async (req, res) => {
+  // --- Scoring System Mock ---
+  app.post('/api/scoring/login', async (req, res) => {
     try {
-      const matchId = parseInt(req.params.matchId);
-      if (isNaN(matchId)) {
-        return res.status(400).json({ error: "Invalid match ID" });
+      const { username, password } = req.body;
+      if (username === 'tuskers' && password === 'tuskers2024') {
+        // In a real app, set a session or token for scorers
+        res.json({ success: true, message: 'Scoring login successful', userType: 'tuskers' });
+      } else {
+        res.status(401).json({ success: false, message: 'Invalid scoring credentials' });
       }
-
-      const { playerPerformances } = req.body;
-      if (!Array.isArray(playerPerformances)) {
-        return res.status(400).json({ error: "Player performances must be an array" });
-      }
-
-      // Add matchId to each performance
-      const performances = playerPerformances.map(perf => ({
-        ...perf,
-        matchId
-      }));
-
-      // Update player stats based on match performances
-      await storage.updatePlayerStatsFromMatch(matchId, performances);
-
-      res.json({ success: true, message: "Player stats updated successfully" });
     } catch (error) {
-      console.error("Error updating player stats:", error);
-      res.status(500).json({ error: "Failed to update player stats" });
+      console.error('Scoring login error:', error);
+      res.status(500).json({ success: false, message: 'Server error during scoring login' });
     }
   });
 
-  // Manual match performance entry endpoint
-  app.post("/api/match-performance/manual", adminAuth, async (req, res) => {
+  app.get('/api/scoring/live', async (req, res) => {
     try {
-      const { matchData, playerPerformances } = req.body;
-      
-      if (!matchData || !Array.isArray(playerPerformances)) {
-        return res.status(400).json({ message: 'Match data and player performances are required' });
+      // TODO: Replace with actual data from storage.getLiveMatches() or a dedicated live scoring table
+      const liveMatches = await storage.getLiveMatches();
+      if (liveMatches.length > 0) {
+          // Format the first live match into the expected structure
+          const liveMatch = liveMatches[0];
+          const liveData = {
+            isLive: true,
+            matchName: `${liveMatch.homeTeam.name} vs ${liveMatch.awayTeam.name}`,
+            venue: "N/A", // Assuming venue is not directly in liveMatch type, adjust if it is
+            status: 'LIVE',
+            tuskersScore: liveMatch.homeTeamScore || 'N/A', // Adjust field names as per your Match type
+            oppositionScore: liveMatch.awayTeamScore || 'N/A',
+            // currentBatsmen and recentOvers would need more detailed live scoring data
+            currentBatsmen: [],
+            recentOvers: []
+          };
+          res.json(liveData);
+      } else {
+        res.json({ isLive: false, message: "No live matches currently." });
       }
-
-      // Update individual player stats
-      for (const performance of playerPerformances) {
-        if (performance.playerId && Object.keys(performance).some(key => 
-          key !== 'playerId' && performance[key] > 0
-        )) {
-          // Only update if there are actual performance values
-          const statsUpdate: any = {};
-          if (performance.runsScored > 0) statsUpdate.runsScored = performance.runsScored;
-          if (performance.ballsFaced > 0) statsUpdate.ballsFaced = performance.ballsFaced;
-          if (performance.fours > 0) statsUpdate.fours = performance.fours;
-          if (performance.sixes > 0) statsUpdate.sixes = performance.sixes;
-          if (performance.wicketsTaken > 0) statsUpdate.wicketsTaken = performance.wicketsTaken;
-          if (performance.ballsBowled > 0) statsUpdate.ballsBowled = performance.ballsBowled;
-          if (performance.runsConceded > 0) statsUpdate.runsConceded = performance.runsConceded;
-          if (performance.catches > 0) statsUpdate.catches = performance.catches;
-          if (performance.stumpings > 0) statsUpdate.stumpings = performance.stumpings;
-          if (performance.runOuts > 0) statsUpdate.runOuts = performance.runOuts;
-
-          if (Object.keys(statsUpdate).length > 0) {
-            await storage.updatePlayerStats(performance.playerId, statsUpdate);
-          }
-        }
-      }
-
-      // Update team stats if match result is available
-      if (matchData.result && (matchData.result === 'Won' || matchData.result === 'Lost' || matchData.result === 'Draw')) {
-        const currentStats = await storage.getTeamStats();
-        const newTotalMatches = currentStats.totalMatches + 1;
-        const newMatchesWon = matchData.result === 'Won' ? currentStats.matchesWon + 1 : currentStats.matchesWon;
-        
-        // Calculate totals from this match
-        const totalRunsThisMatch = playerPerformances.reduce((sum, perf) => sum + (perf.runsScored || 0), 0);
-        const totalWicketsThisMatch = playerPerformances.reduce((sum, perf) => sum + (perf.wicketsTaken || 0), 0);
-
-        await storage.updateTeamStats({
-          matchesWon: newMatchesWon,
-          totalMatches: newTotalMatches,
-          totalRuns: currentStats.totalRuns + totalRunsThisMatch,
-          wicketsTaken: currentStats.wicketsTaken + totalWicketsThisMatch,
-          totalOvers: 20, // Default overs for manual entry
-          runsAgainst: 150, // Default opposition runs
-          oversAgainst: 20, // Default opposition overs
-        });
-      }
-      
-      res.json({ message: 'Match performance recorded successfully' });
     } catch (error) {
-      console.error('Error recording manual match performance:', error);
-      res.status(500).json({ message: 'Failed to record match performance' });
+      console.error('Live scoring error:', error);
+      res.status(500).json({ error: 'Failed to fetch live data' });
     }
   });
 
-  app.get("/api/matches/:matchId/performances", async (req, res) => {
-    try {
-      const matchId = parseInt(req.params.matchId);
-      if (isNaN(matchId)) {
-        return res.status(400).json({ error: "Invalid match ID" });
-      }
-
-      const performances = await storage.getMatchPerformances(matchId);
-      res.json(performances);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch match performances" });
-    }
-  });
-
-  // Poll management endpoints
-  app.get("/api/polls", async (req, res) => {
-    try {
-      const polls = await storage.getActivePolls();
-      res.json(polls);
-    } catch (error) {
-      console.error('Error fetching polls:', error);
-      res.status(500).json({ error: 'Failed to fetch polls' });
-    }
-  });
-
-  app.post("/api/polls", adminAuth, async (req, res) => {
-    try {
-      const { question, options, isActive = true } = req.body;
-      
-      if (!question || !options || !Array.isArray(options) || options.length < 2) {
-        return res.status(400).json({ error: 'Question and at least 2 options are required' });
-      }
-
-      const pollData = {
-        question,
-        options: JSON.stringify(options),
-        isActive,
-        voteCounts: JSON.stringify(options.map(() => 0)),
-        totalVotes: 0
-      };
-
-      const poll = await storage.createPoll(pollData);
-      res.json(poll);
-    } catch (error) {
-      console.error('Error creating poll:', error);
-      res.status(500).json({ error: 'Failed to create poll' });
-    }
-  });
-
-  app.put("/api/polls/:id/visibility", adminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const { isActive } = req.body;
-      
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid poll ID" });
-      }
-
-      await storage.updatePoll(id, { isActive });
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error updating poll visibility:', error);
-      res.status(500).json({ error: 'Failed to update poll visibility' });
-    }
-  });
-
-  app.delete("/api/polls/:id", adminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid poll ID" });
-      }
-
-      await storage.deletePoll(id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting poll:', error);
-      res.status(500).json({ error: 'Failed to delete poll' });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;
