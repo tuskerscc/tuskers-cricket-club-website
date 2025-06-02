@@ -142,6 +142,11 @@ export interface IStorage {
   joinCommunityEvent(eventId: number, userId: number): Promise<EventParticipant>;
   leaveCommunityEvent(eventId: number, userId: number): Promise<void>;
   getCommunityStats(): Promise<{ activeMembersCount: number }>;
+
+  // Player Registrations
+  createPlayerRegistration(data: any): Promise<any>;
+  getPlayerRegistrations(): Promise<any[]>;
+  updatePlayerRegistration(id: number, updates: any): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {

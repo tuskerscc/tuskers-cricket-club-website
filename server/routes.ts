@@ -1363,16 +1363,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Store the registration (for now, just acknowledge receipt)
-      console.log('Player registration received:', formData);
+      // Prepare data for storage
+      const registrationData = {
+        ...formData,
+        playingRoles: JSON.stringify(formData.playingRoles || []),
+        status: 'pending'
+      };
+
+      // Store the registration
+      const registration = await storage.createPlayerRegistration(registrationData);
+      console.log('Player registration saved:', registration.id);
       
       res.json({ 
         success: true, 
-        message: 'Registration submitted successfully. Thank you for your interest in Tuskers CC!' 
+        message: 'Registration submitted successfully. Thank you for your interest in Tuskers CC!',
+        registrationId: registration.id
       });
     } catch (error) {
       console.error('Error processing registration:', error);
       res.status(500).json({ error: 'Failed to submit registration' });
+    }
+  });
+
+  // Admin endpoint to view player registrations
+  app.get("/api/admin/player-registrations", adminAuth, async (req, res) => {
+    try {
+      const registrations = await storage.getPlayerRegistrations();
+      res.json(registrations);
+    } catch (error) {
+      console.error('Error fetching player registrations:', error);
+      res.status(500).json({ error: 'Failed to fetch registrations' });
+    }
+  });
+
+  // Admin endpoint to update registration status
+  app.put("/api/admin/player-registrations/:id", adminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status, adminNotes } = req.body;
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid registration ID" });
+      }
+
+      await storage.updatePlayerRegistration(id, { status, adminNotes });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error updating registration:', error);
+      res.status(500).json({ error: 'Failed to update registration' });
     }
   });
 

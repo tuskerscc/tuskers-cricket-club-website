@@ -3,10 +3,11 @@ import {
   type Match, type InsertMatch, type Venue, type Competition, type Article, type InsertArticle,
   type SocialPost, type InsertSocialPost, type Poll, type InsertPoll, type Quiz, type InsertQuiz,
   type GalleryItem, type InsertGalleryItem, type Announcement, type InsertAnnouncement,
-  type PlayerStats, type MatchPerformance, type InsertMatchPerformance, type TeamStats as TeamStatsType,
+  type PlayerStats, type MatchPerformance, type InsertMatchPerformance,
   type TriviaQuestion, type TriviaLeaderboard, type InsertTriviaLeaderboard,
   type ForumCategory, type ForumTopic, type InsertForumTopic, type ForumPost, type InsertForumPost,
-  type CommunityEvent, type InsertCommunityEvent, type EventParticipant, type Lineup
+  type CommunityEvent, type InsertCommunityEvent, type EventParticipant, type Lineup,
+  type PlayerRegistration, type InsertPlayerRegistration
 } from "@shared/schema";
 
 import { IStorage } from "./storage";
@@ -24,6 +25,8 @@ const matches: (Match & { homeTeam: Team; awayTeam: Team; venue: Venue; competit
 const articles: Article[] = [];
 const galleryItems: GalleryItem[] = [];
 const triviaQuestions: TriviaQuestion[] = [];
+
+const playerRegistrations: PlayerRegistration[] = [];
 
 const announcements: Announcement[] = [
   {
@@ -617,5 +620,59 @@ export class MemoryStorage implements IStorage {
     return {
       activeMembersCount: users.filter(user => user.role === 'member').length
     };
+  }
+
+  // Player Registration methods
+  async createPlayerRegistration(data: InsertPlayerRegistration): Promise<PlayerRegistration> {
+    const registration: PlayerRegistration = {
+      id: nextId++,
+      ...data,
+      submittedAt: new Date(),
+      status: data.status || 'pending',
+      adminNotes: data.adminNotes || null,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      dateOfBirth: data.dateOfBirth,
+      gender: data.gender,
+      email: data.email,
+      mobilePhone: data.mobilePhone,
+      addressLine1: data.addressLine1,
+      addressLine2: data.addressLine2 || null,
+      townCity: data.townCity,
+      playingRoles: data.playingRoles,
+      battingStyle: data.battingStyle,
+      bowlingArm: data.bowlingArm || null,
+      bowlingType: data.bowlingType || null,
+      highestLevel: data.highestLevel,
+      otherLevelDetails: data.otherLevelDetails || null,
+      previousClubs: data.previousClubs || null,
+      hasMedicalConditions: data.hasMedicalConditions,
+      medicalDetails: data.medicalDetails || null,
+      isUnder18: data.isUnder18,
+      parentGuardianName: data.parentGuardianName || null,
+      parentGuardianEmail: data.parentGuardianEmail || null,
+      parentGuardianPhone: data.parentGuardianPhone || null,
+      parentalConsent: data.parentalConsent || null,
+      codeOfConductAgreement: data.codeOfConductAgreement,
+      photographyConsent: data.photographyConsent,
+      dataPrivacyConsent: data.dataPrivacyConsent,
+      howDidYouHear: data.howDidYouHear || null,
+      otherHearDetails: data.otherHearDetails || null
+    };
+    playerRegistrations.push(registration);
+    return registration;
+  }
+
+  async getPlayerRegistrations(): Promise<PlayerRegistration[]> {
+    return [...playerRegistrations].sort((a, b) => 
+      (b.submittedAt?.getTime() || 0) - (a.submittedAt?.getTime() || 0)
+    );
+  }
+
+  async updatePlayerRegistration(id: number, updates: Partial<PlayerRegistration>): Promise<void> {
+    const index = playerRegistrations.findIndex(r => r.id === id);
+    if (index !== -1) {
+      playerRegistrations[index] = { ...playerRegistrations[index], ...updates };
+    }
   }
 }

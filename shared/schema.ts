@@ -449,6 +449,45 @@ export const playerStatsRelations = relations(playerStats, ({ one }) => ({
   }),
 }));
 
+// Player Registration table
+export const playerRegistrations = pgTable("player_registrations", {
+  id: serial("id").primaryKey(),
+  firstName: varchar("first_name", { length: 100 }).notNull(),
+  lastName: varchar("last_name", { length: 100 }).notNull(),
+  dateOfBirth: varchar("date_of_birth", { length: 20 }).notNull(),
+  gender: varchar("gender", { length: 20 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  mobilePhone: varchar("mobile_phone", { length: 20 }).notNull(),
+  addressLine1: varchar("address_line_1", { length: 255 }).notNull(),
+  addressLine2: varchar("address_line_2", { length: 255 }),
+  townCity: varchar("town_city", { length: 100 }).notNull(),
+  playingRoles: text("playing_roles").notNull(), // JSON string
+  battingStyle: varchar("batting_style", { length: 50 }).notNull(),
+  bowlingArm: varchar("bowling_arm", { length: 50 }),
+  bowlingType: varchar("bowling_type", { length: 100 }),
+  highestLevel: varchar("highest_level", { length: 100 }).notNull(),
+  otherLevelDetails: varchar("other_level_details", { length: 255 }),
+  previousClubs: text("previous_clubs"),
+  hasMedicalConditions: varchar("has_medical_conditions", { length: 10 }).notNull(),
+  medicalDetails: text("medical_details"),
+  isUnder18: varchar("is_under_18", { length: 10 }).notNull(),
+  parentGuardianName: varchar("parent_guardian_name", { length: 100 }),
+  parentGuardianEmail: varchar("parent_guardian_email", { length: 255 }),
+  parentGuardianPhone: varchar("parent_guardian_phone", { length: 20 }),
+  parentalConsent: boolean("parental_consent"),
+  codeOfConductAgreement: boolean("code_of_conduct_agreement").notNull(),
+  photographyConsent: varchar("photography_consent", { length: 50 }).notNull(),
+  dataPrivacyConsent: boolean("data_privacy_consent").notNull(),
+  howDidYouHear: varchar("how_did_you_hear", { length: 100 }),
+  otherHearDetails: varchar("other_hear_details", { length: 255 }),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  status: varchar("status", { length: 20 }).default("pending"), // pending, approved, rejected
+  adminNotes: text("admin_notes"),
+});
+
+export type PlayerRegistration = typeof playerRegistrations.$inferSelect;
+export type InsertPlayerRegistration = typeof playerRegistrations.$inferInsert;
+
 export const galleryRelations = relations(gallery, ({ one, many }) => ({
   match: one(matches, {
     fields: [gallery.matchId],
