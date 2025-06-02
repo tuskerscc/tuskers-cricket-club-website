@@ -1349,6 +1349,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Poll management endpoints
+  app.get("/api/polls", async (req, res) => {
+    try {
+      const polls = await storage.getActivePolls();
+      res.json(polls);
+    } catch (error) {
+      console.error('Error fetching polls:', error);
+      res.status(500).json({ error: 'Failed to fetch polls' });
+    }
+  });
+
+  app.post("/api/polls", adminAuth, async (req, res) => {
+    try {
+      const { question, options, isActive = true } = req.body;
+      
+      if (!question || !options || !Array.isArray(options) || options.length < 2) {
+        return res.status(400).json({ error: 'Question and at least 2 options are required' });
+      }
+
+      const pollData = {
+        question,
+        options: JSON.stringify(options),
+        isActive,
+        voteCounts: JSON.stringify(options.map(() => 0)),
+        totalVotes: 0
+      };
+
+      const poll = await storage.createPoll(pollData);
+      res.json(poll);
+    } catch (error) {
+      console.error('Error creating poll:', error);
+      res.status(500).json({ error: 'Failed to create poll' });
+    }
+  });
+
+  app.put("/api/polls/:id/visibility", adminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { isActive } = req.body;
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid poll ID" });
+      }
+
+      await storage.updatePoll(id, { isActive });
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error updating poll visibility:', error);
+      res.status(500).json({ error: 'Failed to update poll visibility' });
+    }
+  });
+
+  app.delete("/api/polls/:id", adminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid poll ID" });
+      }
+
+      await storage.deletePoll(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting poll:', error);
+      res.status(500).json({ error: 'Failed to delete poll' });
+    }
+  });
+
+  app.get("/api/polls/current", async (req, res) => {
+    try {
+      const polls = await storage.getActivePolls();
+      const currentPoll = polls.find(poll => poll.isActive);
+      
+      if (!currentPoll) {
+        return res.json(null);
+      }
+
+      res.json(currentPoll);
+    } catch (error) {
+      console.error('Error fetching current poll:', error);
+      res.status(500).json({ error: 'Failed to fetch current poll' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

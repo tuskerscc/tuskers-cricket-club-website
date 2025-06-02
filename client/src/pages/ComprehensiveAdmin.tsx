@@ -107,6 +107,10 @@ function ComprehensiveAdminContent() {
   const galleryForm = useForm();
   const announcementForm = useForm();
   const matchForm = useForm();
+  const pollForm = useForm();
+
+  // Poll state
+  const [newPollOptions, setNewPollOptions] = useState(['', '', '', '']);
 
   // Queries
   const { data: userRole = 'admin' } = useQuery<string>({ 
@@ -129,6 +133,8 @@ function ComprehensiveAdminContent() {
   const { data: gallery = [] } = useQuery<GalleryItem[]>({ queryKey: ['/api/gallery'] });
   const { data: announcements = [] } = useQuery<Announcement[]>({ queryKey: ['/api/announcements'] });
   const { data: teamStats = {} } = useQuery<any>({ queryKey: ['/api/stats/team'] });
+  const { data: polls = [] } = useQuery<any[]>({ queryKey: ['/api/polls'] });
+  const { data: currentPoll = null } = useQuery<any>({ queryKey: ['/api/polls/current'] });
 
   // Check if role already exists - now allowing unlimited players of all roles
   const checkRoleAvailability = (role: string) => {
@@ -173,6 +179,40 @@ function ComprehensiveAdminContent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/players'] });
       toast({ title: "Success", description: "Player deleted successfully" });
+    }
+  });
+
+  // Poll mutations
+  const createPollMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', '/api/polls', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/polls'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/polls/current'] });
+      pollForm.reset();
+      setNewPollOptions(['', '', '', '']);
+      toast({ title: "Success", description: "Poll created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create poll", variant: "destructive" });
+    }
+  });
+
+  const updatePollVisibilityMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) => 
+      apiRequest('PUT', `/api/polls/${id}/visibility`, { isActive }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/polls'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/polls/current'] });
+      toast({ title: "Success", description: "Poll visibility updated" });
+    }
+  });
+
+  const deletePollMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/polls/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/polls'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/polls/current'] });
+      toast({ title: "Success", description: "Poll deleted successfully" });
     }
   });
 
@@ -1371,8 +1411,19 @@ function ComprehensiveAdminContent() {
                           A
                         </div>
                         <div className="bg-white rounded-lg px-3 py-2 shadow-sm max-w-sm">
-                          <p className="text-sm text-gray-700">Current poll: "Which venue is known as the Home of Cricket?"</p>
-                          <p className="text-xs text-gray-500 mt-1">Status: Visible on homepage</p>
+                          {currentPoll ? (
+                            <>
+                              <p className="text-sm text-gray-700">Current poll: "{currentPoll.question}"</p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Status: {currentPoll.isActive ? 'Visible on homepage' : 'Hidden from homepage'}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-sm text-gray-700">No active poll</p>
+                              <p className="text-xs text-gray-500 mt-1">Create a new poll to display on homepage</p>
+                            </>
+                          )}
                         </div>
                       </div>
 
@@ -1382,17 +1433,33 @@ function ComprehensiveAdminContent() {
                           S
                         </div>
                         <div className="bg-white rounded-lg px-3 py-2 shadow-sm max-w-sm">
-                          <p className="text-sm text-gray-700">Available poll options:</p>
-                          <div className="mt-2 space-y-1">
-                            <button className="block w-full text-left text-xs bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded">
-                              Cricket venue poll (Current)
-                            </button>
-                            <button className="block w-full text-left text-xs bg-gray-50 hover:bg-gray-100 px-2 py-1 rounded">
-                              Player performance poll
-                            </button>
-                            <button className="block w-full text-left text-xs bg-gray-50 hover:bg-gray-100 px-2 py-1 rounded">
-                              Match prediction poll
-                            </button>
+                          <p className="text-sm text-gray-700">Available polls ({polls.length}):</p>
+                          <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
+                            {polls.length > 0 ? polls.map((poll: any) => (
+                              <div key={poll.id} className="flex items-center justify-between">
+                                <button 
+                                  className={`block w-full text-left text-xs px-2 py-1 rounded ${
+                                    poll.isActive ? 'bg-blue-50 text-blue-700' : 'bg-gray-50'
+                                  }`}
+                                  onClick={() => updatePollVisibilityMutation.mutate({ 
+                                    id: poll.id, 
+                                    isActive: !poll.isActive 
+                                  })}
+                                >
+                                  {poll.question.substring(0, 30)}...
+                                </button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="ml-2 h-6 w-6 p-0"
+                                  onClick={() => deletePollMutation.mutate(poll.id)}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            )) : (
+                              <p className="text-xs text-gray-500">No polls created yet</p>
+                            )}
                           </div>
                         </div>
                       </div>

@@ -333,6 +333,13 @@ export class MemoryStorage implements IStorage {
     }
   }
 
+  async deletePoll(id: number): Promise<void> {
+    const index = polls.findIndex(p => p.id === id);
+    if (index !== -1) {
+      polls.splice(index, 1);
+    }
+  }
+
   // Quizzes
   async getActiveQuizzes(): Promise<Quiz[]> {
     return quizzes.filter(quiz => quiz.isActive);
