@@ -391,14 +391,11 @@ export const forumTopics = pgTable("forum_topics", {
 // Forum Posts/Replies
 export const forumPosts = pgTable("forum_posts", {
   id: serial("id").primaryKey(),
-  topicId: integer("topic_id").references(() => forumTopics.id, { onDelete: 'cascade' }).notNull(),
-  userId: integer("user_id").references(() => users.id).notNull(),
   content: text("content").notNull(),
-  isFirstPost: boolean("is_first_post").default(false), // To identify the topic's initial post
-  likeCount: integer("like_count").default(0),
-  parentId: integer("parent_id").references(() => forumPosts.id), // Fixed: Self-reference for replies
+  author: varchar("author", { length: 255 }).notNull(), // Or integer("author_id") if referencing a users table
+  topicId: integer("topic_id").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  forumTopic: varchar("forum_topic", { length: 255 }), // Or integer("forum_topic_id") if referencing a topics table
 });
 
 // Post Likes
