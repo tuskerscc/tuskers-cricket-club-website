@@ -820,9 +820,15 @@ export class DatabaseStorage implements IStorage {
 
   // Player Registration Methods
   async createPlayerRegistration(registrationData: InsertPlayerRegistration): Promise<PlayerRegistration> {
-    const [newRegistration] = await db.insert(playerRegistrations).values(registrationData).returning();
-    return newRegistration;
+  const [newRegistration] = await db.insert(playerRegistrations).values(registrationData).returning();
+  if (!newRegistration) {
+    // Log the failure and throw an error
+    console.error("Failed to insert player registration into the database. Data:", registrationData);
+    throw new Error("Database insert failed. Registration was not saved.");
   }
+  console.log("Inserted player registration:", newRegistration);
+  return newRegistration;
+}
 
   async getPlayerRegistration(id: number): Promise<PlayerRegistration | undefined> {
     const [registration] = await db.select().from(playerRegistrations).where(eq(playerRegistrations.id, id));
