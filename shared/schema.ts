@@ -392,10 +392,16 @@ export const forumTopics = pgTable("forum_topics", {
 export const forumPosts = pgTable("forum_posts", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
-  author: varchar("author", { length: 255 }).notNull(), // Or integer("author_id") if referencing a users table
-  topicId: integer("topic_id").notNull(),
+  // Replace 'author' with 'userId' and link to the 'users' table
+  userId: integer("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  // Ensure topicId references the forumTopics table
+  topicId: integer("topic_id").references(() => forumTopics.id, { onDelete: 'cascade' }).notNull(),
+  // Add 'parentId' for self-referencing replies (threaded discussions)
+  parentId: integer("parent_id").references(() => forumPosts.id, { onDelete: 'cascade' }), // Nullable for top-level posts
   createdAt: timestamp("created_at").defaultNow(),
-  forumTopic: varchar("forum_topic", { length: 255 }), // Or integer("forum_topic_id") if referencing a topics table
+  updatedAt: timestamp("updated_at").defaultNow(), // Recommended to add for tracking updates
+  // The 'forumTopic: varchar("forum_topic", ...)' field has been removed as it's redundant
+  // if topicId is correctly linking to forumTopics.id.
 });
 
 // Post Likes
