@@ -819,24 +819,55 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Player Registration Methods
+class DatabaseStorage {
+  /**
+   * Inserts a new player registration into the database.
+   * @param registrationData The registration data to insert.
+   * @returns The newly inserted player registration.
+   * @throws Error if the insert fails or the result is empty.
+   */
   async createPlayerRegistration(registrationData: InsertPlayerRegistration): Promise<PlayerRegistration> {
-  const [newRegistration] = await db.insert(playerRegistrations).values(registrationData).returning();
-  if (!newRegistration) {
-    // Log the failure and throw an error
-    console.error("Failed to insert player registration into the database. Data:", registrationData);
-    throw new Error("Database insert failed. Registration was not saved.");
+    try {
+      console.log('Attempting to insert registration:', registrationData);
+      const [newRegistration] = await db.insert(playerRegistrations).values(registrationData).returning();
+      if (!newRegistration) {
+        console.error("Failed to insert player registration into the database. Data:", registrationData);
+        throw new Error("Database insert failed. Registration was not saved.");
+      }
+      console.log("Inserted player registration:", newRegistration);
+      return newRegistration;
+    } catch (error) {
+      console.error("Database error inserting player registration:", error);
+      throw error;
+    }
   }
-  console.log("Inserted player registration:", newRegistration);
-  return newRegistration;
-}
 
+  /**
+   * Retrieves a player registration by ID.
+   * @param id The registration ID.
+   * @returns The player registration if found, otherwise undefined.
+   */
   async getPlayerRegistration(id: number): Promise<PlayerRegistration | undefined> {
-    const [registration] = await db.select().from(playerRegistrations).where(eq(playerRegistrations.id, id));
-    return registration || undefined;
+    try {
+      const [registration] = await db.select().from(playerRegistrations).where(eq(playerRegistrations.id, id));
+      return registration || undefined;
+    } catch (error) {
+      console.error(`Database error retrieving player registration with ID ${id}:`, error);
+      throw error;
+    }
   }
 
+  /**
+   * Retrieves all player registrations, ordered by registration timestamp descending.
+   * @returns An array of all player registrations.
+   */
   async getAllPlayerRegistrations(): Promise<PlayerRegistration[]> {
-    return await db.select().from(playerRegistrations).orderBy(desc(playerRegistrations.registrationTimestamp));
+    try {
+      return await db.select().from(playerRegistrations).orderBy(desc(playerRegistrations.registrationTimestamp));
+    } catch (error) {
+      console.error("Database error retrieving all player registrations:", error);
+      throw error;
+    }
   }
 }
 
