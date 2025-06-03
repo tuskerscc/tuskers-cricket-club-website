@@ -849,7 +849,10 @@ class DatabaseStorage {
    */
   async getPlayerRegistration(id: number): Promise<PlayerRegistration | undefined> {
     try {
-      const [registration] = await db.select().from(playerRegistrations).where(eq(playerRegistrations.id, id));
+      const [registration] = await db
+        .select()
+        .from(playerRegistrations)
+        .where(eq(playerRegistrations.id, id));
       return registration || undefined;
     } catch (error) {
       console.error(`Database error retrieving player registration with ID ${id}:`, error);
@@ -863,7 +866,10 @@ class DatabaseStorage {
    */
   async getAllPlayerRegistrations(): Promise<PlayerRegistration[]> {
     try {
-      return await db.select().from(playerRegistrations).orderBy(desc(playerRegistrations.registrationTimestamp));
+      return await db
+        .select()
+        .from(playerRegistrations)
+        .orderBy(desc(playerRegistrations.registrationTimestamp));
     } catch (error) {
       console.error("Database error retrieving all player registrations:", error);
       throw error;
