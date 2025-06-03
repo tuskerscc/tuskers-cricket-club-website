@@ -1,27 +1,26 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, real, date as pgDate } from "drizzle-orm/pg-core"; // Added pgDate for clarity if using specific date type
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, real } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Users table for admin access
+// --- TABLES ---
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  role: text("role").notNull().default("admin"), // Consider an enum type if your DB supports it
+  role: text("role").notNull().default("admin"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Teams table (opponents and our team)
 export const teams = pgTable("teams", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   shortName: text("short_name").notNull(),
-  logo: text("logo"), // URL or path to logo
+  logo: text("logo"),
   isOurTeam: boolean("is_our_team").default(false),
 });
 
-// Venues table
 export const venues = pgTable("venues", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -29,72 +28,58 @@ export const venues = pgTable("venues", {
   capacity: integer("capacity"),
 });
 
-// Competitions table
 export const competitions = pgTable("competitions", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   shortName: text("short_name"),
-  type: text("type").notNull(), // e.g., 'league', 'tournament'
+  type: text("type").notNull(),
 });
 
-// Players table
 export const players = pgTable("players", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   jerseyNumber: integer("jersey_number"),
-  role: text("role").notNull(), // e.g., 'batsman', 'bowler', 'all-rounder', 'wicket-keeper'
-  battingStyle: text("batting_style"), // e.g., 'right-handed', 'left-handed'
-  bowlingStyle: text("bowling_style"), // e.g., 'right-arm fast', 'left-arm spin'
+  role: text("role").notNull(),
+  battingStyle: text("batting_style"),
+  bowlingStyle: text("bowling_style"),
   bio: text("bio"),
-  photo: text("photo"), // URL or path to photo
+  photo: text("photo"),
   isCaptain: boolean("is_captain").default(false),
   isViceCaptain: boolean("is_vice_captain").default(false),
   isActive: boolean("is_active").default(true),
 });
 
-// Matches table
 export const matches = pgTable("matches", {
   id: serial("id").primaryKey(),
-  // Changed to use foreign keys for teams if they are in the 'teams' table
   homeTeamId: integer("home_team_id").references(() => teams.id),
   awayTeamId: integer("away_team_id").references(() => teams.id),
   venueId: integer("venue_id").references(() => venues.id),
   competitionId: integer("competition_id").references(() => competitions.id),
-  // opponentTeam: text("opponent_team").notNull(), // Kept if using for non-standard teams not in 'teams' table
-  // venue: text("venue").notNull(), // Kept if using for non-standard venues
   matchDate: timestamp("match_date").notNull(),
-  matchResult: text("match_result"), // 'Won', 'Lost', 'Draw', 'Tied', 'No Result', 'Abandoned'
-  homeTeamScore: varchar("home_team_score"), // e.g., "156/7"
-  homeTeamOvers: varchar("home_team_overs"), // e.g., "20.0"
-  awayTeamScore: varchar("away_team_score"), // e.g., "150/9"
-  awayTeamOvers: varchar("away_team_overs"), // e.g., "19.4"
-  // tuskersScore: integer("tuskers_score").default(0), // These seem specific to one team.
-  // tuskersOvers: text("tuskers_overs"),
-  // tuskersWickets: integer("tuskers_wickets").default(0),
-  // opponentScore: integer("opponent_score").default(0),
-  // opponentOvers: text("opponent_overs"),
-  // opponentWickets: integer("opponent_wickets").default(0),
+  matchResult: text("match_result"),
+  homeTeamScore: varchar("home_team_score"),
+  homeTeamOvers: varchar("home_team_overs"),
+  awayTeamScore: varchar("away_team_score"),
+  awayTeamOvers: varchar("away_team_overs"),
   playerOfMatch: integer("player_of_match").references(() => players.id),
-  status: text("status").notNull().default("scheduled"), // 'scheduled', 'live', 'completed', 'postponed', 'cancelled'
-  notes: text("notes"), // For toss winner, conditions, etc.
+  status: text("status").notNull().default("scheduled"),
+  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Starting lineups for matches
 export const lineups = pgTable("lineups", {
   id: serial("id").primaryKey(),
   matchId: integer("match_id").references(() => matches.id).notNull(),
   playerId: integer("player_id").references(() => players.id).notNull(),
-  teamId: integer("team_id").references(() => teams.id).notNull(), // To know which team the player belongs to for this match
+  teamId: integer("team_id").references(() => teams.id).notNull(),
   isSubstitute: boolean("is_substitute").default(false),
-  battingOrder: integer("batting_order"), // Nullable if not batting
+  battingOrder: integer("batting_order"),
 });
 
-// Player statistics (aggregated, season-wise or overall)
 export const playerStats = pgTable("player_stats", {
   id: serial("id").primaryKey(),
-  playerId: integer("player_id").references(() => players.id).notNull().unique(), // Usually one aggregated stat record per player
+  playerId: integer("player_id").references(() => players.id).notNull().unique(),
   matches: integer("matches").default(0),
   runsScored: integer("runs_scored").default(0),
   ballsFaced: integer("balls_faced").default(0),
@@ -106,45 +91,42 @@ export const playerStats = pgTable("player_stats", {
   catches: integer("catches").default(0),
   stumpings: integer("stumpings").default(0),
   runOuts: integer("run_outs").default(0),
-  // Add other stats like 50s, 100s, best batting, best bowling if needed
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Individual match performances for players
 export const matchPerformances = pgTable("match_performances", {
   id: serial("id").primaryKey(),
   matchId: integer("match_id").references(() => matches.id).notNull(),
   playerId: integer("player_id").references(() => players.id).notNull(),
-  teamId: integer("team_id").references(() => teams.id), // Which team they played for in this match
+  teamId: integer("team_id").references(() => teams.id),
   runsScored: integer("runs_scored").default(0),
   ballsFaced: integer("balls_faced").default(0),
   fours: integer("fours").default(0),
   sixes: integer("sixes").default(0),
   wicketsTaken: integer("wickets_taken").default(0),
-  ballsBowled: integer("balls_bowled").default(0), // Stored as balls, convert to overs for display (balls/6 + balls%6 / 10)
+  ballsBowled: integer("balls_bowled").default(0),
   runsConceded: integer("runs_conceded").default(0),
   catches: integer("catches").default(0),
   stumpings: integer("stumpings").default(0),
-  runOuts: integer("run_outs").default(0), // Number of run-outs effected
+  runOuts: integer("run_outs").default(0),
   isOut: boolean("is_out").default(false),
-  dismissalType: text("dismissal_type"), // 'bowled', 'caught', 'lbw', 'run out', 'stumped', 'hit wicket', 'handled ball', 'timed out', 'obstructing the field', 'not out'
-  bowlerCaughtBy: integer("bowler_caught_by").references(() => players.id), // If caught, who was the bowler
-  fielderAssisted: integer("fielder_assisted").references(() => players.id), // If caught/stumped/run out, who assisted
+  dismissalType: text("dismissal_type"),
+  bowlerCaughtBy: integer("bowler_caught_by").references(() => players.id),
+  fielderAssisted: integer("fielder_assisted").references(() => players.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Articles/News table
 export const articles = pgTable("articles", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   slug: text("slug").notNull().unique(),
   excerpt: text("excerpt"),
   content: text("content").notNull(),
-  featuredImage: text("featured_image"), // URL
-  authorId: integer("author_id").references(() => users.id), // Link to a user if authors are managed
-  authorName: text("author_name"), // Or just store author name if not linked
-  category: text("category").notNull(), // e.g., 'news', 'match-report', 'club-updates'
-  tags: text("tags").array(), // For PostgreSQL text array
+  featuredImage: text("featured_image"),
+  authorId: integer("author_id").references(() => users.id),
+  authorName: text("author_name"),
+  category: text("category").notNull(),
+  tags: text("tags").array(),
   isPublished: boolean("is_published").default(false),
   isFeatured: boolean("is_featured").default(false),
   publishedAt: timestamp("published_at"),
@@ -152,29 +134,27 @@ export const articles = pgTable("articles", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Social media posts cache (consider if needed or if embedding directly)
 export const socialPosts = pgTable("social_posts", {
   id: serial("id").primaryKey(),
-  platform: text("platform").notNull(), // 'twitter', 'instagram', 'facebook'
-  postId: text("post_id").notNull().unique(), // Unique ID from the platform
+  platform: text("platform").notNull(),
+  postId: text("post_id").notNull().unique(),
   content: text("content").notNull(),
   author: text("author").notNull(),
   authorAvatar: text("author_avatar"),
-  mediaUrl: text("media_url"), // URL to image/video if any
+  mediaUrl: text("media_url"),
   postUrl: text("post_url").notNull(),
   likes: integer("likes").default(0),
   comments: integer("comments").default(0),
-  shares: integer("shares").default(0), // Or retweets, etc.
-  postedAt: timestamp("posted_at").notNull(), // Timestamp from the platform
-  fetchedAt: timestamp("fetched_at").defaultNow(), // When it was last fetched/cached
+  shares: integer("shares").default(0),
+  postedAt: timestamp("posted_at").notNull(),
+  fetchedAt: timestamp("fetched_at").defaultNow(),
 });
 
-// Polls table
 export const polls = pgTable("polls", {
   id: serial("id").primaryKey(),
   question: text("question").notNull(),
-  options: jsonb("options").notNull(), // e.g., [{"id": 1, "text": "Option A"}, {"id": 2, "text": "Option B"}]
-  votes: jsonb("votes").default('{}'),   // e.g., {"1": 10, "2": 5} (optionId: count)
+  options: jsonb("options").notNull(),
+  votes: jsonb("votes").default('{}'),
   isActive: boolean("is_active").default(true),
   createdBy: integer("created_by").references(() => users.id),
   endsAt: timestamp("ends_at"),
@@ -182,10 +162,9 @@ export const polls = pgTable("polls", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Quiz questions
 export const quizzes = pgTable("quizzes", {
   id: serial("id").primaryKey(),
-  title: text("title"), // Title for a set of quiz questions if grouped
+  title: text("title"),
   isActive: boolean("is_active").default(true),
   createdBy: integer("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -193,49 +172,43 @@ export const quizzes = pgTable("quizzes", {
 });
 
 export const quizQuestions = pgTable("quiz_questions", {
-    id: serial("id").primaryKey(),
-    quizId: integer("quiz_id").references(() => quizzes.id),
-    question: text("question").notNull(),
-    options: jsonb("options").notNull(), // e.g., [{"id": "a", "text": "Opt 1"}, {"id": "b", "text": "Opt 2"}]
-    correctOptionId: text("correct_option_id").notNull(), // e.g., "a"
-    explanation: text("explanation"),
-    points: integer("points").default(10),
-    createdAt: timestamp("created_at").defaultNow(),
+  id: serial("id").primaryKey(),
+  quizId: integer("quiz_id").references(() => quizzes.id),
+  question: text("question").notNull(),
+  options: jsonb("options").notNull(),
+  correctOptionId: text("correct_option_id").notNull(),
+  explanation: text("explanation"),
+  points: integer("points").default(10),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-
-// Gallery items
 export const gallery = pgTable("gallery", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
   imageUrl: text("image_url").notNull(),
-  category: text("category").notNull(), // e.g., 'match', 'training', 'social'
-  matchId: integer("match_id").references(() => matches.id), // Optional link to a match
-  uploadedBy: integer("uploaded_by").references(() => users.id), // Optional link to uploader
+  category: text("category").notNull(),
+  matchId: integer("match_id").references(() => matches.id),
+  uploadedBy: integer("uploaded_by").references(() => users.id),
   likesCount: integer("likes_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Gallery likes table
 export const galleryLikes = pgTable("gallery_likes", {
   id: serial("id").primaryKey(),
   galleryItemId: integer("gallery_item_id").references(() => gallery.id, { onDelete: 'cascade' }).notNull(),
-  userIp: text("user_ip").notNull(), // For anonymous likes
-  // userId: integer("user_id").references(() => users.id), // For logged-in user likes
+  userIp: text("user_ip").notNull(),
   userAgent: text("user_agent"),
   createdAt: timestamp("created_at").defaultNow(),
-  // Add unique constraint for (galleryItemId, userIp) or (galleryItemId, userId)
 });
 
-// Announcements
 export const announcements = pgTable("announcements", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  type: text("type").notNull().default('general'), // e.g., 'general', 'match_update', 'event'
-  priority: text("priority").notNull().default('medium'), // e.g., 'low', 'medium', 'high'
+  type: text("type").notNull().default('general'),
+  priority: text("priority").notNull().default('medium'),
   isActive: boolean("is_active").default(true),
   publishedBy: integer("published_by").references(() => users.id),
   expiresAt: timestamp("expires_at"),
@@ -243,35 +216,33 @@ export const announcements = pgTable("announcements", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Team statistics table (refined - assuming one record per our team, possibly per season)
 export const teamStats = pgTable("team_stats", {
-  id: serial("id").primaryKey(), // Or teamId as primary/foreign key if only one stats record per team
-  teamId: integer("team_id").references(() => teams.id).unique(), // If one stat record per team
-  season: varchar("season", { length: 50 }), // e.g., "2025/26", optional
+  id: serial("id").primaryKey(),
+  teamId: integer("team_id").references(() => teams.id).unique(),
+  season: varchar("season", { length: 50 }),
   matchesPlayed: integer("matches_played").default(0),
   matchesWon: integer("matches_won").default(0),
   matchesLost: integer("matches_lost").default(0),
   matchesDraw: integer("matches_draw").default(0),
-  matchesTied: integer("matches_tied").default(0), // If distinguishing from Draw
+  matchesTied: integer("matches_tied").default(0),
   totalRunsScored: integer("total_runs_scored").default(0),
-  totalOversFaced: real("total_overs_faced").default(0.0), // Store as decimal overs (e.g., 19.4)
+  totalOversFaced: real("total_overs_faced").default(0.0),
   wicketsLost: integer("wickets_lost").default(0),
   totalRunsConceded: integer("total_runs_conceded").default(0),
-  oversBowledByTeam: real("overs_bowled_by_team").default(0.0), // Overs bowled by our team
+  oversBowledByTeam: real("overs_bowled_by_team").default(0.0),
   wicketsTakenByBowlers: integer("wickets_taken_by_bowlers").default(0),
-  nrr: real("nrr").default(0.0), // Net Run Rate
-  points: integer("points").default(0), // League points
-  winRate: real("win_rate").default(0.0), // As percentage
+  nrr: real("nrr").default(0.0),
+  points: integer("points").default(0),
+  winRate: real("win_rate").default(0.0),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Trivia questions table (using text array for options as in original)
 export const triviaQuestions = pgTable("trivia_questions", {
   id: serial("id").primaryKey(),
   question: text("question").notNull(),
-  options: text("options").array().notNull(), // Array of strings for options
-  correctAnswer: text("correct_answer").notNull(), // The correct string from the options array
-  difficulty: text("difficulty").notNull().default('medium'), // 'easy', 'medium', 'hard'
+  options: text("options").array().notNull(),
+  correctAnswer: text("correct_answer").notNull(),
+  difficulty: text("difficulty").notNull().default('medium'),
   category: text("category").notNull().default('general'),
   points: integer("points").default(10),
   isActive: boolean("is_active").default(true),
@@ -281,44 +252,80 @@ export const triviaQuestions = pgTable("trivia_questions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Trivia leaderboard table
 export const triviaLeaderboard = pgTable("trivia_leaderboard", {
   id: serial("id").primaryKey(),
-  playerName: text("player_name").notNull(), // Or userId if linked to users table
-  // userId: integer("user_id").references(() => users.id),
+  playerName: text("player_name").notNull(),
   score: integer("score").notNull(),
   questionsAnswered: integer("questions_answered").notNull(),
-  accuracy: real("accuracy").notNull(), // e.g., 0.75 for 75%
-  playDate: timestamp("play_date").defaultNow(), // Date of the attempt
-  quizId: integer("quiz_id").references(() => quizzes.id), // Optional: link to a specific quiz
+  accuracy: real("accuracy").notNull(),
+  playDate: timestamp("play_date").defaultNow(),
+  quizId: integer("quiz_id").references(() => quizzes.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Cricket Scoring Tables (as provided)
-export const scoringUsers = pgTable("scoring_users", {
+// --- FORUM TABLES ---
+
+export const forumCategories = pgTable("forum_categories", {
   id: serial("id").primaryKey(),
-  username: varchar("username", { length: 50 }).notNull().unique(),
-  email: varchar("email", { length: 100 }).notNull().unique(),
-  password: varchar("password", { length: 255 }).notNull(), // Ensure this is hashed
-  userType: varchar("user_type", { length: 20 }).notNull().default("fan"), // 'fan' or 'tuskers' (scorer)
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  icon: varchar("icon", { length: 50 }),
+  color: varchar("color", { length: 20 }),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const scoringMatches = pgTable("scoring_matches", {
+export const forumTopics = pgTable("forum_topics", {
   id: serial("id").primaryKey(),
-  matchName: varchar("match_name", { length: 200 }).notNull(),
-  team1: varchar("team1", { length: 100 }).notNull(),
-  team2: varchar("team2", { length: 100 }).notNull(),
-  venue: varchar("venue", { length: 150 }),
-  matchDate: timestamp("match_date").notNull(),
-  createdBy: integer("created_by").references(() => scoringUsers.id),
-  status: varchar("status", { length: 20 }).notNull().default("upcoming"), // 'upcoming', 'live', 'completed'
-  isLive: boolean("is_live").default(false),
-  currentInningsId: integer("current_innings_id"), // References scoringInnings.id later
-  tossWinner: varchar("toss_winner", { length: 100 }),
-  electedTo: varchar("elected_to", { length: 10 }), // 'bat' or 'bowl'
-  oversPerInnings: integer("overs_per_innings").default(20), // Default T20
+  categoryId: integer("category_id").references(() => forumCategories.id, { onDelete: 'cascade' }).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  slug: varchar("slug", { length: 250 }).unique().notNull(),
+  isSticky: boolean("is_sticky").default(false),
+  isLocked: boolean("is_locked").default(false),
+  viewCount: integer("view_count").default(0),
+  replyCount: integer("reply_count").default(0),
+  lastPostId: integer("last_post_id"),
+  lastReplyAt: timestamp("last_reply_at"),
+  lastReplyUserId: integer("last_reply_user_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const forumPosts = pgTable("forum_posts", {
+  id: serial("id").primaryKey(),
+  content: text("content").notNull(),
+  author: varchar("author", { length: 255 }).notNull(),
+  topicId: integer("topic_id").references(() => forumTopics.id, { onDelete: 'cascade' }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  forumTopic: varchar("forum_topic", { length: 255 }),
+});
+
+export const forumPostLikes = pgTable("forum_post_likes", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").references(() => forumPosts.id, { onDelete: 'cascade' }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userProfiles = pgTable("user_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: 'cascade' }).notNull().unique(),
+  displayName: varchar("display_name", { length: 50 }),
+  bio: text("bio"),
+  location: varchar("location", { length: 100 }),
+  favoritePlayer: varchar("favorite_player", { length: 100 }),
+  joinDate: timestamp("join_date").defaultNow(),
+  postCount: integer("post_count").default(0),
+  reputation: integer("reputation").default(0),
+  avatarUrl: varchar("avatar_url", { length: 255 }),
+  isOnline: boolean("is_online").default(false),
+  lastSeenAt: timestamp("last_seen_at").defaultNow(),
+  badges: text("badges").array(),
+  socialLinks: jsonb("social_links"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const scoringInnings = pgTable("scoring_innings", {
