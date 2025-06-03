@@ -396,7 +396,7 @@ export const forumPosts = pgTable("forum_posts", {
   content: text("content").notNull(),
   isFirstPost: boolean("is_first_post").default(false), // To identify the topic's initial post
   likeCount: integer("like_count").default(0),
-  parentId: integer("parent_id").references(() => forum_posts.id), // For threaded replies within a topic, if supported
+  parentId: integer("parent_id").references(() => forumTopics.id), // For threaded replies within a topic, if supported
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
