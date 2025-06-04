@@ -184,34 +184,53 @@ export class DatabaseStorage implements IStorage {
     return team || undefined;
   }
 
-  async getPlayers(): Promise<(Player & { stats?: PlayerStats })[]> {
-    const playersWithStats = await db
-      .select()
-      .from(players)
-      .leftJoin(playerStats, eq(players.id, playerStats.playerId))
-      .where(eq(players.isActive, true))
-      .orderBy(players.name);
+  // In getPlayers
+async getPlayers(): Promise<(Player & { stats?: PlayerStats })[]> {
+  const playersWithStatsRaw = await db
+    .select()
+    .from(players)
+    .leftJoin(playerStats, eq(players.id, playerStats.playerId))
+    .where(eq(players.isActive, true))
+    .orderBy(players.name);
 
-    return playersWithStats.map(row => ({
-      ...row.players,
-      stats: row.player_stats || undefined
-    }));
-  }
+  console.log('Raw data from getPlayers query:', JSON.stringify(playersWithStatsRaw, null, 2)); // Log the raw output
 
-  async getPlayer(id: number): Promise<(Player & { stats?: PlayerStats }) | undefined> {
-    const [result] = await db
-      .select()
-      .from(players)
-      .leftJoin(playerStats, eq(players.id, playerStats.playerId))
-      .where(eq(players.id, id));
-
-    if (!result) return undefined;
-
+  return playersWithStatsRaw.map(row => {
+    console.log('Processing row in getPlayers:', JSON.stringify(row, null, 2)); // Log each row
     return {
-      ...result.players,
-      stats: result.player_stats || undefined
+      ...row.players, // Is row.players defined?
+      stats: row.player_stats || undefined // Is row.player_stats defined?
     };
+  });
+}
+
+// In getPlayer
+async getPlayer(id: number): Promise<(Player & { stats?: PlayerStats }) | undefined> {
+  const resultRawArray = await db
+    .select()
+    .from(players)
+    .leftJoin(playerStats, eq(players.id, playerStats.playerId))
+    .where(eq(players.id, id));
+
+  console.log('Raw data from getPlayer query for id ' + id + ':', JSON.stringify(resultRawArray, null, 2)); // Log the raw output
+
+  if (!resultRawArray || resultRawArray.length === 0) {
+    console.log('No result found in array for getPlayer id ' + id);
+    return undefined;
   }
+  const [result] = resultRawArray; // This assumes an array is always returned
+  console.log('Processing result in getPlayer:', JSON.stringify(result, null, 2)); // Log the single result object
+
+  if (!result) { // This check is good, but the array check above is also useful
+     console.log('Result is undefined after destructuring for getPlayer id ' + id);
+     return undefined;
+  }
+
+  return {
+    ...result.players, // Is result.players defined?
+    stats: result.player_stats || undefined // Is result.player_stats defined?
+  };
+}
 
   async createPlayer(player: InsertPlayer): Promise<Player> {
     const [newPlayer] = await db.insert(players).values(player).returning();
@@ -774,6 +793,12 @@ export class DatabaseStorage implements IStorage {
     return {
       activeMembersCount: membersCount.count
     };
+  }
+
+  //Player registartion
+  async createPlayerRegistration(registrationData: InsertPlayerRegistration): Promise<PlayerRegistrationRecord> {
+    const [newRegistration] = await db.insert(player_registrations).values(registrationData).returning();
+    return newRegistration as PlayerRegistrationRecord;
   }
 
   // Match Performance Methods
