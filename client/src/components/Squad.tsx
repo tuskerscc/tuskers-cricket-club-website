@@ -83,7 +83,7 @@ export default function Squad() {
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-4xl font-bold text-[#fcd34d] mb-2">SQUAD</h2>
+              <h2 className="text-2xl md:text-4xl font-bold text-[#fcd34d] mb-2">TUSKERS SQUAD</h2>
               <Users className="w-4 h-4" />
                 
               </div>
