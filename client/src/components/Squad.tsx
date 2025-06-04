@@ -84,8 +84,7 @@ export default function Squad() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl md:text-4xl font-bold text-[#fcd34d] mb-2">SQUAD</h2>
-              <div className="flex items-center gap-2 text-sm text-white/80">
-                <Users className="w-4 h-4" />
+              <Users className="w-4 h-4" />
                 
               </div>
             </div>
