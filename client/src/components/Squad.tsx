@@ -11,8 +11,13 @@ export default function Squad() {
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const { data: players = [], isLoading } = useQuery<PlayerWithStats[]>({
-    queryKey: ['/api/players']
-  });
+  queryKey: ['/api/players'],
+  queryFn: async () => {
+    const res = await fetch('/api/players');
+    if (!res.ok) throw new Error('Network response was not ok');
+    return res.json();
+  },
+});
 
   const filteredPlayers = players.filter(player => {
     if (category === 'all') return true;
