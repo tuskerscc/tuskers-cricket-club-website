@@ -11,13 +11,8 @@ export default function Squad() {
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const { data: players = [], isLoading } = useQuery<PlayerWithStats[]>({
-  queryKey: ['/api/players'],
-  queryFn: async () => {
-    const res = await fetch('/api/players');
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
-  },
-});
+    queryKey: ['/api/players']
+  });
 
   const filteredPlayers = players.filter(player => {
     if (category === 'all') return true;
@@ -83,9 +78,10 @@ export default function Squad() {
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl md:text-4xl font-bold text-[#fcd34d] mb-2">TUSKERS SQUAD</h2>
-              <Users className="w-4 h-4" />
-                
+              <h2 className="text-2xl md:text-4xl font-bold text-[#fcd34d] mb-2">SQUAD</h2>
+              <div className="flex items-center gap-2 text-sm text-white/80">
+                <Users className="w-4 h-4" />
+                <span>Men's Team</span>
               </div>
             </div>
           </div>
@@ -119,7 +115,7 @@ export default function Squad() {
             <h2 className="text-responsive-2xl font-bold text-[#fcd34d] mb-2">SQUAD</h2>
             <div className="flex items-center gap-2 text-responsive-xs text-white/80">
               <Users className="w-4 h-4" />
-              
+              <span>Men's Team</span>
             </div>
           </div>
           
