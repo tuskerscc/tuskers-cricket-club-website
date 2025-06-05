@@ -108,15 +108,31 @@ function ComprehensiveAdminContent() {
   const galleryForm = useForm();
   const announcementForm = useForm();
   const matchForm = useForm();
-  const pollForm = useForm({
-    defaultValues: {
-      question: ''
+
+  // Mutations for player registrations
+  const updateRegistrationMutation = useMutation({
+    mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes?: string }) => {
+      return apiRequest(`/api/admin/player-registrations/${id}`, {
+        method: 'PUT',
+        body: { status, adminNotes }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/player-registrations'] });
+      toast({
+        title: "Success",
+        description: "Registration status updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update registration: ${error.message}`,
+        variant: "destructive",
+      });
     }
   });
 
-  // Poll state
-  const [newPollOptions, setNewPollOptions] = useState(['', '', '', '']);
-  const [pollQuestion, setPollQuestion] = useState('');
 
   // Queries
   const { data: userRole = 'admin' } = useQuery<string>({ 
@@ -139,8 +155,7 @@ function ComprehensiveAdminContent() {
   const { data: gallery = [] } = useQuery<GalleryItem[]>({ queryKey: ['/api/gallery'] });
   const { data: announcements = [] } = useQuery<Announcement[]>({ queryKey: ['/api/announcements'] });
   const { data: teamStats = {} } = useQuery<any>({ queryKey: ['/api/stats/team'] });
-  const { data: polls = [] } = useQuery<any[]>({ queryKey: ['/api/polls'] });
-  const { data: currentPoll = null } = useQuery<any>({ queryKey: ['/api/polls/current'] });
+  const { data: playerRegistrations = [] } = useQuery<any[]>({ queryKey: ['/api/admin/player-registrations'] });
 
   // Check if role already exists - now allowing unlimited players of all roles
   const checkRoleAvailability = (role: string) => {
@@ -1528,8 +1543,8 @@ function ComprehensiveAdminContent() {
                           <Label>Poll Question</Label>
                           <Input 
                             placeholder="Enter your poll question..." 
-                            value={pollQuestion}
-                            onChange={(e) => setPollQuestion(e.target.value)}
+                            value={pollForm.watch('question') || ''}
+                            onChange={(e) => pollForm.setValue('question', e.target.value)}
                           />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1550,9 +1565,10 @@ function ComprehensiveAdminContent() {
                         </div>
                         <Button 
                           onClick={() => {
+                            const question = pollForm.getValues('question');
                             const validOptions = newPollOptions.filter(opt => opt.trim() !== '');
                             
-                            if (!pollQuestion || pollQuestion.trim() === '') {
+                            if (!question || question.trim() === '') {
                               toast({ 
                                 title: "Error", 
                                 description: "Please enter a poll question", 
@@ -1571,7 +1587,7 @@ function ComprehensiveAdminContent() {
                             }
                             
                             createPollMutation.mutate({
-                              question: pollQuestion.trim(),
+                              question: question.trim(),
                               options: validOptions,
                               isActive: true
                             });
